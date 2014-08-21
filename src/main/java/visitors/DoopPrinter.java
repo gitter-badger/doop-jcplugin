@@ -30,7 +30,8 @@ public class DoopPrinter extends Pretty {
 
     @Override
     public void visitVarDef(JCTree.JCVariableDecl jcVariableDecl) {
-        System.out.println(jcVariableDecl.sym);
+        System.out.println(jcVariableDecl.sym.outermostClass());
+        //System.out.println(jcVariableDecl.has);
         super.visitVarDef(jcVariableDecl);
     }
 
