@@ -24,11 +24,13 @@ public class DoopPrinter extends Pretty {
 
     @Override
     public void visitMethodDef(JCTree.JCMethodDecl jcMethodDecl) {
+        System.out.println(jcMethodDecl.type);
         super.visitMethodDef(jcMethodDecl);
     }
 
     @Override
     public void visitVarDef(JCTree.JCVariableDecl jcVariableDecl) {
+        System.out.println(jcVariableDecl.sym);
         super.visitVarDef(jcVariableDecl);
     }
 
