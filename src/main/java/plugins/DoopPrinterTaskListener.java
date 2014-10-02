@@ -18,7 +18,7 @@ public class DoopPrinterTaskListener implements TaskListener {
 	@Override
 	public void finished(TaskEvent arg0) {
 		System.out.println("# Task Kind: " + arg0.getKind());
-
+        System.out.println(arg0.getSourceFile().getName());
 		if (arg0.getKind().equals(TaskEvent.Kind.ANALYZE)) {
             JCTree tree = (JCTree) arg0.getCompilationUnit();
             StringWriter s = new StringWriter();

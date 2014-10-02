@@ -3,9 +3,22 @@ package visitors;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.Pretty;
 
+import java.io.IOException;
 import java.io.Writer;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 public class DoopPrinter extends Pretty {
+    private final Set primitiveTypes;
+    private final Writer writer;
+    public DoopPrinter(Writer writer, boolean b) {
+        super(writer, b);
+        this.writer = writer;
+        //initialize set of primitive types
+        String primitiveTypesArray[] = new String[]{"int", "int[]", "boolean"};
+        primitiveTypes = new HashSet<>(Arrays.asList(primitiveTypesArray));
+    }
 
     @Override
     public void visitTopLevel(JCTree.JCCompilationUnit jcCompilationUnit) {
@@ -30,9 +43,16 @@ public class DoopPrinter extends Pretty {
 
     @Override
     public void visitVarDef(JCTree.JCVariableDecl jcVariableDecl) {
-        System.out.println(jcVariableDecl.sym.outermostClass());
-        //System.out.println(jcVariableDecl.has);
-        super.visitVarDef(jcVariableDecl);
+        if (primitiveTypes.contains(jcVariableDecl.vartype.toString()))
+            super.visitVarDef(jcVariableDecl);
+        else {
+            System.out.println(jcVariableDecl.vartype.toString() + " " + jcVariableDecl.sym);
+            try {
+                writer.write(jcVariableDecl.vartype.toString() +" <b>" + jcVariableDecl.sym + "</b>");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
@@ -290,7 +310,4 @@ public class DoopPrinter extends Pretty {
         super.visitTree(jcTree);
     }
 
-    public DoopPrinter(Writer writer, boolean b) {
-        super(writer, b);
-    }
 }
