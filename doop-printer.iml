@@ -7,6 +7,7 @@
       <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/main/resources" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/src/test/resources" type="java-test-resource" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />
@@ -17,13 +18,10 @@
           <root url="jar://$USER_HOME$/Dropbox/resources/java/jdk1.8.0_20/lib/tools.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES>
-          <root url="jar://$USER_HOME$/Dropbox/resources/java/jdk1.8.0_20/lib/tools.jar!/" />
-          <root url="file://$USER_HOME$/Dropbox/MSc Thesis/MSc_Thesis" />
-          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/src/share/classes" />
-        </SOURCES>
+        <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="library" scope="TEST" name="Maven: junit:junit:4.4" level="project" />
   </component>
 </module>
 
