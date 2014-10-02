@@ -17,7 +17,11 @@
           <root url="jar://$USER_HOME$/Dropbox/resources/java/jdk1.8.0_20/lib/tools.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="jar://$USER_HOME$/Dropbox/resources/java/jdk1.8.0_20/lib/tools.jar!/" />
+          <root url="file://$USER_HOME$/Dropbox/MSc Thesis/MSc_Thesis" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/src/share/classes" />
+        </SOURCES>
       </library>
     </orderEntry>
   </component>

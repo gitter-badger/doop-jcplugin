@@ -4,9 +4,9 @@ import com.sun.source.util.JavacTask;
 import com.sun.source.util.TaskEvent;
 import com.sun.source.util.TaskListener;
 import com.sun.tools.javac.tree.JCTree;
-import com.sun.tools.javac.tree.Pretty;
 import visitors.DoopPrinter;
-import java.io.StringWriter;
+
+import java.io.*;
 
 public class DoopPrinterTaskListener implements TaskListener {
 	private JavacTask task;
@@ -24,7 +24,20 @@ public class DoopPrinterTaskListener implements TaskListener {
             StringWriter s = new StringWriter();
 			tree.accept(new DoopPrinter(s, false));
             System.out.println(s.toString());
+
+            Writer writer = null;
+
+            try {
+                writer = new BufferedWriter(new OutputStreamWriter(
+                        new FileOutputStream(arg0.getSourceFile().getName().replaceFirst("\\.java", ".html")), "utf-8"));
+                writer.write(s.toString());
+            } catch (IOException ex) {
+                // report
+            } finally {
+                try {writer.close();} catch (Exception ex) {}
+            }
 		}
+
 	}
 
 	@Override
