@@ -1,87 +1,87 @@
 <br>
-public class HighLowConsole extends ConsoleApplet {<br>
+public class HighLowConsole extends <b>ConsoleApplet</b> {<br>
     <br>
     public HighLowConsole() {<br>
-        super();<br>
+        ();<br>
     }<br>
     <br>
-    protected String getTitle() {<br>
+    protected <b>String</b> getTitle() {<br>
         return "Sample program \"HighLow\"";<br>
     }<br>
     <br>
     protected void program() {<br>
-        console.putln("This program lets you play the simple card game HighLow.");<br>
-        console.putln("A card is dealt from a deck of cards.  You have to predict");<br>
-        console.putln("whether the next card will be higher or lower.  Your score");<br>
-        console.putln("in the game is how many correct predictions you make before");<br>
-        console.putln("you guess wrong.");<br>
-        console.putln();<br>
+        <b>console</b>.putln("This program lets you play the simple card game HighLow.");<br>
+        <b>console</b>.putln("A card is dealt from a deck of cards.  You have to predict");<br>
+        <b>console</b>.putln("whether the next card will be higher or lower.  Your score");<br>
+        <b>console</b>.putln("in the game is how many correct predictions you make before");<br>
+        <b>console</b>.putln("you guess wrong.");<br>
+        <b>console</b>.putln();<br>
         int gamesPlayed = 0;<br>
         int sumOfScores = 0;<br>
         double averageScore;<br>
         boolean playAgain;<br>
         do {<br>
             int scoreThisGame;<br>
-            scoreThisGame = play();<br>
-            sumOfScores += scoreThisGame;<br>
-            gamesPlayed++;<br>
-            console.put("Play again? ");<br>
-            playAgain = console.getlnBoolean();<br>
-        }         while (playAgain);<br>
-        averageScore = ((double)sumOfScores) / gamesPlayed;<br>
-        console.putln();<br>
-        console.putln("You played " + gamesPlayed + " games.");<br>
-        console.putln("Your average score was " + averageScore);<br>
+             = play();<br>
+             += ;<br>
+            ++;<br>
+            <b>console</b>.put("Play again? ");<br>
+             = <b>console</b>.getlnBoolean();<br>
+        }         while ();<br>
+         = ((double)) / ;<br>
+        <b>console</b>.putln();<br>
+        <b>console</b>.putln("You played " +  + " games.");<br>
+        <b>console</b>.putln("Your average score was " + );<br>
     }<br>
     <br>
     int play() {<br>
-        Deck deck = new Deck();<br>
-        Card currentCard;<br>
-        Card nextCard;<br>
+        <b>Deck</b> <b>deck</b> = new <b>Deck</b>();<br>
+        <b>Card</b> <b>currentCard</b>;<br>
+        <b>Card</b> <b>nextCard</b>;<br>
         int correctGuesses;<br>
         char guess;<br>
-        deck.shuffle();<br>
-        correctGuesses = 0;<br>
-        currentCard = deck.dealCard();<br>
-        console.putln("The first card is the " + currentCard);<br>
+        <b>deck</b>.shuffle();<br>
+         = 0;<br>
+        <b>currentCard</b> = <b>deck</b>.dealCard();<br>
+        <b>console</b>.putln("The first card is the " + <b>currentCard</b>);<br>
         while (true) {<br>
-            console.put("Will the next card be higher (H) or lower (L)?  ");<br>
+            <b>console</b>.put("Will the next card be higher (H) or lower (L)?  ");<br>
             do {<br>
-                guess = console.getlnChar();<br>
-                guess = Character.toUpperCase(guess);<br>
-                if (guess != 'H' && guess != 'L') console.put("Please respond with H or L:  ");<br>
-            }             while (guess != 'H' && guess != 'L');<br>
-            nextCard = deck.dealCard();<br>
-            console.putln("The next card is " + nextCard);<br>
-            if (nextCard.getValue() == currentCard.getValue()) {<br>
-                console.putln("The value is the same as the previous card.");<br>
-                console.putln("You lose on ties.  Sorry!");<br>
+                 = <b>console</b>.getlnChar();<br>
+                 = <b>Character</b>.toUpperCase();<br>
+                if ( != 'H' &&  != 'L') <b>console</b>.put("Please respond with H or L:  ");<br>
+            }             while ( != 'H' &&  != 'L');<br>
+            <b>nextCard</b> = <b>deck</b>.dealCard();<br>
+            <b>console</b>.putln("The next card is " + <b>nextCard</b>);<br>
+            if (<b>nextCard</b>.getValue() == <b>currentCard</b>.getValue()) {<br>
+                <b>console</b>.putln("The value is the same as the previous card.");<br>
+                <b>console</b>.putln("You lose on ties.  Sorry!");<br>
                 break;<br>
-            } else if (nextCard.getValue() > currentCard.getValue()) {<br>
-                if (guess == 'H') {<br>
-                    console.putln("Your prediction was correct.");<br>
-                    correctGuesses++;<br>
+            } else if (<b>nextCard</b>.getValue() > <b>currentCard</b>.getValue()) {<br>
+                if ( == 'H') {<br>
+                    <b>console</b>.putln("Your prediction was correct.");<br>
+                    ++;<br>
                 } else {<br>
-                    console.putln("Your prediction was incorrect.");<br>
+                    <b>console</b>.putln("Your prediction was incorrect.");<br>
                     break;<br>
                 }<br>
             } else {<br>
-                if (guess == 'L') {<br>
-                    console.putln("Your prediction was correct.");<br>
-                    correctGuesses++;<br>
+                if ( == 'L') {<br>
+                    <b>console</b>.putln("Your prediction was correct.");<br>
+                    ++;<br>
                 } else {<br>
-                    console.putln("Your prediction was incorrect.");<br>
+                    <b>console</b>.putln("Your prediction was incorrect.");<br>
                     break;<br>
                 }<br>
             }<br>
-            currentCard = nextCard;<br>
-            console.putln();<br>
-            console.putln("The card is " + currentCard);<br>
+            <b>currentCard</b> = <b>nextCard</b>;<br>
+            <b>console</b>.putln();<br>
+            <b>console</b>.putln("The card is " + <b>currentCard</b>);<br>
         }<br>
-        console.putln();<br>
-        console.putln("The game is over.");<br>
-        console.putln("You made " + correctGuesses + " correct predictions.");<br>
-        console.putln();<br>
-        return correctGuesses;<br>
+        <b>console</b>.putln();<br>
+        <b>console</b>.putln("The game is over.");<br>
+        <b>console</b>.putln("You made " +  + " correct predictions.");<br>
+        <b>console</b>.putln();<br>
+        return ;<br>
     }<br>
 }

@@ -111,7 +111,7 @@ public class DoopPrinter extends JCTree.Visitor {
     /** Align code to be indented to left margin.
      */
     void align() throws IOException {
-        for (int i = 0; i < lmargin; i++) out.write("&nbsp");
+        for (int i = 0; i < lmargin; i++) out.write(" ");
     }
 //    void align() throws IOException {
 //        for (int i = 0; i < lmargin; i++) out.write(" ");
@@ -212,7 +212,10 @@ public class DoopPrinter extends JCTree.Visitor {
             this.prec = prec;
             if (tree == null) print("/*missing*/");
             else {
-                tree.accept(this);
+                /*if (tree.type != null)
+                    if (tree.type.asElement() != null)
+                        System.out.println("Printing expr " + tree.type.asElement().toString() + " class: " + tree.getClass());
+                */tree.accept(this);
             }
         } catch (UncheckedIOException ex) {
             IOException e = new IOException(ex.getMessage());
@@ -1045,6 +1048,7 @@ public class DoopPrinter extends JCTree.Visitor {
     public void visitAssign(JCAssign tree) {
         try {
             open(prec, TreeInfo.assignPrec);
+            //System.out.println("Assign: " + tree.getVariable().type.asElement());
             printExpr(tree.lhs, TreeInfo.assignPrec + 1);
             print(" = ");
             printExpr(tree.rhs, TreeInfo.assignPrec);
@@ -1194,7 +1198,23 @@ public class DoopPrinter extends JCTree.Visitor {
 
     public void visitIdent(JCIdent tree) {
         try {
-            print(tree.name);
+            if (tree.type!=null)
+                if (tree.type.asElement() != null) {
+                    System.out.println("Identifier type: " + tree.type.asElement().toString());
+                    if (!primitiveTypes.contains(tree.type.asElement().toString())) {
+//                        System.out.println(tree.type.)
+                        System.out.println(tree.getName());
+                        System.out.println(tree.getKind());
+                        System.out.println(tree.sym.getClass());
+                        System.out.println(tree.getClass());
+                        // Kind expected: DECLARED, but not precise enough
+                        System.out.println(tree.type.getKind());
+                        System.out.println(tree.type.toString());
+                        print("<b>" + tree.name + "</b>");
+                    }
+                }
+            else
+                print(tree.name);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
