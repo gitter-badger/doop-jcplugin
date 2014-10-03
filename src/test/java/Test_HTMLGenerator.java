@@ -12,8 +12,9 @@ public class Test_HTMLGenerator extends BaseTest {
     }
 
     @Test
-    public void Test_Sum() throws IOException, InterruptedException {
+    public void Test_HTMLGenerator() throws IOException, InterruptedException {
         runCompiler("Test.java");
         runCompiler("Test2.java");
+        runCompiler("HighLowConsole.java");
     }
 }

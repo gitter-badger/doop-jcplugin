@@ -63,8 +63,8 @@ public class DoopPrinter extends JCTree.Visitor {
                                                     "long", "long[]",
                                                     "double", "double[]",
                                                     "char", "char[]"};
-        /* Any type contained in this set
-         * should not be checked for points-to information
+        /** Any type contained in this set
+         *  should not be checked for points-to information
          */
         primitiveTypes = new HashSet<>(Arrays.asList(primitiveTypesArray));
     }
@@ -111,8 +111,11 @@ public class DoopPrinter extends JCTree.Visitor {
     /** Align code to be indented to left margin.
      */
     void align() throws IOException {
-        for (int i = 0; i < lmargin; i++) out.write(" ");
+        for (int i = 0; i < lmargin; i++) out.write("&nbsp");
     }
+//    void align() throws IOException {
+//        for (int i = 0; i < lmargin; i++) out.write(" ");
+//    }
 
     /** Increase left margin by indentation width.
      */
@@ -545,6 +548,7 @@ public class DoopPrinter extends JCTree.Visitor {
     }
 
     public void visitVarDef(JCVariableDecl tree) {
+        System.out.println("visiting variable def");
         try {
             if (docComments != null && docComments.hasComment(tree)) {
                 println(); align();
@@ -589,14 +593,21 @@ public class DoopPrinter extends JCTree.Visitor {
                     }
                     print("... " + tree.name);
                 } else {
-                    System.out.println("Var decl found!");
+                    // e.g. A a
                     printExpr(tree.vartype);
-                    print(" " + tree.name);
+                    /** If primitive
+                     */
+                    if (primitiveTypes.contains(tree.vartype.toString()))
+                        print(" " + tree.name);
+                    else
+                        print(" " + "<b>" + tree.name + "</b>");
                 }
+                // e.g. A a = new A()
                 if (tree.init != null) {
                     print(" = ");
                     printExpr(tree.init);
                 }
+                // e.g. A a = new A();
                 if (prec == TreeInfo.notExpression) print(";");
             }
         } catch (IOException e) {

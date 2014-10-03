@@ -18,7 +18,77 @@
           <root url="jar://$USER_HOME$/Dropbox/resources/java/jdk1.8.0_20/lib/tools.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="jar://$USER_HOME$/Dropbox/resources/java/jdk1.8.0_20/src.zip!/" />
+          <root url="file://$USER_HOME$/Dropbox/MSc Thesis/MSc_Thesis" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/apt/Basics" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javac" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javah/4942232" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javah/6257087" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javah/6572945" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javah/T4942232" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javah/T7126832" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javah/compareTest" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javah" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javap/output" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javap/4111861" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javap/4798312" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javap/4866831" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javap/4870651" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javap/6937244" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javap/8006334" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javap/8007907" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javap/stackmap" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javap/classfile/deps" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javap/classfile/6888367" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javap/classfile" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javap" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/jdeps" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/sjavac" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/doclint/html" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/doclint/tidy" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/doclint/tool" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/doclint/anchorTests" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/doclint" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javadoc/api/basic" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javadoc/lib" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javadoc/enum/enumType" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javadoc/enum/docComments" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javadoc/dupOk/sp1" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javadoc/dupOk/sp2" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javadoc/dupOk" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javadoc/parser/7091528" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javadoc/6176978" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javadoc/6227454" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javadoc/6942366" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javadoc/6958836" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javadoc/6964914" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javadoc/8025693" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javadoc/doclint" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javadoc/imports" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javadoc/varArgs" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javadoc/T4994049" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javadoc/badSuper" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javadoc/generics/wildcards" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javadoc/generics/supertypes" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javadoc/generics/tparamCycle" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javadoc/generics/genericClass" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javadoc/generics/genericSuper" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javadoc/generics/genericMethod" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javadoc/generics/throwsGeneric" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javadoc/generics/tparamTagOnType" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javadoc/generics/genericInterface" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javadoc/generics/tparamTagOnMethod" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javadoc/generics/genericInnerAndOuter" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javadoc/sourceOnly" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javadoc" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javac/tree" />
+          <root url="file://$USER_HOME$/Dropbox/MSc Thesis/MSc_Thesis" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/test/tools/javac/tree" />
+          <root url="jar://$USER_HOME$/Dropbox/resources/java/jdk1.8.0_20/src.zip!/" />
+          <root url="jar://$USER_HOME$/Dropbox/resources/java/jdk1.8.0_20/lib/tools.jar!/" />
+          <root url="file://$MODULE_DIR$/../jdk8u20/langtools/src/share/classes" />
+        </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="library" scope="TEST" name="Maven: junit:junit:4.4" level="project" />
