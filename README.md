@@ -10,7 +10,7 @@ mvn package
 =====================
 javac -Xbootclasspath/p:./target/doop-printer-1.0-SNAPSHOT.jar -processorpath ./target/doop-printer-1.0-SNAPSHOT.jar -Xplugin:DoopPrinterPlugin ./src/test/java/*.java
 
-Useful links
+3) Useful links
 ====================
 javac sources:
 http://www.docjar.com/docs/api/com/sun/tools/javac/tree/JCTree.html
