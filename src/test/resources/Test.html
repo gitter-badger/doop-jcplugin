@@ -1,19 +1,27 @@
+package ;<br>
 <br>
 public class Test {<br>
-    <b>Test2</b> <b>test</b>;<br>
-    <b>Test</b> <b>myTest</b>;<br>
+    Test2 <b>test</b>;<br>
+    Test <b>myTest</b>;<br>
     boolean b;<br>
     int[] a;<br>
     <br>
     public Test() {<br>
         super();<br>
         int a = 0;<br>
-        <b>System</b>.out.println();<br>
-        <b>test</b> = new <b>Test2</b>();<br>
-        <b>myTest</b> = new <b>Test</b>();<br>
+        System.out.println(a);<br>
+        test = new Test2();<br>
+        myTest = new Test();<br>
     }<br>
     <br>
-    public void Speak() {<br>
-        <b>System</b>.out.println("Hello World.");<br>
+    public void speak(Test2 <b>testParam</b>) {<br>
+        System.out.println("Hello World.");<br>
+        Test2 <b>testLocal</b> = <b>testParam</b>;<br>
+    }<br>
+    <br>
+    public static void main() {<br>
+        Test <b>test1</b> = new Test();<br>
+        <b>test1</b>.test2 = new Test();<br>
+        <b>test1</b>.speak(new Test2());<br>
     }<br>
 }

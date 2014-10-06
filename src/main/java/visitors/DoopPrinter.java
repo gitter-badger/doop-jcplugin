@@ -551,7 +551,6 @@ public class DoopPrinter extends JCTree.Visitor {
     }
 
     public void visitVarDef(JCVariableDecl tree) {
-        System.out.println("visiting variable def");
         try {
             if (docComments != null && docComments.hasComment(tree)) {
                 println(); align();
@@ -1200,17 +1199,36 @@ public class DoopPrinter extends JCTree.Visitor {
         try {
             if (tree.type!=null)
                 if (tree.type.asElement() != null) {
-                    System.out.println("Identifier type: " + tree.type.asElement().toString());
                     if (!primitiveTypes.contains(tree.type.asElement().toString())) {
-//                        System.out.println(tree.type.)
-                        System.out.println(tree.getName());
-                        System.out.println(tree.getKind());
-                        System.out.println(tree.sym.getClass());
-                        System.out.println(tree.getClass());
-                        // Kind expected: DECLARED, but not precise enough
-                        System.out.println(tree.type.getKind());
-                        System.out.println(tree.type.toString());
-                        print("<b>" + tree.name + "</b>");
+                        if (tree.sym instanceof Symbol.VarSymbol) {
+                            System.out.println("====================================================");
+                            System.out.println("Identifier name: " + tree.getName());
+                            System.out.println("Static type of identifier: " + tree.type.asElement().toString());
+                            System.out.println("Identifier kind: " + tree.getKind());
+                            System.out.println("Identifier symbol: " + tree.sym.getClass());
+                            System.out.println("Identifier class: " + tree.getClass());
+                            // Kind expected: DECLARED, but not precise enough
+                            // TODO: i need a way to distinguish fields from local variables
+                            System.out.println("Identifier type kind: " + tree.type.getKind());
+                            System.out.println("Identifier type as string: " + tree.type.toString());
+                            System.out.println("Identifier symbol base symbol: " + tree.sym.baseSymbol().toString());
+                            System.out.println("Identifier symbol enclosing class: " + tree.sym.enclClass().toString());
+                            System.out.println("Identifier symbol qualified name: " + tree.sym.getQualifiedName() );
+                            if (tree.sym.getEnclosingElement() instanceof Symbol.MethodSymbol) {
+                                System.out.println("Local variable: " + tree.sym.enclClass().toString() + "." + tree.sym.getEnclosingElement().getQualifiedName().toString() + "." + tree.sym.toString());
+                                print("<b>" + tree.name + "</b>");
+                            }
+                            else if (tree.sym.getEnclosingElement() instanceof Symbol.ClassSymbol) {
+                                System.out.println("Field: " + tree.sym.enclClass().toString() + "." + tree.sym.toString());
+                                print(tree.name);
+                            }
+                        }
+                        else {
+                            print(tree.name);
+                        }
+                    }
+                    else {
+                        print(tree.name);
                     }
                 }
             else
