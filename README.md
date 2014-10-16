@@ -15,3 +15,5 @@ http://cr.openjdk.java.net/~forax/lambda/src/share/classes/com/sun/tools/javac/t
 html templates:
 http://velocity.apache.org/
 http://velocity.apache.org/engine/releases/velocity-1.7/overview.html
+
+TODO: focus on javac side add decorator pattern.
