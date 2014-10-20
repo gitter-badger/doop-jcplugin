@@ -1254,10 +1254,7 @@ public class DoopPrinter extends JCTree.Visitor {
                     print(tree.value.toString());
                     break;
                 case CHAR:
-                    print("\'" +
-                            Convert.quote(
-                                    String.valueOf((char)((Number)tree.value).intValue())) +
-                            "\'");
+                    print("\'" + Convert.quote(String.valueOf((char)((Number)tree.value).intValue())) + "\'");
                     break;
                 case BOOLEAN:
                     print(((Number)tree.value).intValue() == 1 ? "true" : "false");
