@@ -1,0 +1,139 @@
+<br>
+import javax.tools.*;<br>
+import java.io.*;<br>
+import java.util.ArrayList;<br>
+import java.util.List;<br>
+import java.util.Locale;<br>
+import static java.util.Arrays.asList;<br>
+import static javax.tools.ToolProvider.getSystemJavaCompiler;<br>
+<br>
+/**<br>
+ * Created by bibou on 3/9/2014.<br>
+ */<br>
+public class BaseTest {<br>
+    public static final String XPLUGIN_STREAM_OPTIMIZER_PLUGIN = "-Xplugin:DoopPrinterPlugin";<br>
+    public static final String SRC_TEST_RESOURCES = "src/test/resources/";<br>
+    protected PrintWriter out;<br>
+    protected PrintWriter err;<br>
+    <br>
+    public BaseTest() {<br>
+        super();<br>
+        out = new PrintWriter(System.out, true);<br>
+        err = new PrintWriter(System.err, true);<br>
+    }<br>
+    <br>
+    protected void runCompiler(String pathname) throws IOException {<br>
+        String[] compileOptions = new String[]{XPLUGIN_STREAM_OPTIMIZER_PLUGIN};<br>
+        pathname = SRC_TEST_RESOURCES + pathname;<br>
+        Iterable<String> compilationOptions = asList(compileOptions);<br>
+        JavaCompiler compiler = getSystemJavaCompiler();<br>
+        DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();<br>
+        StandardJavaFileManager fileManager = compiler.getStandardFileManager(diagnostics, Locale.getDefault(), null);<br>
+        Iterable<? extends JavaFileObject> compilationUnits = fileManager.getJavaFileObjects(new File(pathname));<br>
+        Boolean result = compiler.getTask(null, fileManager, diagnostics, compilationOptions, null, compilationUnits).call();<br>
+        for (Diagnostic diagnostic : diagnostics.getDiagnostics()) {<br>
+            System.out.println(diagnostic.getCode());<br>
+            System.out.println(diagnostic.getKind());<br>
+            System.out.println(diagnostic.getPosition());<br>
+            System.out.println(diagnostic.getStartPosition());<br>
+            System.out.println(diagnostic.getEndPosition());<br>
+            System.out.println(diagnostic.getSource());<br>
+            System.out.println(diagnostic.getMessage(null));<br>
+        }<br>
+        System.out.println("Result: " + result);<br>
+        fileManager.close();<br>
+    }<br>
+    <br>
+    protected String runJVM(String test) throws IOException, InterruptedException {<br>
+        Runtime r = Runtime.getRuntime();<br>
+        Process p = null;<br>
+        try {<br>
+            List<String> listArgs = new ArrayList<String>();<br>
+            String jdk = discoverJDK();<br>
+            listArgs.add(jdk);<br>
+            listArgs.add("-cp");<br>
+            listArgs.add(SRC_TEST_RESOURCES);<br>
+            listArgs.add(test);<br>
+            String[] res = new String[listArgs.size()];<br>
+            p = r.exec(listArgs.toArray(res));<br>
+            StringWriter sw = new StringWriter();<br>
+            PrintWriter accumulator = new PrintWriter(sw);<br>
+            InputStream childOut = p.getInputStream();<br>
+            StreamCopier childOutCopier = new StreamCopier(childOut, accumulator);<br>
+            childOutCopier.start();<br>
+            InputStream childErr = p.getErrorStream();<br>
+            StreamCopier childErrCopier = new StreamCopier(childErr, err);<br>
+            childErrCopier.start();<br>
+            OutputStream childIn = p.getOutputStream();<br>
+            if (childIn != null) childIn.close();<br>
+            childOutCopier.waitUntilDone();<br>
+            childErrCopier.waitUntilDone();<br>
+            int exitCode = p.waitFor();<br>
+            p = null;<br>
+            childOut.close();<br>
+            childErr.close();<br>
+            return sw.toString().trim();<br>
+        } catch (IOException | InterruptedException e) {<br>
+            throw e;<br>
+        } finally {<br>
+            if (p != null) p.destroy();<br>
+        }<br>
+    }<br>
+    <br>
+    private String discoverJDK() {<br>
+        String s = System.getenv("JAVA_HOME");<br>
+        if (s == null || s.length() == 0) s = System.getProperty("java.home");<br>
+        s += "/bin/java";<br>
+        return s;<br>
+    }<br>
+    <br>
+    static class StreamCopier extends Thread {<br>
+        <br>
+        /**<br>
+         * Create one.<br>
+         * @param from  the stream to copy from<br>
+         * @param to    the stream to copy to<br>
+         */<br>
+        StreamCopier(InputStream from, PrintWriter to) {<br>
+            super(Thread.currentThread().getName() + "_StreamCopier_" + (serial++));<br>
+            in = new BufferedReader(new InputStreamReader(from));<br>
+            out = to;<br>
+        }<br>
+        <br>
+        /**<br>
+         * Set the thread going.<br>
+         */<br>
+        @SuppressWarnings(value = "deprecation")<br>
+        @Override()<br>
+        public void run() {<br>
+            try {<br>
+                String line;<br>
+                while ((line = in.readLine()) != null) {<br>
+                    out.println(line);<br>
+                }<br>
+            } catch (IOException e) {<br>
+            }<br>
+            synchronized (this) {<br>
+                done = true;<br>
+                notifyAll();<br>
+            }<br>
+        }<br>
+        <br>
+        public synchronized boolean isDone() {<br>
+            return done;<br>
+        }<br>
+        <br>
+        /**<br>
+         * Blocks until the copy is complete, or until the thread is interrupted<br>
+         */<br>
+        public synchronized void waitUntilDone() throws InterruptedException {<br>
+            boolean interrupted = false;<br>
+            while (!(interrupted = Thread.interrupted()) && !done) wait(1000);<br>
+            if (interrupted) throw new InterruptedException();<br>
+        }<br>
+        private BufferedReader in;<br>
+        private PrintWriter out;<br>
+        private boolean done;<br>
+        private static int serial;<br>
+    }<br>
+}

@@ -1,0 +1,20 @@
+<br>
+import org.junit.Test;<br>
+import java.io.*;<br>
+<br>
+/**<br>
+ * Created by bibou on 2/9/2014.<br>
+ */<br>
+public class Test_HTMLGenerator extends BaseTest {<br>
+    <br>
+    public Test_HTMLGenerator() {<br>
+        super();<br>
+    }<br>
+    <br>
+    @Test()<br>
+    public void Test_HTMLGenerator() throws IOException, InterruptedException {<br>
+        runCompiler("Test.java");<br>
+        runCompiler("Test2.java");<br>
+        runCompiler("HighLowConsole.java");<br>
+    }<br>
+}
