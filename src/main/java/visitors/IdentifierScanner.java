@@ -1,5 +1,6 @@
 package visitors;
 
+import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeScanner;
 import com.sun.tools.javac.util.Assert;
@@ -18,7 +19,7 @@ import com.sun.tools.javac.util.List;
  *  This code and its internal interfaces are subject to change or
  *  deletion without notice.</b>
  */
-public class DecoratorScanner extends TreeScanner {
+public class IdentifierScanner extends TreeScanner {
 
     /** Visitor method: Scan a single node.
      */
@@ -69,6 +70,9 @@ public class DecoratorScanner extends TreeScanner {
     }
 
     public void visitVarDef(JCTree.JCVariableDecl tree) {
+        if (tree.sym.getEnclosingElement() instanceof Symbol.MethodSymbol) {
+            System.out.println("Local variable: " + tree.sym.enclClass().toString() + "." + tree.sym.getEnclosingElement().getQualifiedName().toString() + "." + tree.sym.toString());
+        }
         scan(tree.mods);
         scan(tree.vartype);
         scan(tree.nameexpr);
@@ -247,6 +251,15 @@ public class DecoratorScanner extends TreeScanner {
     }
 
     public void visitIdent(JCTree.JCIdent tree) {
+        /*If the enclosing element is a method we know we have found a local variable */
+        if (tree.sym.getEnclosingElement() instanceof Symbol.MethodSymbol) {
+            System.out.println("Local variable: " + tree.sym.enclClass().toString() + "." + tree.sym.getEnclosingElement().getQualifiedName().toString() + "." + tree.sym.toString());
+        }
+//        else
+//            System.out.println(tree.sym.toString() + " " + " enclosing element: " + tree.sym.getEnclosingElement());
+//        else if (tree.sym.getEnclosingElement() instanceof Symbol.ClassSymbol) {
+//            System.out.println("Field: " + tree.sym.enclClass().toString() + "." + tree.sym.toString());
+//        }
     }
 
     public void visitLiteral(JCTree.JCLiteral tree) {

@@ -4,9 +4,7 @@ import com.sun.source.util.JavacTask;
 import com.sun.source.util.TaskEvent;
 import com.sun.source.util.TaskListener;
 import com.sun.tools.javac.tree.JCTree;
-import com.sun.tools.javac.tree.TreeCopier;
-import com.sun.tools.javac.tree.TreeMaker;
-import visitors.DecoratorScanner;
+import visitors.IdentifierScanner;
 import visitors.DoopPrinter;
 
 import java.io.*;
@@ -26,8 +24,8 @@ public class DoopPrinterTaskListener implements TaskListener {
 
             JCTree tree = (JCTree) arg0.getCompilationUnit();
             StringWriter s = new StringWriter();
-			tree.accept(new DecoratorScanner());
-            tree.accept(new DoopPrinter(s, false));
+			tree.accept(new IdentifierScanner());
+//            tree.accept(new DoopPrinter(s, false));
             System.out.println(s.toString());
 
             Writer writer = null;

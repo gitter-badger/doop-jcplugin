@@ -15,6 +15,6 @@ public class Test_HTMLGenerator extends BaseTest {
     public void Test_HTMLGenerator() throws IOException, InterruptedException {
         runCompiler("Test.java");
         runCompiler("Test2.java");
-        runCompiler("HighLowConsole.java");
+//        runCompiler("HighLowConsole.java");
     }
 }

@@ -13,7 +13,7 @@ import static javax.tools.ToolProvider.getSystemJavaCompiler;
 public class BaseTest {
     public static final String XPLUGIN_STREAM_OPTIMIZER_PLUGIN = "-Xplugin:DoopPrinterPlugin";
 
-    public static final String SRC_TEST_RESOURCES = "src/test/resources/";
+    public static final String SRC_TEST_RESOURCES = "src/test/resources/advanced-test/mytests/";
 
     protected PrintWriter out;
     protected PrintWriter err;
