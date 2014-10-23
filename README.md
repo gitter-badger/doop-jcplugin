@@ -16,4 +16,6 @@ html templates:
 http://velocity.apache.org/
 http://velocity.apache.org/engine/releases/velocity-1.7/overview.html
 
-TODO: Focus on javac side add decorator pattern. Use TreeTranslator to traverse the AST and create a decorator object for each. At the moment only the JCIdent decorator is of importance, since it will store all the doop related information for local variables, fields and methods.
+Question: Distinguish namesake variables by line, column number? Is there a point? 
+
+TODO: Doop DAOs, connect to database and retrieve doop local variable objects.
