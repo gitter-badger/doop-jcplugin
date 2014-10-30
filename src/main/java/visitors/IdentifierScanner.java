@@ -37,8 +37,11 @@ public class IdentifierScanner extends TreeScanner {
     }
 
     public String buildFQType(String typeName, Symbol.PackageSymbol packageSymbol) {
-        StringBuilder fqClass = new StringBuilder();
+        StringBuilder fqTypeName = new StringBuilder();
 
+
+        System.out.println("Type name: " + typeName);
+        System.out.println("Package: " + packageSymbol.getQualifiedName().toString());
         /*String classPart = classSymbol.substring(packge.length()).replace('.', '$');
         fqType.append(packge);
         if (!(packge.equals("")))
@@ -108,14 +111,13 @@ public class IdentifierScanner extends TreeScanner {
         /** build fully qualified name of type */
         methodSignature.append(buildFQType(tree.sym.enclClass().getQualifiedName().toString(), tree.sym.packge()));
 
-
         /**
          * STEP 2: Append method signature: <return type> <method name>((<parameter type>,)*<parameter type?)
          */
         Symbol.MethodSymbol methodSymbol = (Symbol.MethodSymbol) tree.sym.getEnclosingElement();
         methodSignature.append(" ").append(methodSymbol.getReturnType()).
-                append(" ").append(methodSymbol.getQualifiedName()).
-                append("(");
+                        append(" ").append(methodSymbol.getQualifiedName()).
+                        append("(");
 
         List<Symbol.VarSymbol> parameters = methodSymbol.getParameters();
         for (int i = 0; i < parameters.size(); i++) {
