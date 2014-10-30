@@ -1,3 +1,5 @@
+package src.test.resources.advancedTest.myTests;
+
 public class Test {
     Test2 test, test2;
     Test myTest;

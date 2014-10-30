@@ -1,3 +1,4 @@
+package src.test.resources.advancedTest.myTests;
 /**
  * Created by anantoni on 21/8/2014.
  */

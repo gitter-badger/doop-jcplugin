@@ -38,10 +38,13 @@ public class IdentifierScanner extends TreeScanner {
 
     public String buildFQType(String type, String packge) {
         StringBuilder fqType = new StringBuilder();
-        fqType.append(type.replaceFirst("^[a-z].*\\.", "").replace(".", "$"));
 
+        String classPart = type.substring(packge.length()).replace('.', '$');
+        fqType.append(packge);
         if (!(packge.equals("")))
-            fqType.insert(0, packge);
+            fqType.append('.');
+
+        fqType.append(classPart);
 
         return fqType.toString();
     }
@@ -60,11 +63,8 @@ public class IdentifierScanner extends TreeScanner {
          * test.Test$NestedTest$NestedNestedTest
          */
         StringBuilder methodSignature = new StringBuilder();
-        methodSignature.append(tree.sym.enclClass().toString().
-                replaceFirst("^[a-z].*\\.", "").replace(".", "$")).append(':');
-
-        if (!(tree.sym.packge().getQualifiedName().toString().equals("")))
-            methodSignature.insert(0, tree.sym.packge().getQualifiedName().toString());
+        methodSignature.append(buildFQType(tree.sym.enclClass().getQualifiedName().toString(),
+                                           tree.sym.packge().getQualifiedName().toString()));
 
         /**
          * STEP 2: Append method signature: <return type> <method name>((<parameter type>,)*<parameter type?)
@@ -85,7 +85,7 @@ public class IdentifierScanner extends TreeScanner {
                 methodSignature.append(fqType).append(')');
         }
         methodSignature.insert(0, '<');
-        methodSignature.append('>');
+        methodSignature.append(")>");
 
         return methodSignature.toString();
     }
@@ -104,11 +104,8 @@ public class IdentifierScanner extends TreeScanner {
          * test.Test$NestedTest$NestedNestedTest
          */
         StringBuilder methodSignature = new StringBuilder();
-        methodSignature.append(tree.sym.enclClass().toString().
-                replaceFirst("^[a-z].*\\.", "").replace(".", "$")).append(':');
-
-        if (!(tree.sym.packge().getQualifiedName().toString().equals("")))
-            methodSignature.insert(0, tree.sym.packge().getQualifiedName().toString());
+        methodSignature.append(buildFQType(tree.sym.enclClass().getQualifiedName().toString(),
+                                           tree.sym.packge().getQualifiedName().toString()));
 
         /**
          * STEP 2: Append method signature: <return type> <method name>((<parameter type>,)*<parameter type?)
@@ -126,10 +123,10 @@ public class IdentifierScanner extends TreeScanner {
             if (i != parameters.size() - 1)
                 methodSignature.append(fqType).append(',');
             else
-                methodSignature.append(fqType).append(')');
+                methodSignature.append(fqType);
         }
         methodSignature.insert(0, '<');
-        methodSignature.append('>');
+        methodSignature.append(")>");
 
         return methodSignature.toString();
     }
