@@ -16,6 +16,4 @@ html templates:
 http://velocity.apache.org/
 http://velocity.apache.org/engine/releases/velocity-1.7/overview.html
 
-Question: Distinguish namesake variables by line, column number? Is there a point? 
-
-TODO: Doop DAOs, connect to database and retrieve doop local variable objects.
+TODO: Representation of Doop entities in Java, Correct handling of packages when generating fully qualified names for nested types.
