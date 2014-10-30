@@ -170,10 +170,11 @@ public class IdentifierScanner extends TreeScanner {
 
     public void visitVarDef(JCTree.JCVariableDecl tree) {
         if (tree.sym.getEnclosingElement() instanceof Symbol.MethodSymbol) {
-
+            System.out.println("##########################################################################################################################");
             System.out.println("Variable name: " + tree.sym.getQualifiedName().toString());
             System.out.println("Declaring method signature: " + buildMethodSignature(tree));
             System.out.println("Type: " + tree.type);
+            System.out.println("##########################################################################################################################");
         }
 
 
@@ -357,10 +358,11 @@ public class IdentifierScanner extends TreeScanner {
     public void visitIdent(JCTree.JCIdent tree) {
 
         if (tree.sym.getEnclosingElement() instanceof Symbol.MethodSymbol) {
-
+            System.out.println("##########################################################################################################################");
             System.out.println("Variable name: " + tree.sym.getQualifiedName().toString());
             System.out.println("Declaring method signature: " + buildMethodSignature(tree));
             System.out.println("Type: " + tree.sym.type);
+            System.out.println("##########################################################################################################################");
         }
     }
 
