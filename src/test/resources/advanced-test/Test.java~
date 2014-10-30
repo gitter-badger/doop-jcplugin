@@ -14,17 +14,13 @@ public class Test {
             nestedTest2 = b;
         }
 
-        public Test2 speak() {
+        public void speak() {
             Test uniqueLocal = new Test();
-            uniqueLocal.speak();
-            Test2 testLocal = new Test2();
-            testLocal.speak();
-            return testLocal;
+            Test testLocal = new Test();
         }
 
-        public Test speak(Test testParam) {
+        public void speak(Test testParam) {
             Test testLocal = testParam;
-            return testLocal;
         }
 
         class NestedNestedTest {
@@ -49,7 +45,8 @@ public class Test {
                 NestedNestedTest e = nnTest;
             }
         }
-    }
+
+     }
 
     public Test() {
         int a = 0;
@@ -58,7 +55,7 @@ public class Test {
         myTest = new Test();
     }
 
-    public Test(Test myTest, Test2 test, Test2 test2) {
+    public Test(Test myTest, Test2 test, Test2 test2 ) {
         this.myTest = myTest;
         this.test = test;
         this.test2 = test2;

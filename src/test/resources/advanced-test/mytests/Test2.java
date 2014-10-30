@@ -13,4 +13,27 @@ public class Test2 {
         System.out.println("Testing: " + a);
         this.test = new Test();
     }
+
+    public Test2(int a, boolean b) {
+        this.a = a;
+        this.b = b;
+    }
+
+    public Test2(int a, boolean b, Test test) {
+        this.a = a;
+        this.b = b;
+        this.test = test;
+    }
+
+    public Test2(int a, boolean b, Test test, Test2 test2) {
+        this.a = a;
+        this.b = b;
+        this.test = test;
+        this.test2 = test2;
+    }
+
+    public void speak() {
+        Test2 t2 =  new Test2();
+        System.out.println("Test2 speaking.");
+    }
 }

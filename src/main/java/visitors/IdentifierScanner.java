@@ -1,6 +1,7 @@
 package visitors;
 
 import com.sun.tools.javac.code.Symbol;
+import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeScanner;
 import com.sun.tools.javac.util.Assert;
@@ -33,6 +34,104 @@ public class IdentifierScanner extends TreeScanner {
         if (trees != null)
             for (List<? extends JCTree> l = trees; l.nonEmpty(); l = l.tail)
                 scan(l.head);
+    }
+
+    public String buildFQType(String type, String packge) {
+        StringBuilder fqType = new StringBuilder();
+        fqType.append(type.replaceFirst("^[a-z].*\\.", "").replace(".", "$"));
+
+        if (!(packge.equals("")))
+            fqType.insert(0, packge);
+
+        return fqType.toString();
+    }
+
+    public String buildMethodSignature(JCTree.JCIdent tree) {
+        /**
+         *  Building the declaring method signature
+         */
+
+        /**
+         * STEP 1: Build enclosing class name
+         * Remove "package." if it exists and replace all occurences of '.' with '$'.
+         * Afterwards insert the package name at the start of the sequence.
+         * e.g
+         * test.Test.NestedTest.NestedNestedTest will be converted to
+         * test.Test$NestedTest$NestedNestedTest
+         */
+        StringBuilder methodSignature = new StringBuilder();
+        methodSignature.append(tree.sym.enclClass().toString().
+                replaceFirst("^[a-z].*\\.", "").replace(".", "$")).append(':');
+
+        if (!(tree.sym.packge().getQualifiedName().toString().equals("")))
+            methodSignature.insert(0, tree.sym.packge().getQualifiedName().toString());
+
+        /**
+         * STEP 2: Append method signature: <return type> <method name>((<parameter type>,)*<parameter type?)
+         */
+        Symbol.MethodSymbol methodSymbol = (Symbol.MethodSymbol) tree.sym.getEnclosingElement();
+        methodSignature.append(" ").append(methodSymbol.getReturnType()).
+                append(" ").append(methodSymbol.getQualifiedName()).
+                append("(");
+
+        List<Symbol.VarSymbol> parameters = methodSymbol.getParameters();
+        for (int i = 0; i < parameters.size(); i++) {
+            Symbol.VarSymbol param = parameters.get(i);
+            String fqType = buildFQType(param.type.toString(), param.packge().getQualifiedName().toString());
+
+            if (i != parameters.size() - 1)
+                methodSignature.append(fqType).append(',');
+            else
+                methodSignature.append(fqType).append(')');
+        }
+        methodSignature.insert(0, '<');
+        methodSignature.append('>');
+
+        return methodSignature.toString();
+    }
+
+    public String buildMethodSignature(JCTree.JCVariableDecl tree) {
+        /**
+         *  Building the declaring method signature
+         */
+
+        /**
+         * STEP 1: Build enclosing class name
+         * Remove "package." if it exists and replace all occurences of '.' with '$'.
+         * Afterwards insert the package name at the start of the sequence.
+         * e.g
+         * test.Test.NestedTest.NestedNestedTest will be converted to
+         * test.Test$NestedTest$NestedNestedTest
+         */
+        StringBuilder methodSignature = new StringBuilder();
+        methodSignature.append(tree.sym.enclClass().toString().
+                replaceFirst("^[a-z].*\\.", "").replace(".", "$")).append(':');
+
+        if (!(tree.sym.packge().getQualifiedName().toString().equals("")))
+            methodSignature.insert(0, tree.sym.packge().getQualifiedName().toString());
+
+        /**
+         * STEP 2: Append method signature: <return type> <method name>((<parameter type>,)*<parameter type?)
+         */
+        Symbol.MethodSymbol methodSymbol = (Symbol.MethodSymbol) tree.sym.getEnclosingElement();
+        methodSignature.append(" ").append(methodSymbol.getReturnType()).
+                append(" ").append(methodSymbol.getQualifiedName()).
+                append("(");
+
+        List<Symbol.VarSymbol> parameters = methodSymbol.getParameters();
+        for (int i = 0; i < parameters.size(); i++) {
+            Symbol.VarSymbol param = parameters.get(i);
+            String fqType = buildFQType(param.type.toString(), param.packge().getQualifiedName().toString());
+
+            if (i != parameters.size() - 1)
+                methodSignature.append(fqType).append(',');
+            else
+                methodSignature.append(fqType).append(')');
+        }
+        methodSignature.insert(0, '<');
+        methodSignature.append('>');
+
+        return methodSignature.toString();
     }
 
 
@@ -71,8 +170,13 @@ public class IdentifierScanner extends TreeScanner {
 
     public void visitVarDef(JCTree.JCVariableDecl tree) {
         if (tree.sym.getEnclosingElement() instanceof Symbol.MethodSymbol) {
-            System.out.println("Local variable: " + tree.sym.enclClass().toString() + "." + tree.sym.getEnclosingElement().getQualifiedName().toString() + "." + tree.sym.toString());
+
+            System.out.println("Variable name: " + tree.sym.getQualifiedName().toString());
+            System.out.println("Declaring method signature: " + buildMethodSignature(tree));
+            System.out.println("Type: " + tree.type);
         }
+
+
         scan(tree.mods);
         scan(tree.vartype);
         scan(tree.nameexpr);
@@ -251,15 +355,13 @@ public class IdentifierScanner extends TreeScanner {
     }
 
     public void visitIdent(JCTree.JCIdent tree) {
-        /*If the enclosing element is a method we know we have found a local variable */
+
         if (tree.sym.getEnclosingElement() instanceof Symbol.MethodSymbol) {
-            System.out.println("Local variable: " + tree.sym.enclClass().toString() + "." + tree.sym.getEnclosingElement().getQualifiedName().toString() + "." + tree.sym.toString());
+
+            System.out.println("Variable name: " + tree.sym.getQualifiedName().toString());
+            System.out.println("Declaring method signature: " + buildMethodSignature(tree));
+            System.out.println("Type: " + tree.sym.type);
         }
-//        else
-//            System.out.println(tree.sym.toString() + " " + " enclosing element: " + tree.sym.getEnclosingElement());
-//        else if (tree.sym.getEnclosingElement() instanceof Symbol.ClassSymbol) {
-//            System.out.println("Field: " + tree.sym.enclClass().toString() + "." + tree.sym.toString());
-//        }
     }
 
     public void visitLiteral(JCTree.JCLiteral tree) {
