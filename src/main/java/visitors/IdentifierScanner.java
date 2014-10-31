@@ -38,18 +38,16 @@ public class IdentifierScanner extends TreeScanner {
 
     public String buildFQType(String typeName, Symbol.PackageSymbol packageSymbol) {
         StringBuilder fqTypeName = new StringBuilder();
+        String packge = packageSymbol.getQualifiedName().toString();
 
+        if (typeName.startsWith(packge)) {
+            typeName = typeName.substring(packge.length() + 1).replace('.', '$');
+            fqTypeName.append(packge).append('.').append(typeName);
+        }
+        else
+            fqTypeName.append(typeName);
 
-        System.out.println("Type name: " + typeName);
-        System.out.println("Package: " + packageSymbol.getQualifiedName().toString());
-        /*String classPart = classSymbol.substring(packge.length()).replace('.', '$');
-        fqType.append(packge);
-        if (!(packge.equals("")))
-            fqType.append('.');
-
-        fqType.append(classPart);
-        return fqType.toString();*/
-        return "";
+        return fqTypeName.toString();
     }
 
     public String buildMethodSignature(JCTree.JCIdent tree) {
@@ -86,7 +84,7 @@ public class IdentifierScanner extends TreeScanner {
             if (i != parameters.size() - 1)
                 methodSignature.append(fqType).append(',');
             else
-                methodSignature.append(fqType).append(')');
+                methodSignature.append(fqType);
         }
         methodSignature.insert(0, '<');
         methodSignature.append(")>");
