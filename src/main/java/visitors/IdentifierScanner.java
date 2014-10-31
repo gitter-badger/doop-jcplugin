@@ -25,15 +25,27 @@ public class IdentifierScanner extends TreeScanner {
     /** Visitor method: Scan a single node.
      */
     public void scan(JCTree tree) {
+        if (tree instanceof JCTree.JCIdent) {
+            System.out.println("Found identifier");
+            if (((JCTree.JCIdent) tree).sym instanceof Symbol.MethodSymbol)
+                System.out.println(((JCTree.JCIdent) tree).sym.getQualifiedName().toString());
+        }
         if(tree!=null) tree.accept(this);
     }
 
     /** Visitor method: scan a list of nodes.
+     *
      */
     public void scan(List<? extends JCTree> trees) {
         if (trees != null)
-            for (List<? extends JCTree> l = trees; l.nonEmpty(); l = l.tail)
+            for (List<? extends JCTree> l = trees; l.nonEmpty(); l = l.tail) {
+                if (l.head instanceof JCTree.JCIdent) {
+                    System.out.println("Found identifier");
+                    if (((JCTree.JCIdent) l.head).sym instanceof Symbol.MethodSymbol)
+                        System.out.println(((JCTree.JCIdent) l.head).sym.getQualifiedName().toString());
+                }
                 scan(l.head);
+            }
     }
 
     /**
@@ -295,6 +307,7 @@ public class IdentifierScanner extends TreeScanner {
     public void visitApply(JCTree.JCMethodInvocation tree) {
         scan(tree.typeargs);
         scan(tree.meth);
+        System.out.println(tree.meth.toString());
         scan(tree.args);
     }
 
@@ -359,10 +372,12 @@ public class IdentifierScanner extends TreeScanner {
     }
 
     public void visitSelect(JCTree.JCFieldAccess tree) {
+        System.out.println("Field access: " +tree.toString());
         scan(tree.selected);
     }
 
     public void visitReference(JCTree.JCMemberReference tree) {
+        System.out.println("Member reference: " + tree.toString());
         scan(tree.expr);
         scan(tree.typeargs);
     }
