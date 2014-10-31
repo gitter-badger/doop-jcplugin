@@ -36,25 +36,34 @@ public class IdentifierScanner extends TreeScanner {
                 scan(l.head);
     }
 
-    public String buildFQType(String typeName, Symbol.PackageSymbol packageSymbol) {
+    /**
+     * Builds the fully qualified name of a type.
+     *
+     * @param type         the string representation of the type
+     * @param packageSymbol    the package symbol
+     * @return fqType          the fully qualified type
+     */
+    public String buildFQType(String type, Symbol.PackageSymbol packageSymbol) {
         StringBuilder fqTypeName = new StringBuilder();
         String packge = packageSymbol.getQualifiedName().toString();
 
-        if (typeName.startsWith(packge)) {
-            typeName = typeName.substring(packge.length() + 1).replace('.', '$');
-            fqTypeName.append(packge).append('.').append(typeName);
+        if (type.startsWith(packge)) {
+            type = type.substring(packge.length() + 1).replace('.', '$');
+            fqTypeName.append(packge).append('.').append(type);
         }
         else
-            fqTypeName.append(typeName);
-
-        return fqTypeName.toString();
+            fqTypeName.append(type);
+        String fqType = fqTypeName.toString();
+        return fqType;
     }
 
+    /**
+     * Builds the signature of the declaring method of a variable.
+     *
+     * @param tree   the tree node representing the variable identifier
+     * @return       the signature of the declaring method as a string
+     */
     public String buildMethodSignature(JCTree.JCIdent tree) {
-        /**
-         *  Building the declaring method signature
-         */
-
         /**
          * STEP 1: Build enclosing class name
          * Remove "package." if it exists and replace all occurrences of '.' with '$'.
@@ -92,11 +101,13 @@ public class IdentifierScanner extends TreeScanner {
         return methodSignature.toString();
     }
 
+    /**
+     * Builds the signature of the declaring method of a variable.
+     *
+     * @param tree   the tree node representing the variable declaration
+     * @return       the signature of the declaring method as a string
+     */
     public String buildMethodSignature(JCTree.JCVariableDecl tree) {
-        /**
-         *  Building the declaring method signature
-         */
-
         /**
          * STEP 1: Build enclosing class name
          * Remove "package." if it exists and replace all occurrences of '.' with '$'.
