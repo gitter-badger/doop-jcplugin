@@ -23,6 +23,7 @@ TODO:
 <li>Representation of Doop entities in Java (doop-api: https://github.com/plast-lab/doop-api).</li>
 <li>Correct handling of packages when generating fully qualified names for nested types. - Almost done</li>
 <li>Test with doop exclude implicit reachable flag.</li>
+<li>Check spring framework</li>
 </ul>
 
 
