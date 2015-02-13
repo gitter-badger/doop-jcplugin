@@ -208,13 +208,13 @@ public class IdentifierScanner extends TreeScanner {
 
     @Override
     public void visitVarDef(JCTree.JCVariableDecl tree) {
-        /*if (tree.sym.getEnclosingElement() instanceof Symbol.MethodSymbol) {
+        if (tree.sym.getEnclosingElement() instanceof Symbol.MethodSymbol) {
             System.out.println("##########################################################################################################################");
             System.out.println("Variable name: " + tree.sym.getQualifiedName().toString());
             System.out.println("Declaring method signature: " + buildMethodSignature(tree));
             System.out.println("Type: " + tree.type);
             System.out.println("##########################################################################################################################");
-        }*/
+        }
 
 
         scan(tree.mods);
@@ -425,7 +425,7 @@ public class IdentifierScanner extends TreeScanner {
 
     @Override
     public void visitSelect(JCTree.JCFieldAccess tree) {
-        System.out.println("Field access: " +tree.toString());
+        System.out.println("Field access/Method invocation: " +tree.toString());
         scan(tree.selected);
     }
 
