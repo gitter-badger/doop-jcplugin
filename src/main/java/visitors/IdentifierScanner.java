@@ -227,21 +227,28 @@ public class IdentifierScanner extends TreeScanner {
     public void visitSkip(JCTree.JCSkip tree) {
     }
 
+    /**
+     *
+     * @param tree
+     */
     @Override
     public void visitBlock(JCTree.JCBlock tree) {
         scan(tree.stats);
     }
 
+    @Override
     public void visitDoLoop(JCTree.JCDoWhileLoop tree) {
         scan(tree.body);
         scan(tree.cond);
     }
 
+    @Override
     public void visitWhileLoop(JCTree.JCWhileLoop tree) {
         scan(tree.cond);
         scan(tree.body);
     }
 
+    @Override
     public void visitForLoop(JCTree.JCForLoop tree) {
         scan(tree.init);
         scan(tree.cond);
@@ -249,31 +256,37 @@ public class IdentifierScanner extends TreeScanner {
         scan(tree.body);
     }
 
+    @Override
     public void visitForeachLoop(JCTree.JCEnhancedForLoop tree) {
         scan(tree.var);
         scan(tree.expr);
         scan(tree.body);
     }
 
+    @Override
     public void visitLabelled(JCTree.JCLabeledStatement tree) {
         scan(tree.body);
     }
 
+    @Override
     public void visitSwitch(JCTree.JCSwitch tree) {
         scan(tree.selector);
         scan(tree.cases);
     }
 
+    @Override
     public void visitCase(JCTree.JCCase tree) {
         scan(tree.pat);
         scan(tree.stats);
     }
 
+    @Override
     public void visitSynchronized(JCTree.JCSynchronized tree) {
         scan(tree.lock);
         scan(tree.body);
     }
 
+    @Override
     public void visitTry(JCTree.JCTry tree) {
         scan(tree.resources);
         scan(tree.body);
@@ -281,46 +294,56 @@ public class IdentifierScanner extends TreeScanner {
         scan(tree.finalizer);
     }
 
+    @Override
     public void visitCatch(JCTree.JCCatch tree) {
         scan(tree.param);
         scan(tree.body);
     }
 
+    @Override
     public void visitConditional(JCTree.JCConditional tree) {
         scan(tree.cond);
         scan(tree.truepart);
         scan(tree.falsepart);
     }
 
+    @Override
     public void visitIf(JCTree.JCIf tree) {
         scan(tree.cond);
         scan(tree.thenpart);
         scan(tree.elsepart);
     }
 
+    @Override
     public void visitExec(JCTree.JCExpressionStatement tree) {
         scan(tree.expr);
     }
 
+    @Override
     public void visitBreak(JCTree.JCBreak tree) {
     }
 
+    @Override
     public void visitContinue(JCTree.JCContinue tree) {
     }
 
+    @Override
     public void visitReturn(JCTree.JCReturn tree) {
         scan(tree.expr);
     }
 
+    @Override
     public void visitThrow(JCTree.JCThrow tree) {
         scan(tree.expr);
     }
 
+    @Override
     public void visitAssert(JCTree.JCAssert tree) {
         scan(tree.cond);
         scan(tree.detail);
     }
 
+    @Override
     public void visitApply(JCTree.JCMethodInvocation tree) {
         scan(tree.typeargs);
         scan(tree.meth);
@@ -328,6 +351,7 @@ public class IdentifierScanner extends TreeScanner {
         scan(tree.args);
     }
 
+    @Override
     public void visitNewClass(JCTree.JCNewClass tree) {
         scan(tree.encl);
         scan(tree.typeargs);
@@ -336,69 +360,83 @@ public class IdentifierScanner extends TreeScanner {
         scan(tree.def);
     }
 
+    @Override
     public void visitNewArray(JCTree.JCNewArray tree) {
         scan(tree.annotations);
         scan(tree.elemtype);
         scan(tree.dims);
-        for (List<JCTree.JCAnnotation> annos : tree.dimAnnotations)
+        tree.dimAnnotations.stream().forEach((annos) -> {
             scan(annos);
+        });
         scan(tree.elems);
     }
 
+    @Override
     public void visitLambda(JCTree.JCLambda tree) {
         scan(tree.body);
         scan(tree.params);
     }
 
+    @Override
     public void visitParens(JCTree.JCParens tree) {
         scan(tree.expr);
     }
 
+    @Override
     public void visitAssign(JCTree.JCAssign tree) {
         scan(tree.lhs);
         scan(tree.rhs);
     }
 
+    @Override
     public void visitAssignop(JCTree.JCAssignOp tree) {
         scan(tree.lhs);
         scan(tree.rhs);
     }
 
+    @Override
     public void visitUnary(JCTree.JCUnary tree) {
         scan(tree.arg);
     }
 
+    @Override
     public void visitBinary(JCTree.JCBinary tree) {
         scan(tree.lhs);
         scan(tree.rhs);
     }
 
+    @Override
     public void visitTypeCast(JCTree.JCTypeCast tree) {
         scan(tree.clazz);
         scan(tree.expr);
     }
 
+    @Override
     public void visitTypeTest(JCTree.JCInstanceOf tree) {
         scan(tree.expr);
         scan(tree.clazz);
     }
 
+    @Override
     public void visitIndexed(JCTree.JCArrayAccess tree) {
         scan(tree.indexed);
         scan(tree.index);
     }
 
+    @Override
     public void visitSelect(JCTree.JCFieldAccess tree) {
         System.out.println("Field access: " +tree.toString());
         scan(tree.selected);
     }
 
+    @Override
     public void visitReference(JCTree.JCMemberReference tree) {
         System.out.println("Member reference: " + tree.toString());
         scan(tree.expr);
         scan(tree.typeargs);
     }
 
+    @Override
     public void visitIdent(JCTree.JCIdent tree) {
 /*
         if (tree.sym != null && tree.sym.getEnclosingElement() instanceof Symbol.MethodSymbol) {
@@ -414,29 +452,36 @@ public class IdentifierScanner extends TreeScanner {
         }
     }
 
+    @Override
     public void visitLiteral(JCTree.JCLiteral tree) {
     }
 
+    @Override
     public void visitTypeIdent(JCTree.JCPrimitiveTypeTree tree) {
     }
 
+    @Override
     public void visitTypeArray(JCTree.JCArrayTypeTree tree) {
         scan(tree.elemtype);
     }
 
+    @Override
     public void visitTypeApply(JCTree.JCTypeApply tree) {
         scan(tree.clazz);
         scan(tree.arguments);
     }
 
+    @Override
     public void visitTypeUnion(JCTree.JCTypeUnion tree) {
         scan(tree.alternatives);
     }
 
+    @Override
     public void visitTypeIntersection(JCTree.JCTypeIntersection tree) {
         scan(tree.bounds);
     }
 
+    @Override
     public void visitTypeParameter(JCTree.JCTypeParameter tree) {
         scan(tree.annotations);
         scan(tree.bounds);
@@ -453,28 +498,34 @@ public class IdentifierScanner extends TreeScanner {
     public void visitTypeBoundKind(JCTree.TypeBoundKind that) {
     }
 
+    @Override
     public void visitModifiers(JCTree.JCModifiers tree) {
         scan(tree.annotations);
     }
 
+    @Override
     public void visitAnnotation(JCTree.JCAnnotation tree) {
         scan(tree.annotationType);
         scan(tree.args);
     }
 
+    @Override
     public void visitAnnotatedType(JCTree.JCAnnotatedType tree) {
         scan(tree.annotations);
         scan(tree.underlyingType);
     }
 
+    @Override
     public void visitErroneous(JCTree.JCErroneous tree) {
     }
 
+    @Override
     public void visitLetExpr(JCTree.LetExpr tree) {
         scan(tree.defs);
         scan(tree.expr);
     }
 
+    @Override
     public void visitTree(JCTree tree) {
         Assert.error();
     }
