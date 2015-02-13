@@ -30,7 +30,9 @@ public class IdentifierScanner extends TreeScanner {
         
     }
     /** Visitor method: Scan a single node.
+     * @param tree
      */
+    @Override
     public void scan(JCTree tree) {
         if (tree instanceof JCTree.JCIdent) {
             System.out.println("Found identifier");
@@ -41,7 +43,9 @@ public class IdentifierScanner extends TreeScanner {
     }
 
     /** Visitor method: scan a list of nodes.
+     * @param trees
      */
+    @Override
     public void scan(List<? extends JCTree> trees) {
         if (trees != null)
             for (List<? extends JCTree> l = trees; l.nonEmpty(); l = l.tail) {
@@ -169,16 +173,19 @@ public class IdentifierScanner extends TreeScanner {
  * Visitor methods
  ****************************************************************************/
 
+    @Override
     public void visitTopLevel(JCTree.JCCompilationUnit tree) {
         scan(tree.packageAnnotations);
         scan(tree.pid);
         scan(tree.defs);
     }
 
+    @Override
     public void visitImport(JCTree.JCImport tree) {
         scan(tree.qualid);
     }
 
+    @Override
     public void visitClassDef(JCTree.JCClassDecl tree) {
         scan(tree.mods);
         scan(tree.typarams);
@@ -187,6 +194,7 @@ public class IdentifierScanner extends TreeScanner {
         scan(tree.defs);
     }
 
+    @Override
     public void visitMethodDef(JCTree.JCMethodDecl tree) {
         scan(tree.mods);
         scan(tree.restype);
@@ -198,6 +206,7 @@ public class IdentifierScanner extends TreeScanner {
         scan(tree.body);
     }
 
+    @Override
     public void visitVarDef(JCTree.JCVariableDecl tree) {
         /*if (tree.sym.getEnclosingElement() instanceof Symbol.MethodSymbol) {
             System.out.println("##########################################################################################################################");
@@ -214,9 +223,11 @@ public class IdentifierScanner extends TreeScanner {
         scan(tree.init);
     }
 
+    @Override
     public void visitSkip(JCTree.JCSkip tree) {
     }
 
+    @Override
     public void visitBlock(JCTree.JCBlock tree) {
         scan(tree.stats);
     }
