@@ -1,11 +1,11 @@
 package visitors;
-
 import com.sun.tools.javac.code.Symbol;
-import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeScanner;
 import com.sun.tools.javac.util.Assert;
 import com.sun.tools.javac.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /** A subclass of Tree.Visitor, this class defines
  *  a general tree scanner pattern. Translation proceeds recursively in
@@ -21,7 +21,14 @@ import com.sun.tools.javac.util.List;
  *  deletion without notice.</b>
  */
 public class IdentifierScanner extends TreeScanner {
-
+    Map<String, Set<String>> vptMap;
+    public IdentifierScanner() {
+        this.vptMap = null;
+    }
+    public IdentifierScanner(Map<String,Set<String>> vptMap) {
+        this.vptMap = vptMap;
+        
+    }
     /** Visitor method: Scan a single node.
      */
     public void scan(JCTree tree) {
@@ -34,7 +41,6 @@ public class IdentifierScanner extends TreeScanner {
     }
 
     /** Visitor method: scan a list of nodes.
-     *
      */
     public void scan(List<? extends JCTree> trees) {
         if (trees != null)
