@@ -85,7 +85,7 @@ public class IdentifierScanner extends TreeScanner {
      * @param tree   the tree node representing the variable identifier
      * @return       the signature of the declaring method as a string
      */
-    public String buildMethodSignature(JCTree.JCIdent tree) {
+    public StringBuilder[] buildMethodSignature(JCTree.JCIdent tree) {
         /**
          * STEP 1: Build enclosing class name
          * Remove "package." if it exists and replace all occurrences of '.' with '$'.
@@ -94,33 +94,46 @@ public class IdentifierScanner extends TreeScanner {
          * test.Test.NestedTest.NestedNestedTest will be converted to
          * test.Test$NestedTest$NestedNestedTest
          */
-        StringBuilder methodSignature = new StringBuilder();
-        methodSignature.append(buildFQType(tree.sym.enclClass().getQualifiedName().toString(), tree.sym.packge()));
+        StringBuilder[] methodSignatures = new StringBuilder[2];
+        for (int i = 0; i < methodSignatures.length; i++)
+            methodSignatures[i] = new StringBuilder();
+
+        String fqType = buildFQType(tree.sym.enclClass().getQualifiedName().toString(), tree.sym.packge());
+        methodSignatures[0].append(fqType.substring(fqType.lastIndexOf('.') + 1)).append(":");
+        methodSignatures[1].append(fqType).append(":");
 
         /**
          * STEP 2: Append method signature: <return type> <method name>((<parameter type>,)*<parameter type?)
          */
         Symbol.MethodSymbol methodSymbol = (Symbol.MethodSymbol) tree.sym.getEnclosingElement();
-        methodSignature.append(" ").append(methodSymbol.getReturnType()).
+        methodSignatures[1].append(" ").append(methodSymbol.getReturnType()).
                         append(" ").append(methodSymbol.getQualifiedName()).
                         append("(");
-
+        
+        methodSignatures[0].append(" ").append(methodSymbol.getReturnType()).
+                        append(" ").append(methodSymbol.getQualifiedName()).
+                        append("(");
+        
         List<Symbol.VarSymbol> parameters = methodSymbol.getParameters();
         for (int i = 0; i < parameters.size(); i++) {
             Symbol.VarSymbol param = parameters.get(i);
 
             /** build fully qualified name */
-            String fqType = buildFQType(param.type.toString(), param.packge());
+            fqType = buildFQType(param.type.toString(), param.packge());
 
-            if (i != parameters.size() - 1)
-                methodSignature.append(fqType).append(',');
-            else
-                methodSignature.append(fqType);
+            if (i != parameters.size() - 1) {
+                methodSignatures[0].append(fqType.substring(fqType.lastIndexOf('.') + 1)).append(',');
+                methodSignatures[1].append(fqType).append(',');
+            }
+            else {
+                methodSignatures[0].append(fqType.substring(fqType.lastIndexOf('.') + 1));
+                methodSignatures[1].append(fqType);
+            }
         }
-        methodSignature.insert(0, '<');
-        methodSignature.append(")>");
+        methodSignatures[1].insert(0, '<');
+        methodSignatures[1].append(")>");
 
-        return methodSignature.toString();
+        return methodSignatures;
     }
 
     /**
@@ -129,7 +142,8 @@ public class IdentifierScanner extends TreeScanner {
      * @param tree   the tree node representing the variable declaration
      * @return       the signature of the declaring method as a string
      */
-    public String buildMethodSignature(JCTree.JCVariableDecl tree) {
+    public StringBuilder[] buildMethodSignature(JCTree.JCVariableDecl tree) {
+        
         /**
          * STEP 1: Build enclosing class name
          * Remove "package." if it exists and replace all occurrences of '.' with '$'.
@@ -138,34 +152,49 @@ public class IdentifierScanner extends TreeScanner {
          * test.Test.NestedTest.NestedNestedTest will be converted to
          * test.Test$NestedTest$NestedNestedTest
          */
-        StringBuilder methodSignature = new StringBuilder();
+        StringBuilder[] methodSignatures = new StringBuilder[2];
+        for (int i = 0; i < methodSignatures.length; i++)
+            methodSignatures[i] = new StringBuilder();
         /** build fully qualified name of type */
-        methodSignature.append(buildFQType(tree.sym.enclClass().getQualifiedName().toString(), tree.sym.packge()));
-
+        String fqType = buildFQType(tree.sym.enclClass().getQualifiedName().toString(), tree.sym.packge());
+        methodSignatures[0].append(fqType.substring(fqType.lastIndexOf('.') + 1)).append(":");
+        methodSignatures[1].append(fqType).append(":");
+        
         /**
          * STEP 2: Append method signature: <return type> <method name>((<parameter type>,)*<parameter type?)
          */
         Symbol.MethodSymbol methodSymbol = (Symbol.MethodSymbol) tree.sym.getEnclosingElement();
-        methodSignature.append(" ").append(methodSymbol.getReturnType()).
+        methodSignatures[0].append(" ").append(methodSymbol.getReturnType()).
                         append(" ").append(methodSymbol.getQualifiedName()).
                         append("(");
-
+        
+        methodSignatures[1].append(" ").append(methodSymbol.getReturnType()).
+                        append(" ").append(methodSymbol.getQualifiedName()).
+                        append("(");
+        
         List<Symbol.VarSymbol> parameters = methodSymbol.getParameters();
         for (int i = 0; i < parameters.size(); i++) {
             Symbol.VarSymbol param = parameters.get(i);
 
             /** build fully qualified name of type */
-            String fqType = buildFQType(param.type.toString(), param.packge());
+            fqType = buildFQType(param.type.toString(), param.packge());
 
-            if (i != parameters.size() - 1)
-                methodSignature.append(fqType).append(',');
-            else
-                methodSignature.append(fqType);
+            if (i != parameters.size() - 1) {
+                methodSignatures[0].append(fqType.substring(fqType.lastIndexOf('.') + 1)).append(',');
+                methodSignatures[1].append(fqType).append(',');
+            }
+            else {
+                methodSignatures[0].append(fqType.substring(fqType.lastIndexOf('.') + 1));
+                methodSignatures[1].append(fqType);
+            }
         }
-        methodSignature.insert(0, '<');
-        methodSignature.append(")>");
+        methodSignatures[0].insert(0, '<');
+        methodSignatures[0].append(")>");
+        
+        methodSignatures[1].insert(0, '<');
+        methodSignatures[1].append(")>");
 
-        return methodSignature.toString();
+        return methodSignatures;
     }
 
 
@@ -211,7 +240,11 @@ public class IdentifierScanner extends TreeScanner {
         if (tree.sym.getEnclosingElement() instanceof Symbol.MethodSymbol) {
             System.out.println("##########################################################################################################################");
             System.out.println("Variable name: " + tree.sym.getQualifiedName().toString());
-            System.out.println("Declaring method signature: " + buildMethodSignature(tree));
+            StringBuilder[] methodSignatures = buildMethodSignature(tree);
+            System.out.println("Declaring method signature: " + methodSignatures[1].toString());
+            System.out.println("Alternate declaring method signature: " + methodSignatures[0].toString());
+            System.out.println("Possible variable names in Doop:" + methodSignatures[1].toString() + "/" + tree.sym.getQualifiedName().toString() + 
+                               ", " + methodSignatures[0].toString() + "/" + tree.sym.getQualifiedName().toString() );
             System.out.println("Type: " + tree.type);
             System.out.println("##########################################################################################################################");
         }

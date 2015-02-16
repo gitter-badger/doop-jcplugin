@@ -5,7 +5,7 @@ This projects aims to locate all the non-primitive variables in a java source co
 mvn package
 
 <h3>javac command</h3>
-javac -Xbootclasspath/p:./target/doop-printer-1.0-SNAPSHOT.jar -processorpath ./target/doop-printer-1.0-SNAPSHOT.jar -Xplugin:DoopPrinterPlugin ./src/test/java/*.java
+javac -Xbootclasspath/p:./target/doop-printer-1.0-SNAPSHOT.jar -processorpath ./target/doop-printer-1.0-SNAPSHOT.jar -Xplugin:DoopPrinterPlugin ./src/test/resources/advancedTest/myTests/*.java
 
 <h3>useful links</h3>
 javac sources:
