@@ -6,6 +6,7 @@ import com.sun.tools.javac.util.Assert;
 import com.sun.tools.javac.util.List;
 import java.util.Map;
 import java.util.Set;
+import reporters.Reporter;
 
 /** A subclass of Tree.Visitor, this class defines
  *  a general tree scanner pattern. Translation proceeds recursively in
@@ -22,10 +23,14 @@ import java.util.Set;
  */
 public class IdentifierScanner extends TreeScanner {
     Map<String, Set<String>> vptMap;
-    public IdentifierScanner() {
-        this.vptMap = null;
+    Reporter reporter;
+    
+    public IdentifierScanner(Reporter reporter) {
+        this(reporter, null);
     }
-    public IdentifierScanner(Map<String,Set<String>> vptMap) {
+    
+    public IdentifierScanner(Reporter reporter, Map<String,Set<String>> vptMap) {
+        this.reporter = reporter;
         this.vptMap = vptMap;
         
     }
@@ -247,6 +252,7 @@ public class IdentifierScanner extends TreeScanner {
                                ", " + methodSignatures[0].toString() + "/" + tree.sym.getQualifiedName().toString() );
             System.out.println("Type: " + tree.type);
             System.out.println("##########################################################################################################################");
+            reporter.reportVar(0, 0, 5, 5, methodSignatures[0].toString() + "/" + tree.sym.getQualifiedName().toString());
         }
 
 

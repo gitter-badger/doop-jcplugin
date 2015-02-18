@@ -14,12 +14,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import reporters.ConsoleReporter;
+import reporters.Reporter;
 
 public class DoopPrinterTaskListener implements TaskListener {
-	private JavacTask task;
-	
+	private final JavacTask task;
+    private static final String DEFAULT_REPORTER = "reporters.ConsoleReporter";
+	private final Reporter reporter;
+    
 	public DoopPrinterTaskListener(JavacTask javactask) {
 		task = javactask;
+        reporter = initReporter();
 	}
 
 	@Override
@@ -52,7 +57,7 @@ public class DoopPrinterTaskListener implements TaskListener {
             System.out.println("# VarPointsTo facts: " + vptMap.size());
             JCTree tree = (JCTree) arg0.getCompilationUnit();
             StringWriter s = new StringWriter();
-			tree.accept(new IdentifierScanner());
+			tree.accept(new IdentifierScanner(reporter));
 //            tree.accept(new DoopPrinter(s, false));
             System.out.println(s.toString());
 
@@ -73,4 +78,14 @@ public class DoopPrinterTaskListener implements TaskListener {
 	@Override
 	public void started(TaskEvent arg0) {
 	}
+    
+    protected Reporter initReporter()  {
+        String className = System.getProperty("reporter", DEFAULT_REPORTER);
+        try {
+            return (Reporter) Class.forName(className).newInstance();
+        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException ex) {
+            return new ConsoleReporter();
+        }
+        
+    }
 }
