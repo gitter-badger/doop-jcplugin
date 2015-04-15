@@ -6,7 +6,6 @@
 package doop.facts;
 
 /**
- *
  * @author anantoni
  */
 public class VarPointsTo {
@@ -19,8 +18,7 @@ public class VarPointsTo {
      *
      * @param var the variable of VarPointsTo
      */
-    public VarPointsTo(String var)
-    {
+    public VarPointsTo(String var) {
         this(var, null);
     }
 
@@ -28,24 +26,13 @@ public class VarPointsTo {
     /**
      * Constructs a VarPointsTo with a variable and a heapAllocation.
      *
-     * @param var  the name 
-     * @param heapAllocation  the heapAllocation of VarPointsTo
+     * @param var            the name
+     * @param heapAllocation the heapAllocation of VarPointsTo
      */
-    public VarPointsTo(String var, String heapAllocation)
-    {
+    public VarPointsTo(String var, String heapAllocation) {
         this.var = var;
         this.heapAllocation = heapAllocation;
     }
-
-    /**
-     * Sets the var of this VarPointsTo.
-     *
-     * @param var the var to set
-     */
-    public void setVar(String var) {
-        this.var = var;
-    }
-
 
     /**
      * Returns the var of this VarPointsTo.
@@ -57,12 +44,12 @@ public class VarPointsTo {
     }
 
     /**
-     * Sets the type of this variable.
+     * Sets the var of this VarPointsTo.
      *
-     * @param heapAllocation
+     * @param var the var to set
      */
-    public void setHeapAllocation(String heapAllocation) {
-        this.heapAllocation = heapAllocation;
+    public void setVar(String var) {
+        this.var = var;
     }
 
     /**
@@ -72,5 +59,14 @@ public class VarPointsTo {
      */
     public String getHeapAllocation() {
         return this.heapAllocation;
+    }
+
+    /**
+     * Sets the type of this variable.
+     *
+     * @param heapAllocation
+     */
+    public void setHeapAllocation(String heapAllocation) {
+        this.heapAllocation = heapAllocation;
     }
 }

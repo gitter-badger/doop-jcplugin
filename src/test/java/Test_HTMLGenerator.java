@@ -1,6 +1,6 @@
 import org.junit.Test;
 
-import java.io.*;
+import java.io.IOException;
 
 /**
  * Created by bibou on 2/9/2014.

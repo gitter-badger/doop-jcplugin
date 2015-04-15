@@ -1,40 +1,46 @@
 package visitors;
+
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeScanner;
 import com.sun.tools.javac.util.Assert;
 import com.sun.tools.javac.util.List;
-import java.util.Map;
-import java.util.Set;
 import reporters.Reporter;
 
-/** A subclass of Tree.Visitor, this class defines
- *  a general tree scanner pattern. Translation proceeds recursively in
- *  left-to-right order down a tree. There is one visitor method in this class
- *  for every possible kind of tree node.  To obtain a specific
- *  scanner, it suffices to override those visitor methods which
- *  do some interesting work. The scanner class itself takes care of all
- *  navigational aspects.
- *
- *  <p><b>This is NOT part of any supported API.
- *  If you write code that depends on this, you do so at your own risk.
- *  This code and its internal interfaces are subject to change or
- *  deletion without notice.</b>
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * A subclass of Tree.Visitor, this class defines
+ * a general tree scanner pattern. Translation proceeds recursively in
+ * left-to-right order down a tree. There is one visitor method in this class
+ * for every possible kind of tree node.  To obtain a specific
+ * scanner, it suffices to override those visitor methods which
+ * do some interesting work. The scanner class itself takes care of all
+ * navigational aspects.
+ * <p>
+ * <p><b>This is NOT part of any supported API.
+ * If you write code that depends on this, you do so at your own risk.
+ * This code and its internal interfaces are subject to change or
+ * deletion without notice.</b>
  */
 public class IdentifierScanner extends TreeScanner {
     Map<String, Set<String>> vptMap;
     Reporter reporter;
-    
+
     public IdentifierScanner(Reporter reporter) {
         this(reporter, null);
     }
-    
-    public IdentifierScanner(Reporter reporter, Map<String,Set<String>> vptMap) {
+
+    public IdentifierScanner(Reporter reporter, Map<String, Set<String>> vptMap) {
         this.reporter = reporter;
         this.vptMap = vptMap;
-        
+
     }
-    /** Visitor method: Scan a single node.
+
+    /**
+     * Visitor method: Scan a single node.
+     *
      * @param tree
      */
     @Override
@@ -44,10 +50,12 @@ public class IdentifierScanner extends TreeScanner {
             if (((JCTree.JCIdent) tree).sym instanceof Symbol.MethodSymbol)
                 System.out.println(((JCTree.JCIdent) tree).sym.getQualifiedName().toString());
         }
-        if(tree!=null) tree.accept(this);
+        if (tree != null) tree.accept(this);
     }
 
-    /** Visitor method: scan a list of nodes.
+    /**
+     * Visitor method: scan a list of nodes.
+     *
      * @param trees
      */
     @Override
@@ -66,8 +74,8 @@ public class IdentifierScanner extends TreeScanner {
     /**
      * Builds the fully qualified name of a type.
      *
-     * @param type         the string representation of the type
-     * @param packageSymbol    the package symbol
+     * @param type          the string representation of the type
+     * @param packageSymbol the package symbol
      * @return fqType          the fully qualified type
      */
     public String buildFQType(String type, Symbol.PackageSymbol packageSymbol) {
@@ -77,8 +85,7 @@ public class IdentifierScanner extends TreeScanner {
         if (type.startsWith(packge)) {
             type = type.substring(packge.length() + 1).replace('.', '$');
             fqTypeName.append(packge).append('.').append(type);
-        }
-        else
+        } else
             fqTypeName.append(type);
         String fqType = fqTypeName.toString();
         return fqType;
@@ -87,8 +94,8 @@ public class IdentifierScanner extends TreeScanner {
     /**
      * Builds the signature of the declaring method of a variable.
      *
-     * @param tree   the tree node representing the variable identifier
-     * @return       the signature of the declaring method as a string
+     * @param tree the tree node representing the variable identifier
+     * @return the signature of the declaring method as a string
      */
     public StringBuilder[] buildMethodSignature(JCTree.JCIdent tree) {
         /**
@@ -112,13 +119,13 @@ public class IdentifierScanner extends TreeScanner {
          */
         Symbol.MethodSymbol methodSymbol = (Symbol.MethodSymbol) tree.sym.getEnclosingElement();
         methodSignatures[1].append(" ").append(methodSymbol.getReturnType()).
-                        append(" ").append(methodSymbol.getQualifiedName()).
-                        append("(");
-        
+                append(" ").append(methodSymbol.getQualifiedName()).
+                append("(");
+
         methodSignatures[0].append(" ").append(methodSymbol.getReturnType()).
-                        append(" ").append(methodSymbol.getQualifiedName()).
-                        append("(");
-        
+                append(" ").append(methodSymbol.getQualifiedName()).
+                append("(");
+
         List<Symbol.VarSymbol> parameters = methodSymbol.getParameters();
         for (int i = 0; i < parameters.size(); i++) {
             Symbol.VarSymbol param = parameters.get(i);
@@ -129,8 +136,7 @@ public class IdentifierScanner extends TreeScanner {
             if (i != parameters.size() - 1) {
                 methodSignatures[0].append(fqType.substring(fqType.lastIndexOf('.') + 1)).append(',');
                 methodSignatures[1].append(fqType).append(',');
-            }
-            else {
+            } else {
                 methodSignatures[0].append(fqType.substring(fqType.lastIndexOf('.') + 1));
                 methodSignatures[1].append(fqType);
             }
@@ -144,11 +150,11 @@ public class IdentifierScanner extends TreeScanner {
     /**
      * Builds the signature of the declaring method of a variable.
      *
-     * @param tree   the tree node representing the variable declaration
-     * @return       the signature of the declaring method as a string
+     * @param tree the tree node representing the variable declaration
+     * @return the signature of the declaring method as a string
      */
     public StringBuilder[] buildMethodSignature(JCTree.JCVariableDecl tree) {
-        
+
         /**
          * STEP 1: Build enclosing class name
          * Remove "package." if it exists and replace all occurrences of '.' with '$'.
@@ -164,19 +170,19 @@ public class IdentifierScanner extends TreeScanner {
         String fqType = buildFQType(tree.sym.enclClass().getQualifiedName().toString(), tree.sym.packge());
         methodSignatures[0].append(fqType.substring(fqType.lastIndexOf('.') + 1)).append(":");
         methodSignatures[1].append(fqType).append(":");
-        
+
         /**
          * STEP 2: Append method signature: <return type> <method name>((<parameter type>,)*<parameter type?)
          */
         Symbol.MethodSymbol methodSymbol = (Symbol.MethodSymbol) tree.sym.getEnclosingElement();
         methodSignatures[0].append(" ").append(methodSymbol.getReturnType()).
-                        append(" ").append(methodSymbol.getQualifiedName()).
-                        append("(");
-        
+                append(" ").append(methodSymbol.getQualifiedName()).
+                append("(");
+
         methodSignatures[1].append(" ").append(methodSymbol.getReturnType()).
-                        append(" ").append(methodSymbol.getQualifiedName()).
-                        append("(");
-        
+                append(" ").append(methodSymbol.getQualifiedName()).
+                append("(");
+
         List<Symbol.VarSymbol> parameters = methodSymbol.getParameters();
         for (int i = 0; i < parameters.size(); i++) {
             Symbol.VarSymbol param = parameters.get(i);
@@ -187,15 +193,14 @@ public class IdentifierScanner extends TreeScanner {
             if (i != parameters.size() - 1) {
                 methodSignatures[0].append(fqType.substring(fqType.lastIndexOf('.') + 1)).append(',');
                 methodSignatures[1].append(fqType).append(',');
-            }
-            else {
+            } else {
                 methodSignatures[0].append(fqType.substring(fqType.lastIndexOf('.') + 1));
                 methodSignatures[1].append(fqType);
             }
         }
         methodSignatures[0].insert(0, '<');
         methodSignatures[0].append(")>");
-        
+
         methodSignatures[1].insert(0, '<');
         methodSignatures[1].append(")>");
 
@@ -248,11 +253,11 @@ public class IdentifierScanner extends TreeScanner {
             StringBuilder[] methodSignatures = buildMethodSignature(tree);
             System.out.println("Declaring method signature: " + methodSignatures[1].toString());
             System.out.println("Alternate declaring method signature: " + methodSignatures[0].toString());
-            System.out.println("Possible variable names in Doop:" + methodSignatures[1].toString() + "/" + tree.sym.getQualifiedName().toString() + 
-                               ", " + methodSignatures[0].toString() + "/" + tree.sym.getQualifiedName().toString() );
+            System.out.println("Possible variable names in Doop:" + methodSignatures[1].toString() + "/" + tree.sym.getQualifiedName().toString() +
+                    ", " + methodSignatures[0].toString() + "/" + tree.sym.getQualifiedName().toString());
             System.out.println("Type: " + tree.type);
             System.out.println("##########################################################################################################################");
-            reporter.reportVar(0, 0, 5, 5, methodSignatures[0].toString() + "/" + tree.sym.getQualifiedName().toString());
+            reporter.reportVar(tree.pos, tree.pos, tree.pos, tree.pos, methodSignatures[0].toString() + "/" + tree.sym.getQualifiedName().toString());
         }
 
 
@@ -267,7 +272,6 @@ public class IdentifierScanner extends TreeScanner {
     }
 
     /**
-     *
      * @param tree
      */
     @Override
@@ -464,7 +468,7 @@ public class IdentifierScanner extends TreeScanner {
 
     @Override
     public void visitSelect(JCTree.JCFieldAccess tree) {
-        System.out.println("Field access/Method invocation: " +tree.toString());
+        System.out.println("Field access/Method invocation: " + tree.toString());
         scan(tree.selected);
     }
 
@@ -487,7 +491,7 @@ public class IdentifierScanner extends TreeScanner {
         }*/
         if (tree.sym != null && tree.sym instanceof Symbol.MethodSymbol) {
 
-            System.out.println("Method invocation: " + ((Symbol.MethodSymbol)tree.sym).name.toString());
+            System.out.println("Method invocation: " + ((Symbol.MethodSymbol) tree.sym).name.toString());
         }
     }
 

@@ -1,5 +1,10 @@
+package extras;
+import java.util.ArrayList;
+
+
 public class Test {
-    Test2 test, test2;
+    public Test2 test2;
+    public Test2 test;
     Test myTest;
     boolean b;
     int[] a;
@@ -15,8 +20,14 @@ public class Test {
         }
 
         public void speak() {
-            Test uniqueLocal = new Test();
             Test testLocal = new Test();
+            ArrayList<Test> testList = new ArrayList<>();
+            ArrayList<Test2> testList2 = new ArrayList<>();
+            for (Test2 element: testList2)
+                element.speak();
+
+            for (Test element: testList)
+                element.speak();
         }
 
         public void speak(Test testParam) {
@@ -76,11 +87,5 @@ public class Test {
     public void speak() {
         System.out.println("Hello World.");
         Test2 testLocal = new Test2();
-    }
-
-    public static void main(String[] args) {
-        Test test1 = new Test();
-        test1.test2 = new Test2();
-        test1.speak(new Test2());
     }
 }

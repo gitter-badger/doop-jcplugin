@@ -1,3 +1,5 @@
+package extras;
+
 /**
  * Created by anantoni on 21/8/2014.
  */
@@ -13,4 +15,9 @@ public class Test2 {
         System.out.println("Testing: " + a);
         this.test = new Test();
     }
+
+    public void speak() {
+        System.out.println("Speak");
+    }
+
 }

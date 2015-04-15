@@ -1,4 +1,5 @@
 package src.test.resources.advancedTest.myTests;
+
 /**
  * Created by anantoni on 21/8/2014.
  */
@@ -10,8 +11,9 @@ public class Test2 {
 
     public Test2() {
         int a = 0;
+        String s = "Elegxos: " + a;
         int[] testArray;
-        System.out.println("Testing: " + a);
+        System.out.println(s);
         this.test = new Test();
     }
 
@@ -34,7 +36,7 @@ public class Test2 {
     }
 
     public void speak() {
-        Test2 t2 =  new Test2();
-        System.out.println("Test2 speaking.");
+        Test2 t2 = new Test2();
+        System.out.println("Test2 speakin.");
     }
 }

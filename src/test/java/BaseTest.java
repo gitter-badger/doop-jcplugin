@@ -24,7 +24,7 @@ public class BaseTest {
     }
 
     protected void runCompiler(String pathname) throws IOException {
-        String[] compileOptions = new String[]{ XPLUGIN_STREAM_OPTIMIZER_PLUGIN };
+        String[] compileOptions = new String[]{XPLUGIN_STREAM_OPTIMIZER_PLUGIN};
 
         pathname = SRC_TEST_RESOURCES + pathname;
 
@@ -104,8 +104,7 @@ public class BaseTest {
             childErr.close();
 
             return sw.toString().trim();
-        }
-        catch (IOException|InterruptedException e) {
+        } catch (IOException | InterruptedException e) {
             throw e;
         } finally {
             if (p != null)
@@ -125,10 +124,16 @@ public class BaseTest {
 
     // Inspired by JTREG (http://hg.openjdk.java.net/code-tools/jtreg/file/tip/src/share/classes/com/sun/javatest/regtest/Main.java)
     static class StreamCopier extends Thread {
+        private static int serial;
+        private BufferedReader in;
+        private PrintWriter out;
+        private boolean done;
+
         /**
          * Create one.
-         * @param from  the stream to copy from
-         * @param to    the stream to copy to
+         *
+         * @param from the stream to copy from
+         * @param to   the stream to copy to
          */
         StreamCopier(InputStream from, PrintWriter to) {
             super(Thread.currentThread().getName() + "_StreamCopier_" + (serial++));
@@ -173,11 +178,6 @@ public class BaseTest {
             if (interrupted)
                 throw new InterruptedException();
         }
-
-        private BufferedReader in;
-        private PrintWriter out;
-        private boolean done;
-        private static int serial;
 
     }
 }

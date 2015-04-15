@@ -5,7 +5,7 @@ This projects aims to locate all the non-primitive variables in a java source co
 mvn package
 
 <h3>javac command</h3>
-javac -Xbootclasspath/p:./target/doop-printer-1.0-SNAPSHOT.jar -processorpath ./target/doop-printer-1.0-SNAPSHOT.jar -Xplugin:DoopPrinterPlugin ./src/test/resources/advancedTest/myTests/*.java
+javac -Xbootclasspath/p:./target/doop-printer-1.0-SNAPSHOT.jar -processorpath ./target/doop-printer-1.0-SNAPSHOT.jar -Xplugin:DoopPrinterPlugin Main.java extras/*.java
 
 <h3>useful links</h3>
 javac sources:
@@ -18,12 +18,10 @@ http://velocity.apache.org/engine/releases/velocity-1.7/overview.html
 
 
 
-TODO: 
+TODO:
 <ul>
 <li>Representation of Doop entities in Java (doop-api: https://github.com/plast-lab/doop-api).</li>
 <li>Correct handling of packages when generating fully qualified names for nested types. - Almost done</li>
 <li>Test with doop exclude implicit reachable flag.</li>
 <li>Check spring framework</li>
 </ul>
-
-
