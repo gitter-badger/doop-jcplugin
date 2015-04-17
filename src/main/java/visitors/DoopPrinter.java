@@ -77,7 +77,7 @@ public class DoopPrinter extends JCTree.Visitor {
      * Indentation width (can be reassigned from outside).
      */
     public int width = 4;
-    Set primitiveTypes;
+    Set<String> primitiveTypes;
     /**
      * The output stream on which trees are printed.
      */
