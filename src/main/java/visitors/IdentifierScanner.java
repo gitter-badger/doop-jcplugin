@@ -46,7 +46,7 @@ public class IdentifierScanner extends TreeScanner {
     @Override
     public void scan(JCTree tree) {
         if (tree instanceof JCTree.JCIdent) {
-            System.out.println("Found identifier");
+//            System.out.println("Found identifier");
             if (((JCTree.JCIdent) tree).sym instanceof Symbol.MethodSymbol)
                 System.out.println(((JCTree.JCIdent) tree).sym.getQualifiedName().toString());
         }
@@ -253,11 +253,27 @@ public class IdentifierScanner extends TreeScanner {
             StringBuilder[] methodSignatures = buildMethodSignature(tree);
             System.out.println("Declaring method signature: " + methodSignatures[1].toString());
             System.out.println("Alternate declaring method signature: " + methodSignatures[0].toString());
-            System.out.println("Possible variable names in Doop:" + methodSignatures[1].toString() + "/" + tree.sym.getQualifiedName().toString() +
-                    ", " + methodSignatures[0].toString() + "/" + tree.sym.getQualifiedName().toString());
+            System.out.println("Possible variable names in Doop: " + methodSignatures[1].toString() + "/" + tree.sym.getQualifiedName().toString() + ", "
+                                                                  + methodSignatures[0].toString() + "/" + tree.sym.getQualifiedName().toString());
             System.out.println("Type: " + tree.type);
             System.out.println("##########################################################################################################################");
-            reporter.reportVar(tree.pos, tree.pos, tree.pos, tree.pos, methodSignatures[0].toString() + "/" + tree.sym.getQualifiedName().toString());
+            String doopVarName = methodSignatures[1].toString() + "/" + tree.sym.getQualifiedName().toString();
+            reporter.reportVar(tree.pos, tree.pos, tree.pos, tree.pos, doopVarName);
+            Set<String> variableSet = vptMap.keySet();
+            for (String var : variableSet) {
+                if (var.contains("extras"))
+
+                    if (var.equals(doopVarName))
+                        System.out.println("MATCH!");
+            }
+            if (this.vptMap != null) {
+                if (this.vptMap.get(doopVarName) != null) {
+                    System.out.println("Variable exists in VarPointsTo relation");
+                    Set<String> heapAllocationSet = this.vptMap.get(doopVarName);
+                    for (String heapAllocation : heapAllocationSet)
+                        System.out.println(heapAllocation);
+                }
+            }
         }
 
 

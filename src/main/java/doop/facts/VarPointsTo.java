@@ -5,12 +5,14 @@
  */
 package doop.facts;
 
+import java.util.Set;
+
 /**
  * @author anantoni
  */
 public class VarPointsTo {
     private String var = null;
-    private String heapAllocation = null;
+    private Set<String> heapAllocation = null;
 
 
     /**
@@ -29,7 +31,7 @@ public class VarPointsTo {
      * @param var            the name
      * @param heapAllocation the heapAllocation of VarPointsTo
      */
-    public VarPointsTo(String var, String heapAllocation) {
+    public VarPointsTo(String var, Set<String> heapAllocation) {
         this.var = var;
         this.heapAllocation = heapAllocation;
     }
@@ -57,7 +59,7 @@ public class VarPointsTo {
      *
      * @return type  the type of this variable
      */
-    public String getHeapAllocation() {
+    public Set<String> getHeapAllocation() {
         return this.heapAllocation;
     }
 
@@ -66,7 +68,7 @@ public class VarPointsTo {
      *
      * @param heapAllocation
      */
-    public void setHeapAllocation(String heapAllocation) {
+    public void setHeapAllocation(Set<String> heapAllocation) {
         this.heapAllocation = heapAllocation;
     }
 }

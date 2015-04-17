@@ -41,10 +41,10 @@ public class DoopPrinterTaskListener implements TaskListener {
                     Set<String> value;
                     if ((value = vptMap.get(columns[3])) == null) {
                         Set<String> tempSet = new HashSet<>();
-                        tempSet.add(columns[1]);
-                        vptMap.put(columns[3], tempSet);
+                        tempSet.add(columns[1].trim());
+                        vptMap.put(columns[3].trim(), tempSet);
                     } else
-                        value.add(columns[1]);
+                        value.add(columns[1].trim());
 
                 }
             } catch (FileNotFoundException ex) {
@@ -55,7 +55,7 @@ public class DoopPrinterTaskListener implements TaskListener {
             System.out.println("# VarPointsTo facts: " + vptMap.size());
             JCTree tree = (JCTree) arg0.getCompilationUnit();
             StringWriter s = new StringWriter();
-            tree.accept(new IdentifierScanner(reporter));
+            tree.accept(new IdentifierScanner(reporter, vptMap));
 //            tree.accept(new DoopPrinter(s, false));
             System.out.println(s.toString());
 
