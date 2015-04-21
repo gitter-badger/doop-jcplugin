@@ -82,7 +82,7 @@ public class IdentifierScanner extends TreeScanner {
         StringBuilder fqTypeName = new StringBuilder();
         String packge = packageSymbol.getQualifiedName().toString();
 
-        if (type.startsWith(packge)) {
+        if (type.startsWith(packge) && !(packge.equals(""))) {
             type = type.substring(packge.length() + 1).replace('.', '$');
             fqTypeName.append(packge).append('.').append(type);
         } else
@@ -205,6 +205,15 @@ public class IdentifierScanner extends TreeScanner {
         methodSignatures[1].append(")>");
 
         return methodSignatures;
+    }
+
+    public String buildMethodSignature(JCTree tree) {
+        if (tree instanceof JCTree.JCVariableDecl) {
+
+        }
+        else if (tree instanceof JCTree.JCIdent) {
+
+        }
     }
 
 
