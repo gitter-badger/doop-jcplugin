@@ -133,16 +133,39 @@ public class IdentifierScanner extends TreeScanner {
          * test.Test.NestedTest.NestedNestedTest will be converted to
          * test.Test$NestedTest$NestedNestedTest
          */
+
         StringBuilder methodSignature = new StringBuilder();
-        /** build fully qualified name of type */
         String fqType = buildFQType(sym.enclClass().getQualifiedName().toString(), sym.packge());
-        methodSignature.append(fqType).append(":");
+
 
         /**
          * STEP 2: Append method signature: <return_type> <method_name>((<parameter_type>,)*<parameter_type>?)
          */
-        Symbol.MethodSymbol methodSymbol = (Symbol.MethodSymbol) sym.getEnclosingElement();
 
+        Symbol.MethodSymbol methodSymbol = (Symbol.MethodSymbol) sym.getEnclosingElement();
+//        System.out.println(methodSymbol.isStatic());
+//        System.out.println(methodSymbol.name);
+//        System.out.println(methodSymbol.params.length());
+//        if (methodSymbol.params.length() == 1)
+//            System.out.println(methodSymbol.params.get(0));
+
+        /**
+         * Special handling for main method
+         */
+        if (methodSymbol.isStatic() && methodSymbol.name.toString().equals("main") &&
+                methodSymbol.params.length() == 1 )
+        {
+            Symbol.VarSymbol param = methodSymbol.params.get(0);
+            String paramFQType = buildFQType(param.type.toString(), param.packge());
+            if (paramFQType.equals("java.lang.String[]"))
+                return fqType + "." + methodSymbol.getQualifiedName().toString();
+        }
+
+        /**
+         * Special handling for constructors
+         */
+
+        methodSignature.append(fqType).append(":");
         methodSignature.append(" ").append(methodSymbol.getReturnType()).
                 append(" ").append(methodSymbol.getQualifiedName()).
                 append("(");
@@ -153,7 +176,6 @@ public class IdentifierScanner extends TreeScanner {
          */
         for (int i = 0; i < parameters.size(); i++) {
             Symbol.VarSymbol param = parameters.get(i);
-
             fqType = buildFQType(param.type.toString(), param.packge());
 
             if (i != parameters.size() - 1)
