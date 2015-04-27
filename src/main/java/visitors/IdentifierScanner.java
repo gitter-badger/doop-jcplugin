@@ -89,23 +89,41 @@ public class IdentifierScanner extends TreeScanner {
         return fqType;
     }
 
-    public String buildMethodSignature(JCTree tree) {
+    /**
+     * Builds the string representation of a variable name (taken either from a variable declaration or an identifier
+     * in Doop.
+     *
+     * @param tree
+     * @return The string representation of the variable name in Doop
+     */
+    public String buildMethodSignatureInDoop(JCTree tree) {
         if (tree instanceof JCTree.JCVariableDecl)
-            return buildMethodSignature(((JCTree.JCVariableDecl) tree).sym);
-        else if (tree instanceof JCTree.JCIdent) {
-            return buildMethodSignature(((JCTree.JCIdent) tree).sym);
-        }
+            return buildMethodSignatureInDoop(((JCTree.JCVariableDecl) tree).sym);
+        else if (tree instanceof JCTree.JCIdent)
+            return buildMethodSignatureInDoop(((JCTree.JCIdent) tree).sym);
         else
             return null;
     }
 
     /**
-     * Builds the signature of the declaring method of a variable.
+     * Builds the string representation of a variable name in Doop by combining the declaring method signature in Doop
+     * and the qualified name of the variable.
+     *
+     * @param methodSignatureInDoop the declaring method signature
+     * @param varQualifiedName the qualified name of the variable
+     * @return The string representation of the variable name in Doop
+     */
+    public String buildVarNameInDoop(String methodSignatureInDoop, String varQualifiedName) {
+        return methodSignatureInDoop + "/" + varQualifiedName;
+    }
+
+    /**
+     * Builds the signature of the declaring method of a variable symbol.
      *
      * @param sym the symbol of the variable declaration
      * @return the signature of the declaring method as a string
      */
-    public String buildMethodSignature(Symbol sym) {
+    public String buildMethodSignatureInDoop(Symbol sym) {
 
         /**
          * STEP 1: Build enclosing class name
@@ -200,21 +218,20 @@ public class IdentifierScanner extends TreeScanner {
             System.out.println("##########################################################################################################################");
             System.out.println("Variable name: " + tree.sym.getQualifiedName().toString());
             System.out.println("Type: " + tree.type);
-            String methodSignatureInDoop = buildMethodSignature(tree);
-            System.out.println("Variable name in Doop: " + methodSignatureInDoop + "/" + tree.sym.getQualifiedName().toString());
+            String methodSignatureInDoop = buildMethodSignatureInDoop(tree);
+            String varNameInDoop = buildVarNameInDoop(methodSignatureInDoop, tree.sym.getQualifiedName().toString());
+            System.out.println("Variable name in Doop: " + varNameInDoop);
             System.out.println("##########################################################################################################################");
-            String doopVarName = methodSignatureInDoop.toString() + "/" + tree.sym.getQualifiedName().toString();
-            reporter.reportVar(tree.pos, tree.pos + tree.name.length(), doopVarName);
+            reporter.reportVar(tree.pos, tree.pos + tree.name.length(), varNameInDoop);
 
             if (this.vptMap != null) {
-                if (this.vptMap.get(doopVarName) != null) {
-                    Set<String> heapAllocationSet = this.vptMap.get(doopVarName);
+                if (this.vptMap.get(varNameInDoop) != null) {
+                    Set<String> heapAllocationSet = this.vptMap.get(varNameInDoop);
                     for (String heapAllocation : heapAllocationSet)
                         System.out.println(heapAllocation);
                 }
             }
         }
-
 
         scan(tree.mods);
         scan(tree.vartype);
