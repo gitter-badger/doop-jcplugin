@@ -12,17 +12,3 @@ javac -Xbootclasspath/p:./target/doop-printer-1.0-SNAPSHOT.jar -processorpath ./
 javac sources:
 http://www.docjar.com/docs/api/com/sun/tools/javac/tree/JCTree.html
 http://cr.openjdk.java.net/~forax/lambda/src/share/classes/com/sun/tools/javac/tree/JCTree.java.html
-
-html templates:
-http://velocity.apache.org/
-http://velocity.apache.org/engine/releases/velocity-1.7/overview.html
-
-
-
-TODO:
-<ul>
-<li>Representation of Doop entities in Java (doop-api: https://github.com/plast-lab/doop-api).</li>
-<li>Correct handling of packages when generating fully qualified names for nested types. - Almost done</li>
-<li>Test with doop exclude implicit reachable flag.</li>
-<li>Check spring framework</li>
-</ul>
