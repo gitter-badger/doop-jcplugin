@@ -25,8 +25,8 @@ import java.util.Set;
  * deletion without notice.</b>
  */
 public class IdentifierScanner extends TreeScanner {
-    Map<String, Set<String>> vptMap;
-    Reporter reporter;
+    private final Map<String, Set<String>> vptMap;
+    private final Reporter reporter;
 
     public IdentifierScanner(Reporter reporter) {
         this(reporter, null);
@@ -36,10 +36,6 @@ public class IdentifierScanner extends TreeScanner {
         this.reporter = reporter;
         this.vptMap = vptMap;
 
-    }
-
-    public Reporter getReporter() {
-        return reporter;
     }
 
     /**
@@ -190,7 +186,7 @@ public class IdentifierScanner extends TreeScanner {
         return methodSignature.toString();
     }
 
-/* ***************************************************************************
+/****************************************************************************
  * Visitor methods
  ****************************************************************************/
 
