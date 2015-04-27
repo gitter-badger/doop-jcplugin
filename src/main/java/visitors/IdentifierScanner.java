@@ -38,6 +38,10 @@ public class IdentifierScanner extends TreeScanner {
 
     }
 
+    public Reporter getReporter() {
+        return reporter;
+    }
+
     /**
      * Visitor method: Scan a single node.
      *
@@ -137,17 +141,11 @@ public class IdentifierScanner extends TreeScanner {
         StringBuilder methodSignature = new StringBuilder();
         String fqType = buildFQType(sym.enclClass().getQualifiedName().toString(), sym.packge());
 
-
         /**
          * STEP 2: Append method signature: <return_type> <method_name>((<parameter_type>,)*<parameter_type>?)
          */
 
         Symbol.MethodSymbol methodSymbol = (Symbol.MethodSymbol) sym.getEnclosingElement();
-//        System.out.println(methodSymbol.isStatic());
-//        System.out.println(methodSymbol.name);
-//        System.out.println(methodSymbol.params.length());
-//        if (methodSymbol.params.length() == 1)
-//            System.out.println(methodSymbol.params.get(0));
 
         /**
          * Special handling for main method
@@ -239,13 +237,12 @@ public class IdentifierScanner extends TreeScanner {
             String varNameInDoop = buildVarNameInDoop(methodSignatureInDoop, tree.sym.getQualifiedName().toString());
             System.out.println("Variable name in Doop: " + varNameInDoop);
             System.out.println("##########################################################################################################################");
-            reporter.reportVar(tree.pos, tree.pos + tree.name.length(), varNameInDoop);
+
 
             if (this.vptMap != null) {
                 if (this.vptMap.get(varNameInDoop) != null) {
                     Set<String> heapAllocationSet = this.vptMap.get(varNameInDoop);
-                    for (String heapAllocation : heapAllocationSet)
-                        System.out.println(heapAllocation);
+                    reporter.reportVarPointsTo(tree.pos, tree.pos + tree.name.length(), varNameInDoop, heapAllocationSet);
                 }
             }
         }

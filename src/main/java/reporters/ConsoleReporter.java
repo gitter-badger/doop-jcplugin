@@ -5,6 +5,8 @@
  */
 package reporters;
 
+import java.util.Set;
+
 /**
  * @author anantoni
  */
@@ -16,6 +18,11 @@ public class ConsoleReporter implements Reporter {
     }
 
     @Override
+    public void reportVarPointsTo(int startPos, int endPos, String representation, Set<String> heapAllocationSet) {
+
+    }
+
+    @Override
     public void reportMethodInvocation(int startPos, int endPos, String representation) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
@@ -23,5 +30,10 @@ public class ConsoleReporter implements Reporter {
     @Override
     public void reportFieldAccess(int startPos, int endPos, String representation) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void closeFiles() {
+
     }
 }
