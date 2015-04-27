@@ -46,7 +46,6 @@ public class IdentifierScanner extends TreeScanner {
     @Override
     public void scan(JCTree tree) {
         if (tree instanceof JCTree.JCIdent) {
-//            System.out.println("Found identifier");
             if (((JCTree.JCIdent) tree).sym instanceof Symbol.MethodSymbol)
                 System.out.println(((JCTree.JCIdent) tree).sym.getQualifiedName().toString());
         }
@@ -63,7 +62,6 @@ public class IdentifierScanner extends TreeScanner {
         if (trees != null)
             for (List<? extends JCTree> l = trees; l.nonEmpty(); l = l.tail) {
                 if (l.head instanceof JCTree.JCIdent) {
-                    System.out.println("Found identifier");
                     if (((JCTree.JCIdent) l.head).sym instanceof Symbol.MethodSymbol)
                         System.out.println(((JCTree.JCIdent) l.head).sym.getQualifiedName().toString());
                 }
@@ -117,23 +115,21 @@ public class IdentifierScanner extends TreeScanner {
          * test.Test.NestedTest.NestedNestedTest will be converted to
          * test.Test$NestedTest$NestedNestedTest
          */
-        StringBuilder[] methodSignatures = new StringBuilder[2];
-        for (int i = 0; i < methodSignatures.length; i++)
-            methodSignatures[i] = new StringBuilder();
+        StringBuilder methodSignature = new StringBuilder();
         /** build fully qualified name of type */
         String fqType = buildFQType(sym.enclClass().getQualifiedName().toString(), sym.packge());
-        methodSignatures[0].append(fqType.substring(fqType.lastIndexOf('.') + 1)).append(":");
-        methodSignatures[1].append(fqType).append(":");
+        //methodSignatures[0].append(fqType.substring(fqType.lastIndexOf('.') + 1)).append(":");
+        methodSignature.append(fqType).append(":");
 
         /**
          * STEP 2: Append method signature: <return type> <method name>((<parameter type>,)*<parameter type?)
          */
         Symbol.MethodSymbol methodSymbol = (Symbol.MethodSymbol) sym.getEnclosingElement();
-        methodSignatures[0].append(" ").append(methodSymbol.getReturnType()).
-                append(" ").append(methodSymbol.getQualifiedName()).
-                append("(");
+//        methodSignatures[0].append(" ").append(methodSymbol.getReturnType()).
+//                append(" ").append(methodSymbol.getQualifiedName()).
+//                append("(");
 
-        methodSignatures[1].append(" ").append(methodSymbol.getReturnType()).
+        methodSignature.append(" ").append(methodSymbol.getReturnType()).
                 append(" ").append(methodSymbol.getQualifiedName()).
                 append("(");
 
@@ -144,21 +140,20 @@ public class IdentifierScanner extends TreeScanner {
             /** build fully qualified name of type */
             fqType = buildFQType(param.type.toString(), param.packge());
 
-            if (i != parameters.size() - 1) {
-                methodSignatures[0].append(fqType.substring(fqType.lastIndexOf('.') + 1)).append(',');
-                methodSignatures[1].append(fqType).append(',');
-            } else {
-                methodSignatures[0].append(fqType.substring(fqType.lastIndexOf('.') + 1));
-                methodSignatures[1].append(fqType);
-            }
+            if (i != parameters.size() - 1)
+//                methodSignatures[0].append(fqType.substring(fqType.lastIndexOf('.') + 1)).append(',');
+                methodSignature.append(fqType).append(',');
+            else
+//                methodSignatures[0].append(fqType.substring(fqType.lastIndexOf('.') + 1));
+                methodSignature.append(fqType);
         }
-        methodSignatures[0].insert(0, '<');
-        methodSignatures[0].append(")>");
+//        methodSignatures[0].insert(0, '<');
+//        methodSignatures[0].append(")>");
 
-        methodSignatures[1].insert(0, '<');
-        methodSignatures[1].append(")>");
+        methodSignature.insert(0, '<');
+        methodSignature.append(")>");
 
-        return methodSignatures[1].toString();
+        return methodSignature.toString();
     }
 
 
@@ -204,14 +199,13 @@ public class IdentifierScanner extends TreeScanner {
         if (tree.sym.getEnclosingElement() instanceof Symbol.MethodSymbol) {
             System.out.println("##########################################################################################################################");
             System.out.println("Variable name: " + tree.sym.getQualifiedName().toString());
+            System.out.println("Type: " + tree.type);
             String methodSignatureInDoop = buildMethodSignature(tree);
             System.out.println("Variable name in Doop: " + methodSignatureInDoop + "/" + tree.sym.getQualifiedName().toString());
-            System.out.println("Type: " + tree.type);
             System.out.println("##########################################################################################################################");
             String doopVarName = methodSignatureInDoop.toString() + "/" + tree.sym.getQualifiedName().toString();
             reporter.reportVar(tree.pos, tree.pos + tree.name.length(), doopVarName);
 
-            Set<String> variableSet = vptMap.keySet();
             if (this.vptMap != null) {
                 if (this.vptMap.get(doopVarName) != null) {
                     Set<String> heapAllocationSet = this.vptMap.get(doopVarName);
