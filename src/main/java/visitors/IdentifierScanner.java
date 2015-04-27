@@ -162,7 +162,9 @@ public class IdentifierScanner extends TreeScanner {
         }
 
         /**
-         * Special handling for constructors
+         * Constructors and other methods don't need any kind of special handling
+         * the only difference is that the method name in the case of constructors
+         * is <init>
          */
 
         methodSignature.append(fqType).append(":");
