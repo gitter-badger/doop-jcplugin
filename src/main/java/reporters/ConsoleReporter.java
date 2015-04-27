@@ -11,18 +11,17 @@ package reporters;
 public class ConsoleReporter implements Reporter {
 
     @Override
-    public void reportVar(int startx, int starty, int endx, int endy, String representation) {
-        System.out.println("(" + startx + ", " + starty + ")" + "(" + endx + ", " + endy + ")" + " => " + representation);
+    public void reportVar(int startPos, int endPos, String representation) {
+        System.out.println("(" + startPos + ", " + endPos + ")" + " => " + representation);
     }
 
     @Override
-    public void reportMethodInvocation(int startx, int starty, int endx, int endy, String representation) {
+    public void reportMethodInvocation(int startPos, int endPos, String representation) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public void reportFieldAccess(int startx, int starty, int endx, int endy, String representation) {
+    public void reportFieldAccess(int startPos, int endPos, String representation) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
 }

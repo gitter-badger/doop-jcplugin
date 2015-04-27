@@ -204,23 +204,16 @@ public class IdentifierScanner extends TreeScanner {
         if (tree.sym.getEnclosingElement() instanceof Symbol.MethodSymbol) {
             System.out.println("##########################################################################################################################");
             System.out.println("Variable name: " + tree.sym.getQualifiedName().toString());
-            String methodSignature = buildMethodSignature(tree);
-            System.out.println("Declaring method signature: " + methodSignature);
-            System.out.println("Variable name in Doop: " + methodSignature + "/" + tree.sym.getQualifiedName().toString());
+            String methodSignatureInDoop = buildMethodSignature(tree);
+            System.out.println("Variable name in Doop: " + methodSignatureInDoop + "/" + tree.sym.getQualifiedName().toString());
             System.out.println("Type: " + tree.type);
             System.out.println("##########################################################################################################################");
-            String doopVarName = methodSignature.toString() + "/" + tree.sym.getQualifiedName().toString();
-            reporter.reportVar(tree.pos, tree.pos, tree.pos, tree.pos, doopVarName);
-            Set<String> variableSet = vptMap.keySet();
-            for (String var : variableSet) {
-                if (var.contains("extras"))
+            String doopVarName = methodSignatureInDoop.toString() + "/" + tree.sym.getQualifiedName().toString();
+            reporter.reportVar(tree.pos, tree.pos + tree.name.length(), doopVarName);
 
-                    if (var.equals(doopVarName))
-                        System.out.println("MATCH!");
-            }
+            Set<String> variableSet = vptMap.keySet();
             if (this.vptMap != null) {
                 if (this.vptMap.get(doopVarName) != null) {
-                    System.out.println("Variable exists in VarPointsTo relation");
                     Set<String> heapAllocationSet = this.vptMap.get(doopVarName);
                     for (String heapAllocation : heapAllocationSet)
                         System.out.println(heapAllocation);

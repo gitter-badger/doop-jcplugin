@@ -9,9 +9,9 @@ package reporters;
  * @author anantoni
  */
 public interface Reporter {
-    void reportVar(int startx, int starty, int endx, int endy, String representation);
+    void reportVar(int startPos, int endPos, String representation);
 
-    void reportMethodInvocation(int startx, int starty, int endx, int endy, String representation);
+    void reportMethodInvocation(int startPos, int endPos, String representation);
 
-    void reportFieldAccess(int startx, int starty, int endx, int endy, String representation);
+    void reportFieldAccess(int startPos, int endPos, String representation);
 }
