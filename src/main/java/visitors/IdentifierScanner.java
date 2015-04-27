@@ -136,44 +136,37 @@ public class IdentifierScanner extends TreeScanner {
         StringBuilder methodSignature = new StringBuilder();
         /** build fully qualified name of type */
         String fqType = buildFQType(sym.enclClass().getQualifiedName().toString(), sym.packge());
-        //methodSignatures[0].append(fqType.substring(fqType.lastIndexOf('.') + 1)).append(":");
         methodSignature.append(fqType).append(":");
 
         /**
-         * STEP 2: Append method signature: <return type> <method name>((<parameter type>,)*<parameter type?)
+         * STEP 2: Append method signature: <return_type> <method_name>((<parameter_type>,)*<parameter_type>?)
          */
         Symbol.MethodSymbol methodSymbol = (Symbol.MethodSymbol) sym.getEnclosingElement();
-//        methodSignatures[0].append(" ").append(methodSymbol.getReturnType()).
-//                append(" ").append(methodSymbol.getQualifiedName()).
-//                append("(");
 
         methodSignature.append(" ").append(methodSymbol.getReturnType()).
                 append(" ").append(methodSymbol.getQualifiedName()).
                 append("(");
 
         List<Symbol.VarSymbol> parameters = methodSymbol.getParameters();
+        /**
+         * Append fully qualified types of method arguments
+         */
         for (int i = 0; i < parameters.size(); i++) {
             Symbol.VarSymbol param = parameters.get(i);
 
-            /** build fully qualified name of type */
             fqType = buildFQType(param.type.toString(), param.packge());
 
             if (i != parameters.size() - 1)
-//                methodSignatures[0].append(fqType.substring(fqType.lastIndexOf('.') + 1)).append(',');
                 methodSignature.append(fqType).append(',');
             else
-//                methodSignatures[0].append(fqType.substring(fqType.lastIndexOf('.') + 1));
                 methodSignature.append(fqType);
         }
-//        methodSignatures[0].insert(0, '<');
-//        methodSignatures[0].append(")>");
 
         methodSignature.insert(0, '<');
         methodSignature.append(")>");
 
         return methodSignature.toString();
     }
-
 
 /* ***************************************************************************
  * Visitor methods
