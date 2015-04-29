@@ -18,9 +18,9 @@ public class FileReporter implements Reporter {
     public FileReporter() {
         gson = new Gson();
         try {
-            varPointsToWriter = new PrintWriter("VarPointsTo.json", "UTF-8");
-            methodInvocationWriter = new PrintWriter("MethodInvocation.json", "UTF-8");
-            fieldPointsToWriter = new PrintWriter("FieldPointsTo.json", "UTF-8");
+            varPointsToWriter = new PrintWriter("json-output/VarPointsTo.json", "UTF-8");
+            methodInvocationWriter = new PrintWriter("json-output/MethodInvocation.json", "UTF-8");
+            fieldPointsToWriter = new PrintWriter("json-output/FieldPointsTo.json", "UTF-8");
             varPointsToWriter.close();
             methodInvocationWriter.close();
             fieldPointsToWriter.close();
@@ -67,9 +67,9 @@ public class FileReporter implements Reporter {
 
     public void openFiles() {
         try {
-            varPointsToWriter = new PrintWriter(new BufferedWriter(new FileWriter("VarPointsTo.json", true)));
-            methodInvocationWriter = new PrintWriter(new BufferedWriter(new FileWriter("MethodInvocation.json", true)));
-            fieldPointsToWriter = new PrintWriter(new BufferedWriter(new FileWriter("FieldPointsTo.json", true)));
+            varPointsToWriter = new PrintWriter(new BufferedWriter(new FileWriter("json-output/VarPointsTo.json", true)));
+            methodInvocationWriter = new PrintWriter(new BufferedWriter(new FileWriter("json-output/MethodInvocation.json", true)));
+            fieldPointsToWriter = new PrintWriter(new BufferedWriter(new FileWriter("json-output/FieldPointsTo.json", true)));
         } catch (IOException e) {
             e.printStackTrace();
         }
