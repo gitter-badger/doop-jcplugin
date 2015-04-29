@@ -7,15 +7,16 @@ package reporters;
 
 import doop.facts.VarPointsTo;
 
-import java.util.Set;
-
 /**
  * @author anantoni
  */
 public interface Reporter {
     void reportVar(int startPos, int endPos, String representation);
+
     void reportVarPointsTo(VarPointsTo varPointsTo);
+
     void reportMethodInvocation(int startPos, int endPos, String representation);
+
     void reportFieldAccess(int startPos, int endPos, String representation);
 
 }

@@ -111,7 +111,7 @@ public class IdentifierScanner extends TreeScanner {
      * and the qualified name of the variable.
      *
      * @param methodSignatureInDoop the declaring method signature
-     * @param varQualifiedName the qualified name of the variable
+     * @param varQualifiedName      the qualified name of the variable
      * @return The string representation of the variable name in Doop
      */
     public String buildVarNameInDoop(String methodSignatureInDoop, String varQualifiedName) {
@@ -148,8 +148,7 @@ public class IdentifierScanner extends TreeScanner {
          * Special handling for main method
          */
         if (methodSymbol.isStatic() && methodSymbol.name.toString().equals("main") &&
-                methodSymbol.params.length() == 1 )
-        {
+                methodSymbol.params.length() == 1) {
             Symbol.VarSymbol param = methodSymbol.params.get(0);
             String paramFQType = buildFQType(param.type.toString(), param.packge());
             if (paramFQType.equals("java.lang.String[]"))
@@ -187,9 +186,11 @@ public class IdentifierScanner extends TreeScanner {
         return methodSignature.toString();
     }
 
-/****************************************************************************
- * Visitor methods
- ****************************************************************************/
+    /**
+     * *************************************************************************
+     * Visitor methods
+     * **************************************************************************
+     */
 
     @Override
     public void visitTopLevel(JCTree.JCCompilationUnit tree) {
@@ -236,14 +237,17 @@ public class IdentifierScanner extends TreeScanner {
             System.out.println("##########################################################################################################################");
 
 
-            if (this.vptMap != null) {
-                if (this.vptMap.get(varNameInDoop) != null) {
-                    Set<String> heapAllocationSet = this.vptMap.get(varNameInDoop);
-                    reporter.reportVarPointsTo(new VarPointsTo(tree.pos, tree.pos + tree.name.length(), varNameInDoop, heapAllocationSet));
-                }
+            assert (this.vptMap != null);
+            if (this.vptMap.containsKey(varNameInDoop)) {
+                Set<String> heapAllocationSet = this.vptMap.get(varNameInDoop);
+                reporter.reportVarPointsTo(new VarPointsTo(tree.pos, tree.pos + tree.name.length(), varNameInDoop, heapAllocationSet));
+            }
+            else {
+                System.err.println("Match not found for " + varNameInDoop);
+                //System.out.println(vptMap.keySet());
+                System.exit(-1);
             }
         }
-
         scan(tree.mods);
         scan(tree.vartype);
         scan(tree.nameexpr);

@@ -9,7 +9,10 @@ import reporters.FileReporter;
 import reporters.Reporter;
 import visitors.IdentifierScanner;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -30,18 +33,28 @@ public class DoopPrinterTaskListener implements TaskListener {
 
         try (BufferedReader br = new BufferedReader(new FileReader("analysis-results/VarPointsTo.txt"))) {
             String line;
+
             while ((line = br.readLine()) != null) {
                 String[] columns = line.split(",");
                 assert (columns.length == 4);
 
-                Set<String> value;
-                if ((value = vptMap.get(columns[3])) == null) {
-                    Set<String> tempSet = new HashSet<>();
-                    tempSet.add(columns[1].trim());
-                    vptMap.put(columns[3].trim(), tempSet);
-                } else
-                    value.add(columns[1].trim());
+                String var = columns[3].trim();
+                String heapAllocation = columns[1].trim();
+
+                if (!vptMap.containsKey(var)) {
+                    Set<String> heapAllocationSet = new HashSet<>();
+                    heapAllocationSet.add(heapAllocation);
+                    vptMap.put(var, heapAllocationSet);
+                } else {
+                    Set<String> heapAllocationSet = vptMap.get(var);
+                    heapAllocationSet.add(heapAllocation);
+                }
             }
+            System.out.println("VarPointsTo map size: " + vptMap.size());
+            int counter = 0;
+            for (Set<String> set : vptMap.values())
+                counter += set.size();
+            System.out.println(counter);
         } catch (FileNotFoundException ex) {
             Logger.getLogger(DoopPrinterTaskListener.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
@@ -59,15 +72,13 @@ public class DoopPrinterTaskListener implements TaskListener {
     }
 
     @Override
-    public void finished(TaskEvent arg0)
-    {
-        if (arg0.getKind().equals(TaskEvent.Kind.ANALYZE))
-        {
+    public void finished(TaskEvent arg0) {
+        if (arg0.getKind().equals(TaskEvent.Kind.ANALYZE)) {
             if (reporter instanceof FileReporter)
-                ((FileReporter)reporter).openFiles();
+                ((FileReporter) reporter).openFiles();
             System.out.println("# Task Kind: " + arg0.getKind() + " finished in file: " + arg0.getSourceFile().getName());
             /**
-             * Open all files for apending.
+             * Open all files for appending.
              */
 
             /**
@@ -80,12 +91,13 @@ public class DoopPrinterTaskListener implements TaskListener {
              * Close all files.
              */
             if (reporter instanceof FileReporter)
-                ((FileReporter)reporter).closeFiles();
+                ((FileReporter) reporter).closeFiles();
         }
     }
 
     @Override
-    public void started(TaskEvent arg0) {}
+    public void started(TaskEvent arg0) {
+    }
 
 
 }

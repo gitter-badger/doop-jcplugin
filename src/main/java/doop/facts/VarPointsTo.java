@@ -30,7 +30,7 @@ public class VarPointsTo {
     /**
      * Constructs a VarPointsTo with a variable and a heapAllocationSet.
      *
-     * @param varName            the name
+     * @param varName           the name
      * @param heapAllocationSet the heapAllocationSet of VarPointsTo
      */
     public VarPointsTo(String varName, Set<String> heapAllocationSet) {

@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import doop.facts.VarPointsTo;
 
 import java.io.*;
-import java.util.Set;
 
 /**
  * Created by anantoni on 27/4/2015.
@@ -37,22 +36,6 @@ public class FileReporter implements Reporter {
     @Override
     public void reportVarPointsTo(VarPointsTo varPointsTo) {
         varPointsToWriter.write(gson.toJson(varPointsTo));
-//        varPointsToWriter.println("{");
-//        varPointsToWriter.println("\"startPosition\":\"" + startPos + "\"");
-//        varPointsToWriter.println("\"endPosition\":\"" + endPos + "\"");
-//        varPointsToWriter.println("\"representation\":\"" + representation + "\"");
-//        varPointsToWriter.println("\"heapAllocationSet\":[");
-//        int counter = 0;
-//        for (String heapAllocation : heapAllocationSet) {
-//            if (counter == 0)
-//                varPointsToWriter.println("\"" + heapAllocation + "\"");
-//            else
-//                varPointsToWriter.println(",\"" + heapAllocation + "\"");
-//            counter++;
-//        }
-//        varPointsToWriter.println("]};");
-//
-//        varPointsToWriter.println(startPos);
     }
 
     @Override

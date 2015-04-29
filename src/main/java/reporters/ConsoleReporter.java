@@ -7,8 +7,6 @@ package reporters;
 
 import doop.facts.VarPointsTo;
 
-import java.util.Set;
-
 /**
  * @author anantoni
  */
