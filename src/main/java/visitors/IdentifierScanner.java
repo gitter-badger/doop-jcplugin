@@ -5,6 +5,7 @@ import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeScanner;
 import com.sun.tools.javac.util.Assert;
 import com.sun.tools.javac.util.List;
+import doop.facts.VarPointsTo;
 import reporters.Reporter;
 
 import java.util.Map;
@@ -238,7 +239,7 @@ public class IdentifierScanner extends TreeScanner {
             if (this.vptMap != null) {
                 if (this.vptMap.get(varNameInDoop) != null) {
                     Set<String> heapAllocationSet = this.vptMap.get(varNameInDoop);
-                    reporter.reportVarPointsTo(tree.pos, tree.pos + tree.name.length(), varNameInDoop, heapAllocationSet);
+                    reporter.reportVarPointsTo(new VarPointsTo(tree.pos, tree.pos + tree.name.length(), varNameInDoop, heapAllocationSet));
                 }
             }
         }

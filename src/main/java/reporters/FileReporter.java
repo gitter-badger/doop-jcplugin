@@ -1,8 +1,9 @@
 package reporters;
 
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
+import com.google.gson.Gson;
+import doop.facts.VarPointsTo;
+
+import java.io.*;
 import java.util.Set;
 
 /**
@@ -12,27 +13,18 @@ public class FileReporter implements Reporter {
     private PrintWriter varPointsToWriter = null;
     private PrintWriter methodInvocationWriter = null;
     private PrintWriter fieldPointsToWriter = null;
+    private Gson gson = null;
 
     public FileReporter() {
+        gson = new Gson();
         try {
             varPointsToWriter = new PrintWriter("VarPointsTo.json", "UTF-8");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        try {
             methodInvocationWriter = new PrintWriter("MethodInvocation.json", "UTF-8");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        try {
             fieldPointsToWriter = new PrintWriter("FieldPointsTo.json", "UTF-8");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
+            varPointsToWriter.close();
+            methodInvocationWriter.close();
+            fieldPointsToWriter.close();
+        } catch (FileNotFoundException | UnsupportedEncodingException e) {
             e.printStackTrace();
         }
     }
@@ -43,26 +35,24 @@ public class FileReporter implements Reporter {
     }
 
     @Override
-    public void reportVarPointsTo(int startPos, int endPos, String representation, Set<String> heapAllocationSet) {
-        varPointsToWriter.println("{");
-        varPointsToWriter.println("\"startPosition\":\"" + startPos + "\"");
-        varPointsToWriter.println("\"endPosition\":\"" + endPos + "\"");
-        varPointsToWriter.println("\"representation\":\"" + representation + "\"");
-        varPointsToWriter.println("\"heapAllocationSet\":[");
-        int counter = 0;
-        for (String heapAllocation : heapAllocationSet) {
-            if (counter == 0)
-                varPointsToWriter.println("\"" + heapAllocation + "\"");
-            else
-                varPointsToWriter.println(",\"" + heapAllocation + "\"");
-            counter++;
-        }
-        varPointsToWriter.println("]};");
-
-        varPointsToWriter.println(startPos);
-
-
-
+    public void reportVarPointsTo(VarPointsTo varPointsTo) {
+        varPointsToWriter.write(gson.toJson(varPointsTo));
+//        varPointsToWriter.println("{");
+//        varPointsToWriter.println("\"startPosition\":\"" + startPos + "\"");
+//        varPointsToWriter.println("\"endPosition\":\"" + endPos + "\"");
+//        varPointsToWriter.println("\"representation\":\"" + representation + "\"");
+//        varPointsToWriter.println("\"heapAllocationSet\":[");
+//        int counter = 0;
+//        for (String heapAllocation : heapAllocationSet) {
+//            if (counter == 0)
+//                varPointsToWriter.println("\"" + heapAllocation + "\"");
+//            else
+//                varPointsToWriter.println(",\"" + heapAllocation + "\"");
+//            counter++;
+//        }
+//        varPointsToWriter.println("]};");
+//
+//        varPointsToWriter.println(startPos);
     }
 
     @Override
@@ -75,7 +65,16 @@ public class FileReporter implements Reporter {
 
     }
 
-    @Override
+    public void openFiles() {
+        try {
+            varPointsToWriter = new PrintWriter(new BufferedWriter(new FileWriter("VarPointsTo.json", true)));
+            methodInvocationWriter = new PrintWriter(new BufferedWriter(new FileWriter("MethodInvocation.json", true)));
+            fieldPointsToWriter = new PrintWriter(new BufferedWriter(new FileWriter("FieldPointsTo.json", true)));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void closeFiles() {
         varPointsToWriter.close();
         methodInvocationWriter.close();

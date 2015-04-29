@@ -5,6 +5,8 @@
  */
 package reporters;
 
+import doop.facts.VarPointsTo;
+
 import java.util.Set;
 
 /**
@@ -12,10 +14,8 @@ import java.util.Set;
  */
 public interface Reporter {
     void reportVar(int startPos, int endPos, String representation);
-    void reportVarPointsTo(int startPos, int endPos, String representation, Set<String> heapAllocationSet);
+    void reportVarPointsTo(VarPointsTo varPointsTo);
     void reportMethodInvocation(int startPos, int endPos, String representation);
-
     void reportFieldAccess(int startPos, int endPos, String representation);
 
-    void closeFiles();
 }

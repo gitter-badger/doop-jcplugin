@@ -11,8 +11,10 @@ import java.util.Set;
  * @author anantoni
  */
 public class VarPointsTo {
-    private String var = null;
-    private Set<String> heapAllocation = null;
+    private int startPos;
+    private int endPos;
+    private String varName = null;
+    private Set<String> heapAllocationSet = null;
 
 
     /**
@@ -21,19 +23,25 @@ public class VarPointsTo {
      * @param var the variable of VarPointsTo
      */
     public VarPointsTo(String var) {
-        this(var, null);
+        this(-1, -1, var, null);
     }
 
 
     /**
-     * Constructs a VarPointsTo with a variable and a heapAllocation.
+     * Constructs a VarPointsTo with a variable and a heapAllocationSet.
      *
-     * @param var            the name
-     * @param heapAllocation the heapAllocation of VarPointsTo
+     * @param varName            the name
+     * @param heapAllocationSet the heapAllocationSet of VarPointsTo
      */
-    public VarPointsTo(String var, Set<String> heapAllocation) {
-        this.var = var;
-        this.heapAllocation = heapAllocation;
+    public VarPointsTo(String varName, Set<String> heapAllocationSet) {
+        this(-1, -1, varName, heapAllocationSet);
+    }
+
+    public VarPointsTo(int startPos, int endPos, String varName, Set<String> heapAllocationSet) {
+        this.startPos = startPos;
+        this.endPos = endPos;
+        this.varName = varName;
+        this.heapAllocationSet = heapAllocationSet;
     }
 
     /**
@@ -42,7 +50,7 @@ public class VarPointsTo {
      * @return var the var of this VarPointsTo
      */
     public String getVar() {
-        return this.var;
+        return this.varName;
     }
 
     /**
@@ -51,7 +59,7 @@ public class VarPointsTo {
      * @param var the var to set
      */
     public void setVar(String var) {
-        this.var = var;
+        this.varName = var;
     }
 
     /**
@@ -59,16 +67,16 @@ public class VarPointsTo {
      *
      * @return type  the type of this variable
      */
-    public Set<String> getHeapAllocation() {
-        return this.heapAllocation;
+    public Set<String> getHeapAllocationSet() {
+        return this.heapAllocationSet;
     }
 
     /**
      * Sets the type of this variable.
      *
-     * @param heapAllocation
+     * @param heapAllocationSet
      */
-    public void setHeapAllocation(Set<String> heapAllocation) {
-        this.heapAllocation = heapAllocation;
+    public void setHeapAllocationSet(Set<String> heapAllocationSet) {
+        this.heapAllocationSet = heapAllocationSet;
     }
 }

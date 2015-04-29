@@ -56,22 +56,31 @@ public class DoopPrinterTaskListener implements TaskListener {
         } catch (InstantiationException | IllegalAccessException | ClassNotFoundException ex) {
             return new ConsoleReporter();
         }
-
     }
 
     @Override
     public void finished(TaskEvent arg0)
     {
-        System.out.println("# Task Kind: " + arg0.getKind());
-        System.out.println(arg0.getSourceFile().getName());
         if (arg0.getKind().equals(TaskEvent.Kind.ANALYZE))
         {
-            JCTree tree = (JCTree) arg0.getCompilationUnit();
-            StringWriter s = new StringWriter();
-            tree.accept(new IdentifierScanner(reporter, vptMap));
-            System.out.println(s.toString());
             if (reporter instanceof FileReporter)
-                reporter.closeFiles();
+                ((FileReporter)reporter).openFiles();
+            System.out.println("# Task Kind: " + arg0.getKind() + " finished in file: " + arg0.getSourceFile().getName());
+            /**
+             * Open all files for apending.
+             */
+
+            /**
+             * Get AST root for this source code file.
+             */
+            JCTree treeRoot = (JCTree) arg0.getCompilationUnit();
+            treeRoot.accept(new IdentifierScanner(reporter, vptMap));
+
+            /**
+             * Close all files.
+             */
+            if (reporter instanceof FileReporter)
+                ((FileReporter)reporter).closeFiles();
         }
     }
 

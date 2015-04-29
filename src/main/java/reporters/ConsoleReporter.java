@@ -5,6 +5,8 @@
  */
 package reporters;
 
+import doop.facts.VarPointsTo;
+
 import java.util.Set;
 
 /**
@@ -18,7 +20,7 @@ public class ConsoleReporter implements Reporter {
     }
 
     @Override
-    public void reportVarPointsTo(int startPos, int endPos, String representation, Set<String> heapAllocationSet) {
+    public void reportVarPointsTo(VarPointsTo varPointsTo) {
 
     }
 
@@ -32,8 +34,5 @@ public class ConsoleReporter implements Reporter {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    @Override
-    public void closeFiles() {
 
-    }
 }
