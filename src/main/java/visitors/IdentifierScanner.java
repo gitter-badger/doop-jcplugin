@@ -36,7 +36,6 @@ public class IdentifierScanner extends TreeScanner {
     public IdentifierScanner(Reporter reporter, Map<String, Set<String>> vptMap) {
         this.reporter = reporter;
         this.vptMap = vptMap;
-
     }
 
     /**
