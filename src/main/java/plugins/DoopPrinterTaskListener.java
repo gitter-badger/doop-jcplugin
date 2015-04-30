@@ -27,15 +27,20 @@ public class DoopPrinterTaskListener implements TaskListener {
     private final Map<String, Set<String>> vptMap;
 
     public DoopPrinterTaskListener(JavacTask javactask) {
+
         task = javactask;
         reporter = initReporter();
         vptMap = new HashMap<>();
 
-        try (BufferedReader br = new BufferedReader(new FileReader("analysis-results/VarPointsTo.txt"))) {
-            String line;
+        BufferedReader br = null;
+        try {
+
+            String line = "";
+            String cvsSplitBy = ", ";
+            br = new BufferedReader(new FileReader("analysis-results/VarPointsTo.txt"));
 
             while ((line = br.readLine()) != null) {
-                String[] columns = line.split(",");
+                String[] columns = line.split(cvsSplitBy);
                 assert (columns.length == 4);
 
                 String var = columns[3].trim();
@@ -59,6 +64,14 @@ public class DoopPrinterTaskListener implements TaskListener {
             Logger.getLogger(DoopPrinterTaskListener.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(DoopPrinterTaskListener.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (br != null) {
+                try {
+                    br.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 

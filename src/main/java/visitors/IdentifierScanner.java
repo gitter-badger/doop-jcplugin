@@ -242,11 +242,6 @@ public class IdentifierScanner extends TreeScanner {
                 Set<String> heapAllocationSet = this.vptMap.get(varNameInDoop);
                 reporter.reportVarPointsTo(new VarPointsTo(tree.pos, tree.pos + tree.name.length(), varNameInDoop, heapAllocationSet));
             }
-            else {
-                System.err.println("Match not found for " + varNameInDoop);
-                //System.out.println(vptMap.keySet());
-                System.exit(-1);
-            }
         }
         scan(tree.mods);
         scan(tree.vartype);
