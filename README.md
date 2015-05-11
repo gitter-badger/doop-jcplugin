@@ -7,7 +7,7 @@ mvn package
 <h3>javac command</h3>
 execute:
 javac -Xbootclasspath/p:./target/doop-printer-1.0-SNAPSHOT.jar -processorpath ./target/doop-printer-1.0-SNAPSHOT.jar -Xplugin:DoopPrinterPlugin ../advancedTest/Main.java ../advancedTest/extras/*.java
-javac -Xbootclasspath/p:./target/doop-printer-1.0-SNAPSHOT.jar -processorpath ./target/doop-printer-1.0-SNAPSHOT-jar-with-dependencies.jar -Xplugin:DoopPrinterPlugin ../advancedTest/Main.java ../advancedTest/extras/*.java
+javac -Xbootclasspath/p:./target/doop-printer-1.0-SNAPSHOT.jar -processorpath ./target/doop-printer-1.0-SNAPSHOT-jar-with-dependencies.jar -Xplugin:DoopPrinterPlugin  ../advancedTest/Main.java ../advancedTest/extras/*.java
 
 <h3>useful links</h3>
 javac sources:

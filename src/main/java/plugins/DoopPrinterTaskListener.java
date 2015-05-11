@@ -22,44 +22,59 @@ import java.util.logging.Logger;
 
 public class DoopPrinterTaskListener implements TaskListener {
     private static final String DEFAULT_REPORTER = "reporters.FileReporter";
+    private static final boolean MATCH_DOOP_RESULTS = false;
     private final JavacTask task;
     private final Reporter reporter;
-    private final Map<String, Set<String>> vptMap;
+    private Map<String, Set<String>> vptMap;
 
     public DoopPrinterTaskListener(JavacTask javactask) {
 
-        task = javactask;
-        reporter = initReporter();
-        vptMap = new HashMap<>();
+        this.task = javactask;
+        this.reporter = initReporter();
+
+
 
         BufferedReader br = null;
         try {
+            /**
+             * If doop results are locally available then create the necessary maps to match static information
+             * with doop points-to results.
+             */
+            if (MATCH_DOOP_RESULTS) {
+                this.vptMap = new HashMap<>();
+                String line = "";
+                String cvsSplitBy = ", ";
+                br = new BufferedReader(new FileReader("analysis-results/VarPointsTo.txt"));
 
-            String line = "";
-            String cvsSplitBy = ", ";
-            br = new BufferedReader(new FileReader("analysis-results/VarPointsTo.txt"));
+                while ((line = br.readLine()) != null) {
+                    String[] columns = line.split(cvsSplitBy);
+                    assert (columns.length == 4);
 
-            while ((line = br.readLine()) != null) {
-                String[] columns = line.split(cvsSplitBy);
-                assert (columns.length == 4);
+                    String var = columns[3].trim();
+                    String heapAllocation = columns[1].trim();
 
-                String var = columns[3].trim();
-                String heapAllocation = columns[1].trim();
-
-                if (!vptMap.containsKey(var)) {
-                    Set<String> heapAllocationSet = new HashSet<>();
-                    heapAllocationSet.add(heapAllocation);
-                    vptMap.put(var, heapAllocationSet);
-                } else {
-                    Set<String> heapAllocationSet = vptMap.get(var);
-                    heapAllocationSet.add(heapAllocation);
+                    if (!vptMap.containsKey(var)) {
+                        Set<String> heapAllocationSet = new HashSet<>();
+                        heapAllocationSet.add(heapAllocation);
+                        vptMap.put(var, heapAllocationSet);
+                    } else {
+                        Set<String> heapAllocationSet = vptMap.get(var);
+                        heapAllocationSet.add(heapAllocation);
+                    }
                 }
+
+                System.out.println("VarPointsTo map size: " + vptMap.size());
+                int counter = 0;
+                for (Set<String> set : vptMap.values())
+                    counter += set.size();
+                System.out.println(counter);
             }
-            System.out.println("VarPointsTo map size: " + vptMap.size());
-            int counter = 0;
-            for (Set<String> set : vptMap.values())
-                counter += set.size();
-            System.out.println(counter);
+            /**
+             * Otherwise set map fields to null and generate empty sets representing doop information such as
+             * heap allocation sets for varPointsTo.
+             */
+            else
+                this.vptMap = null;
         } catch (FileNotFoundException ex) {
             Logger.getLogger(DoopPrinterTaskListener.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
@@ -68,8 +83,8 @@ public class DoopPrinterTaskListener implements TaskListener {
             if (br != null) {
                 try {
                     br.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                } catch (IOException ex) {
+                    Logger.getLogger(DoopPrinterTaskListener.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }
@@ -80,6 +95,7 @@ public class DoopPrinterTaskListener implements TaskListener {
         try {
             return (Reporter) Class.forName(className).newInstance();
         } catch (InstantiationException | IllegalAccessException | ClassNotFoundException ex) {
+            Logger.getLogger(DoopPrinterTaskListener.class.getName()).log(Level.SEVERE, null, ex);
             return new ConsoleReporter();
         }
     }
@@ -90,9 +106,6 @@ public class DoopPrinterTaskListener implements TaskListener {
             if (reporter instanceof FileReporter)
                 ((FileReporter) reporter).openFiles();
             System.out.println("# Task Kind: " + arg0.getKind() + " finished in file: " + arg0.getSourceFile().getName());
-            /**
-             * Open all files for appending.
-             */
 
             /**
              * Get AST root for this source code file.

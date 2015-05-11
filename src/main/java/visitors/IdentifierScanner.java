@@ -8,6 +8,7 @@ import com.sun.tools.javac.util.List;
 import doop.facts.VarPointsTo;
 import reporters.Reporter;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -236,10 +237,14 @@ public class IdentifierScanner extends TreeScanner {
             System.out.println("##########################################################################################################################");
 
 
-            assert (this.vptMap != null);
-            if (this.vptMap.containsKey(varNameInDoop)) {
-                Set<String> heapAllocationSet = this.vptMap.get(varNameInDoop);
-                reporter.reportVarPointsTo(new VarPointsTo(tree.pos, tree.pos + tree.name.length(), varNameInDoop, heapAllocationSet));
+            if( this.vptMap != null) {
+                if (this.vptMap.containsKey(varNameInDoop)) {
+                    Set<String> heapAllocationSet = this.vptMap.get(varNameInDoop);
+                    reporter.reportVarPointsTo(new VarPointsTo(tree.pos, tree.pos + tree.name.length(), varNameInDoop, heapAllocationSet));
+                }
+            }
+            else {
+                reporter.reportVarPointsTo(new VarPointsTo(tree.pos, tree.pos + tree.name.length(), varNameInDoop, new HashSet<>()));
             }
         }
         scan(tree.mods);
