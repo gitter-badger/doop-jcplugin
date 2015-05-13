@@ -187,6 +187,74 @@ public class IdentifierScanner extends TreeScanner {
     }
 
     /**
+     * Builds the signature of the declaring method of a variable symbol.
+     *
+     * @param methodSymbol the symbol of the variable declaration
+     * @return the signature of the declaring method as a string
+     */
+    public String buildMethodSignatureInDoop(Symbol.MethodSymbol methodSymbol) {
+
+        /**
+         * STEP 1: Build enclosing class name
+         * Remove "package." if it exists and replace all occurrences of '.' with '$'.
+         * Afterwards insert the package name at the start of the sequence.
+         * e.g
+         * test.Test.NestedTest.NestedNestedTest will be converted to
+         * test.Test$NestedTest$NestedNestedTest
+         */
+
+        StringBuilder methodSignature = new StringBuilder();
+        String fqType = buildFQType(methodSymbol.enclClass().getQualifiedName().toString(), methodSymbol.packge());
+
+        /**
+         * STEP 2: Append method signature: <return_type> <method_name>((<parameter_type>,)*<parameter_type>?)
+         */
+
+//        Symbol.MethodSymbol methodSymbol = (Symbol.MethodSymbol) methodSymbol.getEnclosingElement();
+
+        /**
+         * Special handling for main method
+         */
+        if (methodSymbol.isStatic() && methodSymbol.name.toString().equals("main") &&
+                methodSymbol.params.length() == 1) {
+            Symbol.VarSymbol param = methodSymbol.params.get(0);
+            String paramFQType = buildFQType(param.type.toString(), param.packge());
+            if (paramFQType.equals("java.lang.String[]"))
+                return fqType + "." + methodSymbol.getQualifiedName().toString();
+        }
+
+        /**
+         * Constructors and other methods don't need any kind of special handling
+         * the only difference is that the method name in the case of constructors
+         * is <init>
+         */
+
+        methodSignature.append(fqType).append(":");
+        methodSignature.append(" ").append(methodSymbol.getReturnType()).
+                append(" ").append(methodSymbol.getQualifiedName()).
+                append("(");
+
+        List<Symbol.VarSymbol> parameters = methodSymbol.getParameters();
+        /**
+         * Append fully qualified types of method arguments
+         */
+        for (int i = 0; i < parameters.size(); i++) {
+            Symbol.VarSymbol param = parameters.get(i);
+            fqType = buildFQType(param.type.toString(), param.packge());
+
+            if (i != parameters.size() - 1)
+                methodSignature.append(fqType).append(',');
+            else
+                methodSignature.append(fqType);
+        }
+
+        methodSignature.insert(0, '<');
+        methodSignature.append(")>");
+
+        return methodSignature.toString();
+    }
+
+    /**
      * *************************************************************************
      * Visitor methods
      * **************************************************************************
@@ -467,16 +535,19 @@ public class IdentifierScanner extends TreeScanner {
 
     @Override
     public void visitIdent(JCTree.JCIdent tree) {
-/*
-        if (tree.sym != null && tree.sym.getEnclosingElement() instanceof Symbol.MethodSymbol) {
+        if (tree.sym != null && tree.sym.isLocal()) {
             System.out.println("##########################################################################################################################");
-            System.out.println("Variable name: " + tree.sym.getQualifiedName().toString());
-            System.out.println("Declaring method signature: " + buildMethodSignature(tree));
+            System.out.println("IDENTIFIFER name: " + tree.sym.getQualifiedName().toString());
+            System.out.println("Declaring method signature: " + buildMethodSignatureInDoop(tree));
             System.out.println("Type: " + tree.sym.type);
             System.out.println("##########################################################################################################################");
-        }*/
+        }
         if (tree.sym != null && tree.sym instanceof Symbol.MethodSymbol) {
-
+            System.out.println("##########################################################################################################################");
+            System.out.println("IDENTIFIFER name: " + tree.sym.getQualifiedName().toString());
+            //System.out.println("Declaring method signature: " + buildMethodSignatureInDoop(tree));
+            System.out.println("Type: " + tree.sym.type);
+            System.out.println("##########################################################################################################################");
             System.out.println("Method invocation: " + ((Symbol.MethodSymbol) tree.sym).name.toString());
         }
     }
