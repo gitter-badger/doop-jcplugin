@@ -22,7 +22,7 @@ import java.util.logging.Logger;
 
 public class DoopPrinterTaskListener implements TaskListener {
     private static final String DEFAULT_REPORTER = "reporters.FileReporter";
-    private static final boolean MATCH_DOOP_RESULTS = false;
+    private static final boolean MATCH_DOOP_RESULTS = true;
     private final JavacTask task;
     private final Reporter reporter;
     private Map<String, Set<String>> vptMap;

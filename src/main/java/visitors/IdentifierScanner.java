@@ -299,7 +299,7 @@ public class IdentifierScanner extends TreeScanner {
             System.out.println("##########################################################################################################################");
             System.out.println("Variable name: " + tree.sym.getQualifiedName().toString());
             System.out.println("Type: " + tree.type);
-            String methodSignatureInDoop = buildMethodSignatureInDoop(tree);
+            String methodSignatureInDoop = buildMethodSignatureInDoop((Symbol.MethodSymbol)tree.sym.getEnclosingElement());
             String varNameInDoop = buildVarNameInDoop(methodSignatureInDoop, tree.sym.getQualifiedName().toString());
             System.out.println("Variable name in Doop: " + varNameInDoop);
             System.out.println("##########################################################################################################################");
@@ -538,14 +538,16 @@ public class IdentifierScanner extends TreeScanner {
         if (tree.sym != null && tree.sym.isLocal()) {
             System.out.println("##########################################################################################################################");
             System.out.println("IDENTIFIFER name: " + tree.sym.getQualifiedName().toString());
-            System.out.println("Declaring method signature: " + buildMethodSignatureInDoop(tree));
+            System.out.println("Declaring method signature: " + buildMethodSignatureInDoop((Symbol.MethodSymbol) tree.sym.getEnclosingElement()));
+            System.out.println("Qualified name: " + tree.sym.getQualifiedName());
             System.out.println("Type: " + tree.sym.type);
             System.out.println("##########################################################################################################################");
         }
         if (tree.sym != null && tree.sym instanceof Symbol.MethodSymbol) {
             System.out.println("##########################################################################################################################");
             System.out.println("IDENTIFIFER name: " + tree.sym.getQualifiedName().toString());
-            //System.out.println("Declaring method signature: " + buildMethodSignatureInDoop(tree));
+            System.out.println("Method signature: " + buildMethodSignatureInDoop((Symbol.MethodSymbol) tree.sym));
+            System.out.println("Qualified name: " + tree.sym.getQualifiedName());
             System.out.println("Type: " + tree.sym.type);
             System.out.println("##########################################################################################################################");
             System.out.println("Method invocation: " + ((Symbol.MethodSymbol) tree.sym).name.toString());
