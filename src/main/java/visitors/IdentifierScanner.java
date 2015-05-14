@@ -5,7 +5,8 @@ import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeScanner;
 import com.sun.tools.javac.util.Assert;
 import com.sun.tools.javac.util.List;
-import doop.facts.VarPointsTo;
+import doop.DoopRepresentationBuilder;
+import doop.VarPointsTo;
 import reporters.Reporter;
 
 import java.util.HashSet;
@@ -29,19 +30,22 @@ import java.util.Set;
 public class IdentifierScanner extends TreeScanner {
     private final Map<String, Set<String>> vptMap;
     private final Reporter reporter;
+    private DoopRepresentationBuilder doopReprBuilder = null;
+    private int invocationCounter;
 
     public IdentifierScanner(Reporter reporter) {
         this(reporter, null);
     }
 
     public IdentifierScanner(Reporter reporter, Map<String, Set<String>> vptMap) {
+        this.doopReprBuilder = DoopRepresentationBuilder.getInstance();
         this.reporter = reporter;
         this.vptMap = vptMap;
+        this.invocationCounter = 0;
     }
 
     /**
      * Visitor method: Scan a single node.
-     *
      * @param tree
      */
     @Override
@@ -55,7 +59,6 @@ public class IdentifierScanner extends TreeScanner {
 
     /**
      * Visitor method: scan a list of nodes.
-     *
      * @param trees
      */
     @Override
@@ -71,195 +74,10 @@ public class IdentifierScanner extends TreeScanner {
     }
 
     /**
-     * Builds the fully qualified name of a type.
-     *
-     * @param type          the string representation of the type
-     * @param packageSymbol the package symbol
-     * @return fqType          the fully qualified type
-     */
-    public String buildFQType(String type, Symbol.PackageSymbol packageSymbol) {
-        StringBuilder fqTypeName = new StringBuilder();
-        String packge = packageSymbol.getQualifiedName().toString();
-
-        if (type.startsWith(packge) && !(packge.equals(""))) {
-            type = type.substring(packge.length() + 1).replace('.', '$');
-            fqTypeName.append(packge).append('.').append(type);
-        } else
-            fqTypeName.append(type);
-        String fqType = fqTypeName.toString();
-        return fqType;
-    }
-
-    /**
-     * Builds the string representation of a variable name (taken either from a variable declaration or an identifier
-     * in Doop.
-     *
-     * @param tree
-     * @return The string representation of the variable name in Doop
-     */
-    public String buildMethodSignatureInDoop(JCTree tree) {
-        if (tree instanceof JCTree.JCVariableDecl)
-            return buildMethodSignatureInDoop(((JCTree.JCVariableDecl) tree).sym);
-        else if (tree instanceof JCTree.JCIdent)
-            return buildMethodSignatureInDoop(((JCTree.JCIdent) tree).sym);
-        else
-            return null;
-    }
-
-    /**
-     * Builds the string representation of a variable name in Doop by combining the declaring method signature in Doop
-     * and the qualified name of the variable.
-     *
-     * @param methodSignatureInDoop the declaring method signature
-     * @param varQualifiedName      the qualified name of the variable
-     * @return The string representation of the variable name in Doop
-     */
-    public String buildVarNameInDoop(String methodSignatureInDoop, String varQualifiedName) {
-        return methodSignatureInDoop + "/" + varQualifiedName;
-    }
-
-    /**
-     * Builds the signature of the declaring method of a variable symbol.
-     *
-     * @param sym the symbol of the variable declaration
-     * @return the signature of the declaring method as a string
-     */
-    public String buildMethodSignatureInDoop(Symbol sym) {
-
-        /**
-         * STEP 1: Build enclosing class name
-         * Remove "package." if it exists and replace all occurrences of '.' with '$'.
-         * Afterwards insert the package name at the start of the sequence.
-         * e.g
-         * test.Test.NestedTest.NestedNestedTest will be converted to
-         * test.Test$NestedTest$NestedNestedTest
-         */
-
-        StringBuilder methodSignature = new StringBuilder();
-        String fqType = buildFQType(sym.enclClass().getQualifiedName().toString(), sym.packge());
-
-        /**
-         * STEP 2: Append method signature: <return_type> <method_name>((<parameter_type>,)*<parameter_type>?)
-         */
-
-        Symbol.MethodSymbol methodSymbol = (Symbol.MethodSymbol) sym.getEnclosingElement();
-
-        /**
-         * Special handling for main method
-         */
-        if (methodSymbol.isStatic() && methodSymbol.name.toString().equals("main") &&
-                methodSymbol.params.length() == 1) {
-            Symbol.VarSymbol param = methodSymbol.params.get(0);
-            String paramFQType = buildFQType(param.type.toString(), param.packge());
-            if (paramFQType.equals("java.lang.String[]"))
-                return fqType + "." + methodSymbol.getQualifiedName().toString();
-        }
-
-        /**
-         * Constructors and other methods don't need any kind of special handling
-         * the only difference is that the method name in the case of constructors
-         * is <init>
-         */
-
-        methodSignature.append(fqType).append(":");
-        methodSignature.append(" ").append(methodSymbol.getReturnType()).
-                append(" ").append(methodSymbol.getQualifiedName()).
-                append("(");
-
-        List<Symbol.VarSymbol> parameters = methodSymbol.getParameters();
-        /**
-         * Append fully qualified types of method arguments
-         */
-        for (int i = 0; i < parameters.size(); i++) {
-            Symbol.VarSymbol param = parameters.get(i);
-            fqType = buildFQType(param.type.toString(), param.packge());
-
-            if (i != parameters.size() - 1)
-                methodSignature.append(fqType).append(',');
-            else
-                methodSignature.append(fqType);
-        }
-
-        methodSignature.insert(0, '<');
-        methodSignature.append(")>");
-
-        return methodSignature.toString();
-    }
-
-    /**
-     * Builds the signature of the declaring method of a variable symbol.
-     *
-     * @param methodSymbol the symbol of the variable declaration
-     * @return the signature of the declaring method as a string
-     */
-    public String buildMethodSignatureInDoop(Symbol.MethodSymbol methodSymbol) {
-
-        /**
-         * STEP 1: Build enclosing class name
-         * Remove "package." if it exists and replace all occurrences of '.' with '$'.
-         * Afterwards insert the package name at the start of the sequence.
-         * e.g
-         * test.Test.NestedTest.NestedNestedTest will be converted to
-         * test.Test$NestedTest$NestedNestedTest
-         */
-
-        StringBuilder methodSignature = new StringBuilder();
-        String fqType = buildFQType(methodSymbol.enclClass().getQualifiedName().toString(), methodSymbol.packge());
-
-        /**
-         * STEP 2: Append method signature: <return_type> <method_name>((<parameter_type>,)*<parameter_type>?)
-         */
-
-//        Symbol.MethodSymbol methodSymbol = (Symbol.MethodSymbol) methodSymbol.getEnclosingElement();
-
-        /**
-         * Special handling for main method
-         */
-        if (methodSymbol.isStatic() && methodSymbol.name.toString().equals("main") &&
-                methodSymbol.params.length() == 1) {
-            Symbol.VarSymbol param = methodSymbol.params.get(0);
-            String paramFQType = buildFQType(param.type.toString(), param.packge());
-            if (paramFQType.equals("java.lang.String[]"))
-                return fqType + "." + methodSymbol.getQualifiedName().toString();
-        }
-
-        /**
-         * Constructors and other methods don't need any kind of special handling
-         * the only difference is that the method name in the case of constructors
-         * is <init>
-         */
-
-        methodSignature.append(fqType).append(":");
-        methodSignature.append(" ").append(methodSymbol.getReturnType()).
-                append(" ").append(methodSymbol.getQualifiedName()).
-                append("(");
-
-        List<Symbol.VarSymbol> parameters = methodSymbol.getParameters();
-        /**
-         * Append fully qualified types of method arguments
-         */
-        for (int i = 0; i < parameters.size(); i++) {
-            Symbol.VarSymbol param = parameters.get(i);
-            fqType = buildFQType(param.type.toString(), param.packge());
-
-            if (i != parameters.size() - 1)
-                methodSignature.append(fqType).append(',');
-            else
-                methodSignature.append(fqType);
-        }
-
-        methodSignature.insert(0, '<');
-        methodSignature.append(")>");
-
-        return methodSignature.toString();
-    }
-
-    /**
      * *************************************************************************
      * Visitor methods
      * **************************************************************************
      */
-
     @Override
     public void visitTopLevel(JCTree.JCCompilationUnit tree) {
         scan(tree.packageAnnotations);
@@ -299,11 +117,10 @@ public class IdentifierScanner extends TreeScanner {
             System.out.println("##########################################################################################################################");
             System.out.println("Variable name: " + tree.sym.getQualifiedName().toString());
             System.out.println("Type: " + tree.type);
-            String methodSignatureInDoop = buildMethodSignatureInDoop((Symbol.MethodSymbol)tree.sym.getEnclosingElement());
-            String varNameInDoop = buildVarNameInDoop(methodSignatureInDoop, tree.sym.getQualifiedName().toString());
+            String methodSignatureInDoop = this.doopReprBuilder.buildDoopMethodSignature((Symbol.MethodSymbol)tree.sym.getEnclosingElement());
+            String varNameInDoop = this.doopReprBuilder.buildDoopVarName(methodSignatureInDoop, tree.sym.getQualifiedName().toString());
             System.out.println("Variable name in Doop: " + varNameInDoop);
             System.out.println("##########################################################################################################################");
-
 
             if( this.vptMap != null) {
                 if (this.vptMap.containsKey(varNameInDoop)) {
@@ -537,20 +354,22 @@ public class IdentifierScanner extends TreeScanner {
     public void visitIdent(JCTree.JCIdent tree) {
         if (tree.sym != null && tree.sym.isLocal()) {
             System.out.println("##########################################################################################################################");
-            System.out.println("IDENTIFIFER name: " + tree.sym.getQualifiedName().toString());
-            System.out.println("Declaring method signature: " + buildMethodSignatureInDoop((Symbol.MethodSymbol) tree.sym.getEnclosingElement()));
+            System.out.println("IDENTIFIER name: " + tree.sym.getQualifiedName().toString());
+            System.out.println("Declaring method signature: " + this.doopReprBuilder.buildDoopMethodSignature((Symbol.MethodSymbol) tree.sym.getEnclosingElement()));
             System.out.println("Qualified name: " + tree.sym.getQualifiedName());
             System.out.println("Type: " + tree.sym.type);
             System.out.println("##########################################################################################################################");
         }
         if (tree.sym != null && tree.sym instanceof Symbol.MethodSymbol) {
             System.out.println("##########################################################################################################################");
-            System.out.println("IDENTIFIFER name: " + tree.sym.getQualifiedName().toString());
-            System.out.println("Method signature: " + buildMethodSignatureInDoop((Symbol.MethodSymbol) tree.sym));
+            System.out.println("Identifier: " + tree.name);
+            System.out.println("IDENTIFIER name: " + tree.sym.getQualifiedName().toString());
+            System.out.println("Method signature: " + this.doopReprBuilder.buildDoopMethodSignature((Symbol.MethodSymbol) tree.sym));
             System.out.println("Qualified name: " + tree.sym.getQualifiedName());
             System.out.println("Type: " + tree.sym.type);
+            System.out.println("Position: " + tree.pos);
             System.out.println("##########################################################################################################################");
-            System.out.println("Method invocation: " + ((Symbol.MethodSymbol) tree.sym).name.toString());
+            System.out.println("Method invocation: " + ((Symbol.MethodSymbol) tree.sym).name.toString()+invocationCounter++);
         }
     }
 

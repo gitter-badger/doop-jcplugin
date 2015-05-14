@@ -5,7 +5,7 @@
  */
 package reporters;
 
-import doop.facts.VarPointsTo;
+import doop.VarPointsTo;
 
 /**
  * @author anantoni

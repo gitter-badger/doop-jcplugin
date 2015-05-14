@@ -22,7 +22,7 @@ import java.util.logging.Logger;
 
 public class DoopPrinterTaskListener implements TaskListener {
     private static final String DEFAULT_REPORTER = "reporters.FileReporter";
-    private static final boolean MATCH_DOOP_RESULTS = true;
+    private static final boolean MATCH_DOOP_RESULTS = false;
     private final JavacTask task;
     private final Reporter reporter;
     private Map<String, Set<String>> vptMap;
@@ -42,7 +42,7 @@ public class DoopPrinterTaskListener implements TaskListener {
              */
             if (MATCH_DOOP_RESULTS) {
                 this.vptMap = new HashMap<>();
-                String line = "";
+                String line;
                 String cvsSplitBy = ", ";
                 br = new BufferedReader(new FileReader("analysis-results/VarPointsTo.txt"));
 
@@ -105,7 +105,7 @@ public class DoopPrinterTaskListener implements TaskListener {
         if (arg0.getKind().equals(TaskEvent.Kind.ANALYZE)) {
             if (reporter instanceof FileReporter)
                 ((FileReporter) reporter).openFiles();
-            System.out.println("# Task Kind: " + arg0.getKind() + " finished in file: " + arg0.getSourceFile().getName());
+            System.out.println("\033[31m # Task Kind: " + arg0.getKind() + " finished in file: " + arg0.getSourceFile().getName() + "\033[0m");
 
             /**
              * Get AST root for this source code file.

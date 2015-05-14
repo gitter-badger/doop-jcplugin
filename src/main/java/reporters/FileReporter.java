@@ -1,7 +1,7 @@
 package reporters;
 
 import com.google.gson.Gson;
-import doop.facts.VarPointsTo;
+import doop.VarPointsTo;
 
 import java.io.*;
 
