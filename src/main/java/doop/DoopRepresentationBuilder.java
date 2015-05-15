@@ -26,8 +26,8 @@ public class DoopRepresentationBuilder {
     /**
      * Builds the fully qualified name of a type.
      *
-     * @param type          the string representation of the type
-     * @param packageSymbol the package symbol
+     * @param type             the string representation of the type
+     * @param packageSymbol    the package symbol
      * @return fqType          the fully qualified type
      */
     public String buildFQType(String type, Symbol.PackageSymbol packageSymbol) {
@@ -47,12 +47,22 @@ public class DoopRepresentationBuilder {
      * Builds the string representation of a variable name in Doop by combining the declaring method signature in Doop
      * and the qualified name of the variable.
      *
-     * @param methodSignatureInDoop the declaring method signature
-     * @param varQualifiedName      the qualified name of the variable
-     * @return The string representation of the variable name in Doop
+     * @param doopMethodSignature the declaring method signature
+     * @param varQualifiedName    the qualified name of the variable
+     * @return                    the string representation of the variable name in Doop
      */
-    public String buildDoopVarName(String methodSignatureInDoop, String varQualifiedName) {
-        return methodSignatureInDoop + "/" + varQualifiedName;
+    public String buildDoopVarName(String doopMethodSignature, String varQualifiedName) {
+        return doopMethodSignature + "/" + varQualifiedName;
+    }
+
+    /**
+     *
+     * @param doopMethodSignature  the enclosing method signature
+     * @param doopMethodInvocation the method invocation string representation
+     * @return                     the string representation of the method invocation in Doop
+     */
+    public String buildDoopMethodInvocation(String doopMethodSignature, String doopMethodInvocation) {
+        return doopMethodSignature + "/" + doopMethodInvocation;
     }
 
     /**

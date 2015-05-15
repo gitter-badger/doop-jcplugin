@@ -1,6 +1,7 @@
 package visitors;
 
 import com.sun.tools.javac.code.Symbol;
+import com.sun.tools.javac.code.Symbol.MethodSymbol;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeScanner;
 import com.sun.tools.javac.util.Assert;
@@ -9,6 +10,7 @@ import doop.DoopRepresentationBuilder;
 import doop.VarPointsTo;
 import reporters.Reporter;
 
+import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -31,7 +33,9 @@ public class IdentifierScanner extends TreeScanner {
     private final Map<String, Set<String>> vptMap;
     private final Reporter reporter;
     private DoopRepresentationBuilder doopReprBuilder = null;
-    private int invocationCounter;
+    private int methodInvocationCounter;
+    private int constructorInvocationCounter;
+    private MethodSymbol currentMethodSymbol;
 
     public IdentifierScanner(Reporter reporter) {
         this(reporter, null);
@@ -41,7 +45,8 @@ public class IdentifierScanner extends TreeScanner {
         this.doopReprBuilder = DoopRepresentationBuilder.getInstance();
         this.reporter = reporter;
         this.vptMap = vptMap;
-        this.invocationCounter = 0;
+        this.constructorInvocationCounter = 0;
+        this.methodInvocationCounter = 0;
     }
 
     /**
@@ -51,7 +56,7 @@ public class IdentifierScanner extends TreeScanner {
     @Override
     public void scan(JCTree tree) {
         if (tree instanceof JCTree.JCIdent) {
-            if (((JCTree.JCIdent) tree).sym instanceof Symbol.MethodSymbol)
+            if (((JCTree.JCIdent) tree).sym instanceof MethodSymbol)
                 System.out.println(((JCTree.JCIdent) tree).sym.getQualifiedName().toString());
         }
         if (tree != null) tree.accept(this);
@@ -66,7 +71,7 @@ public class IdentifierScanner extends TreeScanner {
         if (trees != null)
             for (List<? extends JCTree> l = trees; l.nonEmpty(); l = l.tail) {
                 if (l.head instanceof JCTree.JCIdent) {
-                    if (((JCTree.JCIdent) l.head).sym instanceof Symbol.MethodSymbol)
+                    if (((JCTree.JCIdent) l.head).sym instanceof MethodSymbol)
                         System.out.println(((JCTree.JCIdent) l.head).sym.getQualifiedName().toString());
                 }
                 scan(l.head);
@@ -101,6 +106,9 @@ public class IdentifierScanner extends TreeScanner {
 
     @Override
     public void visitMethodDef(JCTree.JCMethodDecl tree) {
+        this.constructorInvocationCounter = 0;
+        this.methodInvocationCounter = 0;
+        this.currentMethodSymbol = tree.sym;
         scan(tree.mods);
         scan(tree.restype);
         scan(tree.typarams);
@@ -113,11 +121,11 @@ public class IdentifierScanner extends TreeScanner {
 
     @Override
     public void visitVarDef(JCTree.JCVariableDecl tree) {
-        if (tree.sym.getEnclosingElement() instanceof Symbol.MethodSymbol) {
+        if (tree.sym.getEnclosingElement() instanceof MethodSymbol) {
             System.out.println("##########################################################################################################################");
             System.out.println("Variable name: " + tree.sym.getQualifiedName().toString());
             System.out.println("Type: " + tree.type);
-            String methodSignatureInDoop = this.doopReprBuilder.buildDoopMethodSignature((Symbol.MethodSymbol)tree.sym.getEnclosingElement());
+            String methodSignatureInDoop = this.doopReprBuilder.buildDoopMethodSignature((MethodSymbol)tree.sym.getEnclosingElement());
             String varNameInDoop = this.doopReprBuilder.buildDoopVarName(methodSignatureInDoop, tree.sym.getQualifiedName().toString());
             System.out.println("Variable name in Doop: " + varNameInDoop);
             System.out.println("##########################################################################################################################");
@@ -261,7 +269,22 @@ public class IdentifierScanner extends TreeScanner {
     public void visitApply(JCTree.JCMethodInvocation tree) {
         scan(tree.typeargs);
         scan(tree.meth);
-        System.out.println(tree.meth.toString());
+        Class<?> clazz = tree.meth.getClass();
+        Field field;
+        Object fieldValue = null;
+
+        try {
+            field = clazz.getField("sym");
+            fieldValue = field.get(tree.meth);
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        if (fieldValue instanceof MethodSymbol)
+            System.out.println("\033[35m Method Invocation: \033[0m" + this.doopReprBuilder.buildDoopMethodInvocation(
+                    this.doopReprBuilder.buildDoopMethodSignature(currentMethodSymbol),
+                    this.doopReprBuilder.buildDoopMethodSignature((Symbol.MethodSymbol) fieldValue) + "/" + this.methodInvocationCounter++));
         scan(tree.args);
     }
 
@@ -272,6 +295,9 @@ public class IdentifierScanner extends TreeScanner {
         scan(tree.clazz);
         scan(tree.args);
         scan(tree.def);
+        System.out.println("\033[35m Method Invocation (Constructor): \033[0m" + this.doopReprBuilder.buildDoopMethodInvocation(
+                this.doopReprBuilder.buildDoopMethodSignature(currentMethodSymbol),
+                this.doopReprBuilder.buildDoopMethodSignature((MethodSymbol) tree.constructor) + "/" + this.constructorInvocationCounter++));
     }
 
     @Override
@@ -279,9 +305,7 @@ public class IdentifierScanner extends TreeScanner {
         scan(tree.annotations);
         scan(tree.elemtype);
         scan(tree.dims);
-        tree.dimAnnotations.stream().forEach((annos) -> {
-            scan(annos);
-        });
+        tree.dimAnnotations.stream().forEach((annos) -> scan(annos));
         scan(tree.elems);
     }
 
@@ -355,21 +379,21 @@ public class IdentifierScanner extends TreeScanner {
         if (tree.sym != null && tree.sym.isLocal()) {
             System.out.println("##########################################################################################################################");
             System.out.println("IDENTIFIER name: " + tree.sym.getQualifiedName().toString());
-            System.out.println("Declaring method signature: " + this.doopReprBuilder.buildDoopMethodSignature((Symbol.MethodSymbol) tree.sym.getEnclosingElement()));
+            System.out.println("Declaring method signature: " + this.doopReprBuilder.buildDoopMethodSignature((MethodSymbol) tree.sym.getEnclosingElement()));
             System.out.println("Qualified name: " + tree.sym.getQualifiedName());
             System.out.println("Type: " + tree.sym.type);
             System.out.println("##########################################################################################################################");
         }
-        if (tree.sym != null && tree.sym instanceof Symbol.MethodSymbol) {
+        if (tree.sym != null && tree.sym instanceof MethodSymbol) {
             System.out.println("##########################################################################################################################");
             System.out.println("Identifier: " + tree.name);
             System.out.println("IDENTIFIER name: " + tree.sym.getQualifiedName().toString());
-            System.out.println("Method signature: " + this.doopReprBuilder.buildDoopMethodSignature((Symbol.MethodSymbol) tree.sym));
+            System.out.println("Method signature: " + this.doopReprBuilder.buildDoopMethodSignature((MethodSymbol) tree.sym));
             System.out.println("Qualified name: " + tree.sym.getQualifiedName());
             System.out.println("Type: " + tree.sym.type);
             System.out.println("Position: " + tree.pos);
             System.out.println("##########################################################################################################################");
-            System.out.println("Method invocation: " + ((Symbol.MethodSymbol) tree.sym).name.toString()+invocationCounter++);
+//            System.out.println("Method invocation: " + ((Symbol.MethodSymbol) tree.sym).name.toString()+invocationCounter++);
         }
     }
 
