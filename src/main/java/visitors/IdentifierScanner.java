@@ -282,9 +282,9 @@ public class IdentifierScanner extends TreeScanner {
             e.printStackTrace();
         }
         if (fieldValue instanceof MethodSymbol)
-            System.out.println("\033[35m Method Invocation: \033[0m" + this.doopReprBuilder.buildDoopMethodInvocation(
+            System.out.println("\033[35m Method Invocation: \033[0m" + this.doopReprBuilder.buildDoopMethodInvocationInMethod(
                     this.doopReprBuilder.buildDoopMethodSignature(currentMethodSymbol),
-                    this.doopReprBuilder.buildDoopMethodSignature((Symbol.MethodSymbol) fieldValue) + "/" + this.methodInvocationCounter++));
+                    this.doopReprBuilder.buildDoopMethodInvocation((Symbol.MethodSymbol) fieldValue) + "/" + this.methodInvocationCounter++));
         scan(tree.args);
     }
 
@@ -295,9 +295,9 @@ public class IdentifierScanner extends TreeScanner {
         scan(tree.clazz);
         scan(tree.args);
         scan(tree.def);
-        System.out.println("\033[35m Method Invocation (Constructor): \033[0m" + this.doopReprBuilder.buildDoopMethodInvocation(
+        System.out.println("\033[35m Method Invocation (Constructor): \033[0m" + this.doopReprBuilder.buildDoopMethodInvocationInMethod(
                 this.doopReprBuilder.buildDoopMethodSignature(currentMethodSymbol),
-                this.doopReprBuilder.buildDoopMethodSignature((MethodSymbol) tree.constructor) + "/" + this.constructorInvocationCounter++));
+                this.doopReprBuilder.buildDoopMethodInvocation((MethodSymbol) tree.constructor) + "/" + this.constructorInvocationCounter++));
     }
 
     @Override
