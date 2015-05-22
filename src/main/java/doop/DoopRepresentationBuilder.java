@@ -62,12 +62,16 @@ public class DoopRepresentationBuilder {
      * @return                     the string representation of the method invocation in Doop
      */
     public String buildDoopMethodInvocationInMethod(String doopMethodSignature, String doopMethodInvocation) {
-        return doopMethodSignature + "/" + doopMethodInvocation;
+        StringBuilder doopMethodInvocationInMethod = new StringBuilder();
+
+        doopMethodInvocationInMethod.append(doopMethodSignature + "/" + doopMethodInvocation);
+        return doopMethodInvocationInMethod.toString();
     }
 
 
     public String buildDoopMethodInvocation(Symbol.MethodSymbol methodSymbol) {
         StringBuilder methodInvocation = new StringBuilder();
+
         String fqType = buildFQType(methodSymbol.enclClass().getQualifiedName().toString(), methodSymbol.packge());
         methodInvocation.append(fqType).append(".").append(methodSymbol.getQualifiedName());
 
@@ -105,8 +109,6 @@ public class DoopRepresentationBuilder {
      * @return the signature of the declaring method as a string
      */
     public String buildDoopMethodSignature(Symbol.MethodSymbol methodSymbol) {
-
-
         /**
          * STEP 2: Append method signature: <return_type> <method_name>((<parameter_type>,)*<parameter_type>?)
          *
@@ -123,20 +125,13 @@ public class DoopRepresentationBuilder {
         }
 
         /**
-         * STEP 1: Build enclosing class name
-         * Remove "package." if it exists and replace all occurrences of '.' with '$'.
-         * Afterwards insert the package name at the start of the sequence.
-         * e.g
-         * test.Test.NestedTest.NestedNestedTest will be converted to
-         * test.Test$NestedTest$NestedNestedTest
-         */
-        StringBuilder methodSignature = new StringBuilder();
-        /**
          * Constructors and other methods don't need any kind of special handling
          * the only difference is that the method name in the case of constructors
          * is <init>
          */
+        StringBuilder methodSignature = new StringBuilder();
         methodSignature.append(buildDoopMethodSignatureNoArgs(methodSymbol)).append("(");
+
         /**
          * Append fully qualified types of method arguments
          */
