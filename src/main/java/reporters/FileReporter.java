@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import doop.VarPointsTo;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by anantoni on 27/4/2015.
@@ -13,9 +15,11 @@ public class FileReporter implements Reporter {
     private PrintWriter methodInvocationWriter = null;
     private PrintWriter fieldPointsToWriter = null;
     private Gson gson = null;
+    private List<VarPointsTo> varPointsToList = null;
 
     public FileReporter() {
         gson = new Gson();
+        varPointsToList = new ArrayList<>();
         try {
             varPointsToWriter = new PrintWriter("json-output/VarPointsTo.json", "UTF-8");
             methodInvocationWriter = new PrintWriter("json-output/MethodInvocation.json", "UTF-8");
@@ -35,7 +39,8 @@ public class FileReporter implements Reporter {
 
     @Override
     public void reportVarPointsTo(VarPointsTo varPointsTo) {
-        varPointsToWriter.write(gson.toJson(varPointsTo));
+//        varPointsToWriter.println(gson.toJson(varPointsTo));
+        varPointsToList.add(varPointsTo);
     }
 
     @Override
@@ -56,6 +61,10 @@ public class FileReporter implements Reporter {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void writeJson() {
+        varPointsToWriter.write(gson.toJson(varPointsToList));
     }
 
     public void closeFiles() {

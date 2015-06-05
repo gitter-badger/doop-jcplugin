@@ -22,7 +22,7 @@ import java.util.logging.Logger;
 
 public class DoopPrinterTaskListener implements TaskListener {
     private static final String DEFAULT_REPORTER = "reporters.FileReporter";
-    private static final boolean MATCH_DOOP_RESULTS = false;
+    private static final boolean MATCH_DOOP_RESULTS = true;
     private final JavacTask task;
     private final Reporter reporter;
     private Map<String, Set<String>> vptMap;
@@ -116,8 +116,10 @@ public class DoopPrinterTaskListener implements TaskListener {
             /**
              * Close all files.
              */
-            if (reporter instanceof FileReporter)
+            if (reporter instanceof FileReporter) {
+                ((FileReporter) reporter).writeJson();
                 ((FileReporter) reporter).closeFiles();
+            }
         }
     }
 
