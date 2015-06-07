@@ -103,9 +103,10 @@ public class DoopPrinterTaskListener implements TaskListener {
     @Override
     public void finished(TaskEvent arg0) {
         if (arg0.getKind().equals(TaskEvent.Kind.ANALYZE)) {
-            if (reporter instanceof FileReporter)
-                ((FileReporter) reporter).openFiles();
             System.out.println("\033[31m # Task Kind: " + arg0.getKind() + " finished in file: " + arg0.getSourceFile().getName() + "\033[0m");
+            if (reporter instanceof FileReporter)
+                ((FileReporter) reporter).openFiles(arg0.getSourceFile().getName().replace("../", "").replace(".java", ""));
+
 
             /**
              * Get AST root for this source code file.

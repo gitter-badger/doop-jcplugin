@@ -5,6 +5,7 @@
  */
 package reporters;
 
+import doop.MethodInvocation;
 import doop.VarPointsTo;
 
 /**
@@ -23,7 +24,7 @@ public class ConsoleReporter implements Reporter {
     }
 
     @Override
-    public void reportMethodInvocation(int startPos, int endPos, String representation) {
+    public void reportMethodInvocation(MethodInvocation methodInvocation) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

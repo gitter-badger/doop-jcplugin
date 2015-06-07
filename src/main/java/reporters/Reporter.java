@@ -5,7 +5,10 @@
  */
 package reporters;
 
+import doop.MethodInvocation;
 import doop.VarPointsTo;
+
+import java.lang.reflect.Method;
 
 /**
  * @author anantoni
@@ -15,7 +18,7 @@ public interface Reporter {
 
     void reportVarPointsTo(VarPointsTo varPointsTo);
 
-    void reportMethodInvocation(int startPos, int endPos, String representation);
+    void reportMethodInvocation(MethodInvocation methodInvocation);
 
     void reportFieldAccess(int startPos, int endPos, String representation);
 
