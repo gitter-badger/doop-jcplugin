@@ -64,7 +64,7 @@ public class FileReporter implements Reporter {
 //            fieldPointsToWriter = new PrintWriter(new BufferedWriter(new FileWriter("json-output" + fileName + "FieldPointsTo.json", true)));
             varPointsToWriter = new PrintWriter("json-output/" + fileName + "-VarPointsTo.json", "UTF-8");
             methodInvocationWriter = new PrintWriter("json-output/" + fileName + "-MethodInvocation.json", "UTF-8");
-//            fieldPointsToWriter = new PrintWriter("json-output" + fileName + "FieldPointsTo.json", "UTF-8");
+//            fieldPointsToWriter = new PrintWriter("json-output" + fileName + "-FieldPointsTo.json", "UTF-8");
         } catch (IOException e) {
             e.printStackTrace();
         }
