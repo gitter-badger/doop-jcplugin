@@ -1,5 +1,5 @@
 <h1>Doop Plugin for Javac</h1>
-This projects aims to locate all the non-primitive variables in a java source code and retrieve points-to information for these variables from the results of a doop framework analysis. Furthermore, it aims to locate all the method invocations in a java source code and retrieve all the possible method resolutions for such a method invocation, again from the results of an analysis performed using the doop framework.
+This projects aim to locate all the non-primitive variables in a java source code and retrieve points-to information for these variables from the results of an analysis performed using the Doop framework. Furthermore, it aims to locate all the method invocations in a java source code and retrieve all the possible method resolutions for such a method invocation, again from the results of an analysis performed using the doop framework.
 
 <h3>create package</h3>
 mvn package
