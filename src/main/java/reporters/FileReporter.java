@@ -17,10 +17,11 @@ public class FileReporter implements Reporter {
     private PrintWriter fieldPointsToWriter = null;
     private Gson gson = null;
     private List<VarPointsTo> varPointsToList = null;
+    private List<MethodInvocation> methodInvocationList = null;
 
     public FileReporter() {
         gson = new Gson();
-        varPointsToList = new ArrayList<>();
+
 //        try {
 //            varPointsToWriter = new PrintWriter("json-output/VarPointsTo.json", "UTF-8");
 //            methodInvocationWriter = new PrintWriter("json-output/MethodInvocation.json", "UTF-8");
@@ -62,6 +63,8 @@ public class FileReporter implements Reporter {
 //            varPointsToWriter = new PrintWriter(new BufferedWriter(new FileWriter("json-output/" + fileName + "VarPointsTo.json", true)));
 //            methodInvocationWriter = new PrintWriter(new BufferedWriter(new FileWriter("json-output/" + fileName + "MethodInvocation.json", true)));
 //            fieldPointsToWriter = new PrintWriter(new BufferedWriter(new FileWriter("json-output" + fileName + "FieldPointsTo.json", true)));
+            varPointsToList = new ArrayList<>();
+            methodInvocationList = new ArrayList<>();
             varPointsToWriter = new PrintWriter("json-output/" + fileName + "-VarPointsTo.json", "UTF-8");
             methodInvocationWriter = new PrintWriter("json-output/" + fileName + "-MethodInvocation.json", "UTF-8");
 //            fieldPointsToWriter = new PrintWriter("json-output" + fileName + "-FieldPointsTo.json", "UTF-8");

@@ -1,5 +1,6 @@
 package visitors;
 
+import com.sun.source.tree.LineMap;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Symbol.MethodSymbol;
 import com.sun.tools.javac.tree.JCTree;
@@ -32,19 +33,21 @@ import java.util.Set;
 public class IdentifierScanner extends TreeScanner {
     private final Map<String, Set<String>> vptMap;
     private final Reporter reporter;
-    private DoopRepresentationBuilder doopReprBuilder = null;
+    private final LineMap lineMap;
+    private final DoopRepresentationBuilder doopReprBuilder;
     private int methodInvocationCounter;
     private int constructorInvocationCounter;
     private MethodSymbol currentMethodSymbol;
 
     public IdentifierScanner(Reporter reporter) {
-        this(reporter, null);
+        this(reporter, null, null);
     }
 
-    public IdentifierScanner(Reporter reporter, Map<String, Set<String>> vptMap) {
+    public IdentifierScanner(Reporter reporter, Map<String, Set<String>> vptMap, LineMap lineMap) {
         this.doopReprBuilder = DoopRepresentationBuilder.getInstance();
         this.reporter = reporter;
         this.vptMap = vptMap;
+        this.lineMap = lineMap;
         this.constructorInvocationCounter = 0;
         this.methodInvocationCounter = 0;
     }
@@ -133,11 +136,23 @@ public class IdentifierScanner extends TreeScanner {
             if( this.vptMap != null) {
                 if (this.vptMap.containsKey(varNameInDoop)) {
                     Set<String> heapAllocationSet = this.vptMap.get(varNameInDoop);
-                    reporter.reportVarPointsTo(new VarPointsTo(tree.pos, tree.pos + tree.name.length(), varNameInDoop, heapAllocationSet));
+                    System.out.println("Diagnostic position: " + tree.pos());
+                    this.reporter.reportVarPointsTo(new VarPointsTo(lineMap.getLineNumber(tree.pos),
+                                                                lineMap.getColumnNumber(tree.pos),
+                                                                lineMap.getLineNumber(tree.pos + tree.name.length()),
+                                                                lineMap.getColumnNumber(tree.pos + tree.name.length()),
+                                                                varNameInDoop,
+                                                                heapAllocationSet));
                 }
             }
             else {
-                reporter.reportVarPointsTo(new VarPointsTo(tree.pos, tree.pos + tree.name.length(), varNameInDoop, new HashSet<>()));
+                System.out.println("Diagnostic position: " + tree.pos());
+                this.reporter.reportVarPointsTo(new VarPointsTo(lineMap.getLineNumber(tree.pos),
+                        lineMap.getColumnNumber(tree.pos),
+                        lineMap.getLineNumber(tree.pos + tree.name.length()),
+                        lineMap.getColumnNumber(tree.pos + tree.name.length()),
+                        varNameInDoop,
+                        new HashSet<>()));
             }
         }
         scan(tree.mods);

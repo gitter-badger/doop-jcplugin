@@ -11,8 +11,11 @@ import java.util.Set;
  * @author anantoni
  */
 public class VarPointsTo {
-    private int startPos;
-    private int endPos;
+    private long startLine;
+    private long startColumn;
+    private long endLine;
+    private long endColumn;
+
     private String varName = null;
     private Set<String> heapAllocationSet = null;
 
@@ -23,7 +26,7 @@ public class VarPointsTo {
      * @param var the variable of VarPointsTo
      */
     public VarPointsTo(String var) {
-        this(-1, -1, var, null);
+        this(-1, -1, -1, -1, var, null);
     }
 
 
@@ -34,12 +37,14 @@ public class VarPointsTo {
      * @param heapAllocationSet the heapAllocationSet of VarPointsTo
      */
     public VarPointsTo(String varName, Set<String> heapAllocationSet) {
-        this(-1, -1, varName, heapAllocationSet);
+        this(-1, -1, -1, -1, varName, heapAllocationSet);
     }
 
-    public VarPointsTo(int startPos, int endPos, String varName, Set<String> heapAllocationSet) {
-        this.startPos = startPos;
-        this.endPos = endPos;
+    public VarPointsTo(long startLine, long startColumn, long endLine, long endColumn, String varName, Set<String> heapAllocationSet) {
+        this.startLine = startLine;
+        this.startColumn = startColumn;
+        this.endLine = endLine;
+        this.endColumn = endColumn;
         this.varName = varName;
         this.heapAllocationSet = heapAllocationSet;
     }

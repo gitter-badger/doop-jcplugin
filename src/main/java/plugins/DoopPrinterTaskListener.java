@@ -1,5 +1,6 @@
 package plugins;
 
+import com.sun.source.tree.LineMap;
 import com.sun.source.util.JavacTask;
 import com.sun.source.util.TaskEvent;
 import com.sun.source.util.TaskListener;
@@ -104,6 +105,7 @@ public class DoopPrinterTaskListener implements TaskListener {
     public void finished(TaskEvent arg0) {
         if (arg0.getKind().equals(TaskEvent.Kind.ANALYZE)) {
             System.out.println("\033[31m # Task Kind: " + arg0.getKind() + " finished in file: " + arg0.getSourceFile().getName() + "\033[0m");
+            LineMap lineMap = arg0.getCompilationUnit().getLineMap();
             if (reporter instanceof FileReporter)
                 ((FileReporter) reporter).openFiles(arg0.getSourceFile().getName().replace("../", "").replace(".java", ""));
 
@@ -112,7 +114,7 @@ public class DoopPrinterTaskListener implements TaskListener {
              * Get AST root for this source code file.
              */
             JCTree treeRoot = (JCTree) arg0.getCompilationUnit();
-            treeRoot.accept(new IdentifierScanner(reporter, vptMap));
+            treeRoot.accept(new IdentifierScanner(reporter, vptMap, lineMap));
 
             /**
              * Close all files.
