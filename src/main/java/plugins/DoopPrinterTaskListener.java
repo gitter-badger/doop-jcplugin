@@ -23,17 +23,31 @@ import java.util.logging.Logger;
 
 public class DoopPrinterTaskListener implements TaskListener {
     private static final String DEFAULT_REPORTER = "reporters.FileReporter";
+    private static final String DEFAULT_OUTPUT_DIR = "/home/anantoni/plugin-output-projects/";
+    private static final String DEFAULT_ANALYSIS_RESULTS_DIR = "./analysis-results/";
+    private static final String DEFAULT_PROJECT = "advancedTest";
     private static final boolean MATCH_DOOP_RESULTS = true;
+
+
     private final JavacTask task;
     private final Reporter reporter;
     private Map<String, Set<String>> vptMap;
 
+    /**
+     * DoopPrinterTaskListener constructor.
+     *
+     * @param javactask
+     */
     public DoopPrinterTaskListener(JavacTask javactask) {
 
         this.task = javactask;
-        this.reporter = initReporter();
-
-
+        /**
+         * Initialize the reporter.
+         */
+        if (DEFAULT_REPORTER.equals("reporters.FileReporter"))
+            this.reporter = initReporter();
+        else
+            this.reporter = initReporter();
 
         BufferedReader br = null;
         try {
@@ -45,7 +59,7 @@ public class DoopPrinterTaskListener implements TaskListener {
                 this.vptMap = new HashMap<>();
                 String line;
                 String cvsSplitBy = ", ";
-                br = new BufferedReader(new FileReader("analysis-results/VarPointsTo.txt"));
+                br = new BufferedReader(new FileReader(DEFAULT_ANALYSIS_RESULTS_DIR + "VarPointsTo.txt"));
 
                 while ((line = br.readLine()) != null) {
                     String[] columns = line.split(cvsSplitBy);
@@ -71,8 +85,8 @@ public class DoopPrinterTaskListener implements TaskListener {
                 System.out.println(counter);
             }
             /**
-             * Otherwise set map fields to null and generate empty sets representing doop information such as
-             * heap allocation sets for varPointsTo.
+             * Otherwise set map field to null and generate empty sets representing doop information such as
+             * heap allocation sets for varPointsTo. The empty sets will be filled later by another Java application.
              */
             else
                 this.vptMap = null;
@@ -91,24 +105,49 @@ public class DoopPrinterTaskListener implements TaskListener {
         }
     }
 
+
+    /**
+     * Initializes the doop facts reporter.
+     *
+     * @return the initialized reporter
+     */
     protected Reporter initReporter() {
         String className = System.getProperty("reporter", DEFAULT_REPORTER);
         try {
-            return (Reporter) Class.forName(className).newInstance();
+            if (DEFAULT_REPORTER.equals("reporters.FileReporter")) {
+                FileReporter fileReporter = (FileReporter) Class.forName(className).newInstance();
+                fileReporter.setOutDir(DEFAULT_OUTPUT_DIR);
+                return fileReporter;
+            }
+            else
+                return (Reporter) Class.forName(className).newInstance();
         } catch (InstantiationException | IllegalAccessException | ClassNotFoundException ex) {
             Logger.getLogger(DoopPrinterTaskListener.class.getName()).log(Level.SEVERE, null, ex);
             return new ConsoleReporter();
         }
     }
 
+    /**
+     * After the ANALYZE task for each compilation unit the identifier scanner is called to identify variables and
+     * method invocations.
+     *
+     * @param arg0 the finished TaskEvent
+     */
     @Override
     public void finished(TaskEvent arg0) {
         if (arg0.getKind().equals(TaskEvent.Kind.ANALYZE)) {
             System.out.println("\033[31m # Task Kind: " + arg0.getKind() + " finished in file: " + arg0.getSourceFile().getName() + "\033[0m");
-            LineMap lineMap = arg0.getCompilationUnit().getLineMap();
-            if (reporter instanceof FileReporter)
-                ((FileReporter) reporter).openFiles(arg0.getSourceFile().getName().replace("../", "").replace(".java", ""));
 
+            /**
+             * Get the LineMap for this compilation unit in order to much positions with lines and columns.
+             */
+            LineMap lineMap = arg0.getCompilationUnit().getLineMap();
+
+            /**
+             * Open all necessary json files to write facts.
+             */
+            if (reporter instanceof FileReporter)
+                ((FileReporter) reporter).openFiles(arg0.getSourceFile(), DEFAULT_PROJECT);
 
             /**
              * Get AST root for this source code file.
@@ -127,8 +166,5 @@ public class DoopPrinterTaskListener implements TaskListener {
     }
 
     @Override
-    public void started(TaskEvent arg0) {
-    }
-
-
+    public void started(TaskEvent arg0) {}
 }

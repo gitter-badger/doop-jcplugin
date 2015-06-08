@@ -136,23 +136,21 @@ public class IdentifierScanner extends TreeScanner {
             if( this.vptMap != null) {
                 if (this.vptMap.containsKey(varNameInDoop)) {
                     Set<String> heapAllocationSet = this.vptMap.get(varNameInDoop);
-                    System.out.println("Diagnostic position: " + tree.pos());
                     this.reporter.reportVarPointsTo(new VarPointsTo(lineMap.getLineNumber(tree.pos),
+                                                                    lineMap.getColumnNumber(tree.pos),
+                                                                    lineMap.getLineNumber(tree.pos + tree.name.length()),
+                                                                    lineMap.getColumnNumber(tree.pos + tree.name.length()),
+                                                                    varNameInDoop,
+                                                                    heapAllocationSet));
+                }
+            }
+            else {
+                this.reporter.reportVarPointsTo(new VarPointsTo(lineMap.getLineNumber(tree.pos),
                                                                 lineMap.getColumnNumber(tree.pos),
                                                                 lineMap.getLineNumber(tree.pos + tree.name.length()),
                                                                 lineMap.getColumnNumber(tree.pos + tree.name.length()),
                                                                 varNameInDoop,
-                                                                heapAllocationSet));
-                }
-            }
-            else {
-                System.out.println("Diagnostic position: " + tree.pos());
-                this.reporter.reportVarPointsTo(new VarPointsTo(lineMap.getLineNumber(tree.pos),
-                        lineMap.getColumnNumber(tree.pos),
-                        lineMap.getLineNumber(tree.pos + tree.name.length()),
-                        lineMap.getColumnNumber(tree.pos + tree.name.length()),
-                        varNameInDoop,
-                        new HashSet<>()));
+                                                                new HashSet<>()));
             }
         }
         scan(tree.mods);

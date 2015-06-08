@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import doop.MethodInvocation;
 import doop.VarPointsTo;
 
+import javax.tools.JavaFileObject;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +19,7 @@ public class FileReporter implements Reporter {
     private Gson gson = null;
     private List<VarPointsTo> varPointsToList = null;
     private List<MethodInvocation> methodInvocationList = null;
+    private File outputProjectsDirectory;
 
     public FileReporter() {
         gson = new Gson();
@@ -32,6 +34,19 @@ public class FileReporter implements Reporter {
 //        } catch (FileNotFoundException | UnsupportedEncodingException e) {
 //            e.printStackTrace();
 //        }
+    }
+
+    public void setOutDir(String outDir) {
+
+        this.outputProjectsDirectory = new File(outDir);
+        if (!outputProjectsDirectory.exists())
+            outputProjectsDirectory.mkdirs();
+        else
+            if (outputProjectsDirectory.isFile()) {
+                System.err.println("A file with the proposed directory name already exists");
+                System.exit(-1);
+            }
+
     }
 
     @Override
@@ -56,18 +71,25 @@ public class FileReporter implements Reporter {
     }
 
     /**
-     * @param fileName the fileName of the currently processed compilation unit.
+     * @param sourceFile   the source file object of the currently processed compilation unit.
+     * @param projectName  the fileName of the currently processed compilation unit.
      */
-    public void openFiles(String fileName) {
+    public void openFiles(JavaFileObject sourceFile, String projectName) {
         try {
-//            varPointsToWriter = new PrintWriter(new BufferedWriter(new FileWriter("json-output/" + fileName + "VarPointsTo.json", true)));
-//            methodInvocationWriter = new PrintWriter(new BufferedWriter(new FileWriter("json-output/" + fileName + "MethodInvocation.json", true)));
-//            fieldPointsToWriter = new PrintWriter(new BufferedWriter(new FileWriter("json-output" + fileName + "FieldPointsTo.json", true)));
             varPointsToList = new ArrayList<>();
             methodInvocationList = new ArrayList<>();
-            varPointsToWriter = new PrintWriter("json-output/" + fileName + "-VarPointsTo.json", "UTF-8");
-            methodInvocationWriter = new PrintWriter("json-output/" + fileName + "-MethodInvocation.json", "UTF-8");
-//            fieldPointsToWriter = new PrintWriter("json-output" + fileName + "-FieldPointsTo.json", "UTF-8");
+
+            int index = sourceFile.getName().indexOf(projectName);
+            String trimmedFilePath = sourceFile.getName().substring(index + projectName.length() + 1);
+
+            String outFileName = this.outputProjectsDirectory.getPath() + "/" + projectName + "/" + trimmedFilePath;
+            File outFile = new File(outFileName);
+            outFile.mkdirs();
+            System.out.println("Out file: " + outFileName);
+
+            varPointsToWriter = new PrintWriter(outFileName.replace(".java", "") + "-VarPointsTo.json", "UTF-8");
+            methodInvocationWriter = new PrintWriter(outFileName.replace(".java", "") + "-MethodInvocation.json", "UTF-8");
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -86,6 +108,5 @@ public class FileReporter implements Reporter {
     public void closeFiles() {
         varPointsToWriter.close();
         methodInvocationWriter.close();
-//        fieldPointsToWriter.close();
     }
 }
