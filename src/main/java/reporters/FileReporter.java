@@ -51,7 +51,7 @@ public class FileReporter implements Reporter {
      * @param sourceFile   the source file object of the currently processed compilation unit.
      * @param projectName  the fileName of the currently processed compilation unit.
      */
-    public void openFiles(JavaFileObject sourceFile, String projectName) {
+    public void openJSONFiles(JavaFileObject sourceFile, String projectName) {
         try {
             varPointsToList = new ArrayList<>();
             methodInvocationList = new ArrayList<>();
@@ -73,14 +73,14 @@ public class FileReporter implements Reporter {
     /**
      * Writes the JSON files for this particular compilation unit.
      */
-    public void writeJson() {
+    public void writeJSON() {
         varPointsToWriter.write(gson.toJson(varPointsToList));
     }
 
     /**
      * Closes the JSON files generated for this particular compilation unit.
      */
-    public void closeFiles() {
+    public void closeJSONFiles() {
         varPointsToWriter.close();
         methodInvocationWriter.close();
     }

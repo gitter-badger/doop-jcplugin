@@ -78,6 +78,7 @@ public class DoopPrinterTaskListener implements TaskListener {
                 }
 
                 System.out.println("VarPointsTo map size: " + vptMap.size());
+                System.out.println(vptMap);
                 int counter = 0;
                 for (Set<String> set : vptMap.values())
                     counter += set.size();
@@ -140,7 +141,7 @@ public class DoopPrinterTaskListener implements TaskListener {
              * Open all necessary json files to write facts.
              */
             if (reporter instanceof FileReporter)
-                ((FileReporter) reporter).openFiles(arg0.getSourceFile(), DEFAULT_PROJECT);
+                ((FileReporter) reporter).openJSONFiles(arg0.getSourceFile(), DEFAULT_PROJECT);
 
             /**
              * Get AST root for this source code file.
@@ -152,8 +153,8 @@ public class DoopPrinterTaskListener implements TaskListener {
              * Close all files.
              */
             if (reporter instanceof FileReporter) {
-                ((FileReporter) reporter).writeJson();
-                ((FileReporter) reporter).closeFiles();
+                ((FileReporter) reporter).writeJSON();
+                ((FileReporter) reporter).closeJSONFiles();
             }
         }
     }
