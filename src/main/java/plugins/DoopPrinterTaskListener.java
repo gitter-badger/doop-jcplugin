@@ -23,7 +23,6 @@ import java.util.logging.Logger;
 
 public class DoopPrinterTaskListener implements TaskListener {
     private static final String DEFAULT_REPORTER = "reporters.FileReporter";
-    private static final String DEFAULT_OUTPUT_DIR = "/home/anantoni/plugin-output-projects/";
     private static final String DEFAULT_ANALYSIS_RESULTS_DIR = "./analysis-results/";
     private static final String DEFAULT_PROJECT = "advancedTest";
     private static final boolean MATCH_DOOP_RESULTS = true;
@@ -114,13 +113,7 @@ public class DoopPrinterTaskListener implements TaskListener {
     protected Reporter initReporter() {
         String className = System.getProperty("reporter", DEFAULT_REPORTER);
         try {
-            if (DEFAULT_REPORTER.equals("reporters.FileReporter")) {
-                FileReporter fileReporter = (FileReporter) Class.forName(className).newInstance();
-                fileReporter.setOutDir(DEFAULT_OUTPUT_DIR);
-                return fileReporter;
-            }
-            else
-                return (Reporter) Class.forName(className).newInstance();
+            return (Reporter) Class.forName(className).newInstance();
         } catch (InstantiationException | IllegalAccessException | ClassNotFoundException ex) {
             Logger.getLogger(DoopPrinterTaskListener.class.getName()).log(Level.SEVERE, null, ex);
             return new ConsoleReporter();
