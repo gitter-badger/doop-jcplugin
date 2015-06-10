@@ -5,6 +5,7 @@ import com.sun.source.util.JavacTask;
 import com.sun.source.util.TaskEvent;
 import com.sun.source.util.TaskListener;
 import com.sun.tools.javac.tree.JCTree;
+import doop.HeapAllocation;
 import reporters.ConsoleReporter;
 import reporters.FileReporter;
 import reporters.Reporter;
@@ -30,7 +31,7 @@ public class DoopPrinterTaskListener implements TaskListener {
 
     private final JavacTask task;
     private final Reporter reporter;
-    private Map<String, Set<String>> vptMap;
+    private Map<String, Set<HeapAllocation>> vptMap;
 
     /**
      * DoopPrinterTaskListener constructor.
@@ -68,19 +69,19 @@ public class DoopPrinterTaskListener implements TaskListener {
                     String heapAllocation = columns[1].trim();
 
                     if (!vptMap.containsKey(var)) {
-                        Set<String> heapAllocationSet = new HashSet<>();
-                        heapAllocationSet.add(heapAllocation);
+                        Set<HeapAllocation> heapAllocationSet = new HashSet<>();
+                        heapAllocationSet.add(new HeapAllocation(heapAllocation));
                         vptMap.put(var, heapAllocationSet);
                     } else {
-                        Set<String> heapAllocationSet = vptMap.get(var);
-                        heapAllocationSet.add(heapAllocation);
+                        Set<HeapAllocation> heapAllocationSet = vptMap.get(var);
+                        heapAllocationSet.add(new HeapAllocation(heapAllocation));
                     }
                 }
 
                 System.out.println("VarPointsTo map size: " + vptMap.size());
                 System.out.println(vptMap);
                 int counter = 0;
-                for (Set<String> set : vptMap.values())
+                for (Set<HeapAllocation> set : vptMap.values())
                     counter += set.size();
                 System.out.println(counter);
             }

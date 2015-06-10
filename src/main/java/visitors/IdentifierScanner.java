@@ -9,10 +9,13 @@ import com.sun.tools.javac.util.Assert;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.Name;
 import doop.DoopRepresentationBuilder;
+import doop.HeapAllocation;
 import doop.VarPointsTo;
+import reporters.FileReporter;
 import reporters.Reporter;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -32,29 +35,44 @@ import java.util.Set;
  * deletion without notice.</b>
  */
 public class IdentifierScanner extends TreeScanner {
-    private final Map<String, Set<String>> vptMap;
+    private final Map<String, Set<HeapAllocation>> vptMap;
     private final Reporter reporter;
     private final LineMap lineMap;
     private final DoopRepresentationBuilder doopReprBuilder;
     private int methodInvocationCounter;
     private int constructorInvocationCounter;
+    private int heapAllocationCounter;
     private MethodSymbol currentMethodSymbol;
+    private Map<String, Integer> allocatedClassesMap = null;
 
+    /**
+     *
+     * @param reporter
+     */
     public IdentifierScanner(Reporter reporter) {
         this(reporter, null, null);
     }
 
-    public IdentifierScanner(Reporter reporter, Map<String, Set<String>> vptMap, LineMap lineMap) {
+    /**
+     *
+     * @param reporter
+     * @param vptMap
+     * @param lineMap
+     */
+    public IdentifierScanner(Reporter reporter, Map<String, Set<HeapAllocation>> vptMap, LineMap lineMap) {
         this.doopReprBuilder = DoopRepresentationBuilder.getInstance();
         this.reporter = reporter;
         this.vptMap = vptMap;
         this.lineMap = lineMap;
         this.constructorInvocationCounter = 0;
         this.methodInvocationCounter = 0;
+        this.heapAllocationCounter = 0;
+        this.allocatedClassesMap = new HashMap<>();
     }
 
     /**
      * Visitor method: Scan a single node.
+     *
      * @param tree
      */
     @Override
@@ -68,6 +86,7 @@ public class IdentifierScanner extends TreeScanner {
 
     /**
      * Visitor method: scan a list of nodes.
+     *
      * @param trees
      */
     @Override
@@ -84,29 +103,29 @@ public class IdentifierScanner extends TreeScanner {
 
     /**
      * Add VarPointsTo information to [line : VarPointsTo] map.
-     *  @param varNameInDoop
+     *
+     * @param varNameInDoop
      * @param pos
      * @param varName
      */
-    public void mapVarPointsTo(String varNameInDoop, long pos, Name varName ) {
-        if( this.vptMap != null) {
+    public void mapVarPointsTo(String varNameInDoop, long pos, Name varName) {
+        if (this.vptMap != null) {
             if (this.vptMap.containsKey(varNameInDoop)) {
-                Set<String> heapAllocationSet = this.vptMap.get(varNameInDoop);
+                Set<HeapAllocation> heapAllocationSet = this.vptMap.get(varNameInDoop);
                 this.reporter.reportVarPointsTo(new VarPointsTo(lineMap.getLineNumber(pos),
-                        lineMap.getColumnNumber(pos),
-                        lineMap.getLineNumber(pos + varName.length()),
-                        lineMap.getColumnNumber(pos + varName.length()),
-                        varNameInDoop,
-                        heapAllocationSet));
+                                                                lineMap.getColumnNumber(pos),
+                                                                lineMap.getLineNumber(pos + varName.length()),
+                                                                lineMap.getColumnNumber(pos + varName.length()),
+                                                                varNameInDoop,
+                                                                heapAllocationSet));
             }
-        }
-        else {
+        } else {
             this.reporter.reportVarPointsTo(new VarPointsTo(lineMap.getLineNumber(pos),
-                    lineMap.getColumnNumber(pos),
-                    lineMap.getLineNumber(pos + varName.length()),
-                    lineMap.getColumnNumber(pos + varName.length()),
-                    varNameInDoop,
-                    new HashSet<>()));
+                                                            lineMap.getColumnNumber(pos),
+                                                            lineMap.getLineNumber(pos + varName.length()),
+                                                            lineMap.getColumnNumber(pos + varName.length()),
+                                                            varNameInDoop,
+                                                            new HashSet<>()));
         }
     }
 
@@ -141,6 +160,7 @@ public class IdentifierScanner extends TreeScanner {
         this.constructorInvocationCounter = 0;
         this.methodInvocationCounter = 0;
         this.currentMethodSymbol = tree.sym;
+
         scan(tree.mods);
         scan(tree.restype);
         scan(tree.typarams);
@@ -153,17 +173,16 @@ public class IdentifierScanner extends TreeScanner {
 
     @Override
     public void visitVarDef(JCTree.JCVariableDecl tree) {
-        if (tree.sym.getEnclosingElement() instanceof MethodSymbol) {
-            System.out.println("##########################################################################################################################");
-            String methodSignatureInDoop = this.doopReprBuilder.buildDoopMethodSignature((MethodSymbol)tree.sym.getEnclosingElement());
+        if (tree.sym.isLocal()) {
+            String methodSignatureInDoop = this.doopReprBuilder.buildDoopMethodSignature((MethodSymbol) tree.sym.getEnclosingElement());
             String varNameInDoop = this.doopReprBuilder.buildDoopVarName(methodSignatureInDoop, tree.sym.getQualifiedName().toString());
             System.out.println("Variable name in Doop: " + varNameInDoop);
             System.out.println("Declaring method: " + methodSignatureInDoop);
             System.out.println("##########################################################################################################################");
-            
-            mapVarPointsTo(varNameInDoop, tree.pos, tree.name);
 
+            mapVarPointsTo(varNameInDoop, tree.pos, tree.name);
         }
+
         scan(tree.mods);
         scan(tree.vartype);
         scan(tree.nameexpr);
@@ -319,8 +338,29 @@ public class IdentifierScanner extends TreeScanner {
         scan(tree.clazz);
         scan(tree.args);
         scan(tree.def);
+        String currentMethodDoopSignature = this.doopReprBuilder.buildDoopMethodSignature(currentMethodSymbol);
+
+
+        String heapAllocation = currentMethodDoopSignature + "/new " + tree.clazz.type.getOriginalType();
+
+        if (allocatedClassesMap.containsKey(heapAllocation)) {
+            heapAllocationCounter = allocatedClassesMap.get(heapAllocation) + 1;
+            allocatedClassesMap.put(heapAllocation, heapAllocationCounter);
+        }
+        else {
+            heapAllocationCounter = 0;
+            allocatedClassesMap.put(heapAllocation, 0);
+        }
+        System.out.println("Found HeapAllocation: " + heapAllocation);
+        if (this.reporter instanceof FileReporter) {
+            ((FileReporter) reporter).reportHeapAllocation(new HeapAllocation(lineMap.getLineNumber(tree.clazz.pos),
+                                                                                lineMap.getColumnNumber(tree.clazz.pos),
+                                                                                lineMap.getColumnNumber(tree.clazz.pos) + tree.clazz.type.getOriginalType().tsym.toString().length(),
+                                                                                heapAllocation + "/" + heapAllocationCounter));
+        }
+
         System.out.println("\033[35m Method Invocation (Constructor): \033[0m" + this.doopReprBuilder.buildDoopMethodInvocationInMethod(
-                this.doopReprBuilder.buildDoopMethodSignature(currentMethodSymbol),
+                currentMethodDoopSignature,
                 this.doopReprBuilder.buildDoopMethodInvocation((MethodSymbol) tree.constructor) + "/" + this.constructorInvocationCounter++));
     }
 
@@ -402,20 +442,22 @@ public class IdentifierScanner extends TreeScanner {
     public void visitIdent(JCTree.JCIdent tree) {
 
         /**
-         * If identifier is a local variable
+         * If identifier is a local variable.
          */
         if (tree.sym != null && tree.sym.isLocal()) {
 
-            String methodSignatureInDoop = this.doopReprBuilder.buildDoopMethodSignature((MethodSymbol)tree.sym.getEnclosingElement());
+            String methodSignatureInDoop = this.doopReprBuilder.buildDoopMethodSignature((MethodSymbol) tree.sym.getEnclosingElement());
             String varNameInDoop = this.doopReprBuilder.buildDoopVarName(methodSignatureInDoop, tree.sym.getQualifiedName().toString());
             System.out.println("Declaring method signature: " + methodSignatureInDoop);
             System.out.println("Qualified name: " + varNameInDoop);
             System.out.println("##########################################################################################################################");
 
             mapVarPointsTo(varNameInDoop, tree.pos, tree.name);
-
         }
-        if (tree.sym != null && tree.sym instanceof MethodSymbol) {
+        /**
+         * If identifier is a method symbol.
+         */
+        else if (tree.sym != null && tree.sym instanceof MethodSymbol) {
             System.out.println("Identifier: " + tree.name);
             System.out.println("IDENTIFIER name: " + tree.sym.getQualifiedName().toString());
             System.out.println("Method signature: " + this.doopReprBuilder.buildDoopMethodSignature((MethodSymbol) tree.sym));
@@ -423,7 +465,6 @@ public class IdentifierScanner extends TreeScanner {
             System.out.println("Type: " + tree.sym.type);
             System.out.println("Position: " + tree.pos);
             System.out.println("##########################################################################################################################");
-//            System.out.println("Method invocation: " + ((Symbol.MethodSymbol) tree.sym).name.toString()+invocationCounter++);
         }
     }
 

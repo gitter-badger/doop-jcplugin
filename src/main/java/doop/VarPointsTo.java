@@ -17,7 +17,7 @@ public class VarPointsTo {
     private long endColumn;
 
     private String varName = null;
-    private Set<String> heapAllocationSet = null;
+    private Set<HeapAllocation> heapAllocationSet = null;
 
     public long getStartLine() {
         return startLine;
@@ -74,7 +74,7 @@ public class VarPointsTo {
      * @param varName           the variable name.
      * @param heapAllocationSet the set of possible heap allocations the variable may point to.
      */
-    public VarPointsTo(String varName, Set<String> heapAllocationSet) {
+    public VarPointsTo(String varName, Set<HeapAllocation> heapAllocationSet) {
         this(-1, -1, -1, -1, varName, heapAllocationSet);
     }
 
@@ -90,7 +90,7 @@ public class VarPointsTo {
      * @param startColumn       the starting column of the variable identifier in the source code
      * @param endColumn         the ending column of the variable identifier in the source code
      */
-    public VarPointsTo(long startLine, long startColumn, long endLine, long endColumn, String varName, Set<String> heapAllocationSet) {
+    public VarPointsTo(long startLine, long startColumn, long endLine, long endColumn, String varName, Set<HeapAllocation> heapAllocationSet) {
         this.startLine = startLine;
         this.startColumn = startColumn;
         this.endLine = endLine;
@@ -122,7 +122,7 @@ public class VarPointsTo {
      *
      * @return type  the type of this variable
      */
-    public Set<String> getHeapAllocationSet() {
+    public Set<HeapAllocation> getHeapAllocationSet() {
         return this.heapAllocationSet;
     }
 
@@ -131,7 +131,7 @@ public class VarPointsTo {
      *
      * @param heapAllocationSet
      */
-    public void setHeapAllocationSet(Set<String> heapAllocationSet) {
+    public void setHeapAllocationSet(Set<HeapAllocation> heapAllocationSet) {
         this.heapAllocationSet = heapAllocationSet;
     }
 }

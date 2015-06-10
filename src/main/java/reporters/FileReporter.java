@@ -1,6 +1,7 @@
 package reporters;
 
 import com.google.gson.Gson;
+import doop.HeapAllocation;
 import doop.MethodInvocation;
 import doop.VarPointsTo;
 import org.apache.commons.io.FileUtils;
@@ -40,6 +41,23 @@ public class FileReporter implements Reporter {
         else {
             System.out.println("Line: " + line);
             this.varPointsToMap.get(line).add(varPointsTo);
+        }
+    }
+
+    public void reportHeapAllocation(HeapAllocation heapAllocation) {
+        for (Set<VarPointsTo> varPointsToSet : varPointsToMap.values()) {
+            for (VarPointsTo varPointsTo : varPointsToSet) {
+                Set<HeapAllocation> heapAllocationSet = varPointsTo.getHeapAllocationSet();
+
+                for (HeapAllocation initialHeapAllocation : heapAllocationSet) {
+                    if (initialHeapAllocation.getDoopAllocationName().equals(heapAllocation.getDoopAllocationName())) {
+                        initialHeapAllocation.setStartLine(heapAllocation.getStartLine());
+                        initialHeapAllocation.setEndLine(heapAllocation.getEndLine());
+                        initialHeapAllocation.setStartColumn(heapAllocation.getStartColumn());
+                        initialHeapAllocation.setEndColumn(heapAllocation.getEndColumn());
+                    }
+                }
+            }
         }
     }
 
