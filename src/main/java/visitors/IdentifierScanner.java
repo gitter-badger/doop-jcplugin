@@ -393,9 +393,31 @@ public class IdentifierScanner extends TreeScanner {
             System.out.println("##########################################################################################################################");
             System.out.println("IDENTIFIER name: " + tree.sym.getQualifiedName().toString());
             System.out.println("Declaring method signature: " + this.doopReprBuilder.buildDoopMethodSignature((MethodSymbol) tree.sym.getEnclosingElement()));
+            String methodSignatureInDoop = this.doopReprBuilder.buildDoopMethodSignature((MethodSymbol)tree.sym.getEnclosingElement());
+            String varNameInDoop = this.doopReprBuilder.buildDoopVarName(methodSignatureInDoop, tree.sym.getQualifiedName().toString());
             System.out.println("Qualified name: " + tree.sym.getQualifiedName());
             System.out.println("Type: " + tree.sym.type);
             System.out.println("##########################################################################################################################");
+
+            if( this.vptMap != null) {
+                if (this.vptMap.containsKey(varNameInDoop)) {
+                    Set<String> heapAllocationSet = this.vptMap.get(varNameInDoop);
+                    this.reporter.reportVarPointsTo(new VarPointsTo(lineMap.getLineNumber(tree.pos),
+                            lineMap.getColumnNumber(tree.pos),
+                            lineMap.getLineNumber(tree.pos + tree.name.length()),
+                            lineMap.getColumnNumber(tree.pos + tree.name.length()),
+                            varNameInDoop,
+                            heapAllocationSet));
+                }
+            }
+            else {
+                this.reporter.reportVarPointsTo(new VarPointsTo(lineMap.getLineNumber(tree.pos),
+                        lineMap.getColumnNumber(tree.pos),
+                        lineMap.getLineNumber(tree.pos + tree.name.length()),
+                        lineMap.getColumnNumber(tree.pos + tree.name.length()),
+                        varNameInDoop,
+                        new HashSet<>()));
+            }
         }
         if (tree.sym != null && tree.sym instanceof MethodSymbol) {
             System.out.println("##########################################################################################################################");
