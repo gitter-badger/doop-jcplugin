@@ -7,8 +7,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import javax.tools.JavaFileObject;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by anantoni on 27/4/2015.
@@ -17,9 +16,8 @@ public class FileReporter implements Reporter {
     private PrintWriter varPointsToWriter = null;
     private PrintWriter methodInvocationWriter = null;
     private Gson gson = null;
-    private List<VarPointsTo> varPointsToList = null;
+    private Map<Long, Set<VarPointsTo>> varPointsToMap = null;
     private List<MethodInvocation> methodInvocationList = null;
-    private FileUtils fileUtils = null;
     private static final String DEFAULT_OUTPUT_DIR = "/home/anantoni/plugin-output-projects/";
 
     public FileReporter() {
@@ -34,7 +32,16 @@ public class FileReporter implements Reporter {
     @Override
     public void reportVarPointsTo(VarPointsTo varPointsTo) {
         //varPointsToWriter.println(gson.toJson(varPointsTo));
-        varPointsToList.add(varPointsTo);
+        long line = varPointsTo.getStartLine();
+        if (!this.varPointsToMap.containsKey(line)) {
+            Set<VarPointsTo> varPointsToSet = new HashSet<>();
+            varPointsToSet.add(varPointsTo);
+            varPointsToMap.put(line, varPointsToSet);
+        }
+        else {
+            System.out.println("Line: " + line);
+            this.varPointsToMap.get(line).add(varPointsTo);
+        }
     }
 
     @Override
@@ -53,7 +60,7 @@ public class FileReporter implements Reporter {
      */
     public void openJSONFiles(JavaFileObject sourceFile, String projectName) {
         try {
-            varPointsToList = new ArrayList<>();
+            varPointsToMap = new HashMap<>();
             methodInvocationList = new ArrayList<>();
 
             String varPointsToPath = FilenameUtils.concat(DEFAULT_OUTPUT_DIR + projectName, sourceFile.getName().replace(".java", "-VarPointsTo.json"));
@@ -62,7 +69,7 @@ public class FileReporter implements Reporter {
             String methodInvocationPath = FilenameUtils.concat(DEFAULT_OUTPUT_DIR + projectName, sourceFile.getName().replace(".java", "-MethodInvocation.json"));
             FileUtils.forceMkdir(new File(FilenameUtils.getFullPath(methodInvocationPath)));
 
-            varPointsToWriter = new PrintWriter(methodInvocationPath, "UTF-8");
+            varPointsToWriter = new PrintWriter(varPointsToPath, "UTF-8");
             methodInvocationWriter = new PrintWriter(methodInvocationPath, "UTF-8");
 
         } catch (IOException e) {
@@ -74,7 +81,7 @@ public class FileReporter implements Reporter {
      * Writes the JSON files for this particular compilation unit.
      */
     public void writeJSON() {
-        varPointsToWriter.write(gson.toJson(varPointsToList));
+        varPointsToWriter.write(gson.toJson(varPointsToMap));
     }
 
     /**
