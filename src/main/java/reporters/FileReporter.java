@@ -31,7 +31,6 @@ public class FileReporter implements Reporter {
 
     @Override
     public void reportVarPointsTo(VarPointsTo varPointsTo) {
-        //varPointsToWriter.println(gson.toJson(varPointsTo));
         long line = varPointsTo.getStartLine();
         if (!this.varPointsToMap.containsKey(line)) {
             Set<VarPointsTo> varPointsToSet = new HashSet<>();

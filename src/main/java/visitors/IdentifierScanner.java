@@ -7,6 +7,7 @@ import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeScanner;
 import com.sun.tools.javac.util.Assert;
 import com.sun.tools.javac.util.List;
+import com.sun.tools.javac.util.Name;
 import doop.DoopRepresentationBuilder;
 import doop.VarPointsTo;
 import reporters.Reporter;
@@ -82,6 +83,34 @@ public class IdentifierScanner extends TreeScanner {
     }
 
     /**
+     * Add VarPointsTo information to [line : VarPointsTo] map.
+     *  @param varNameInDoop
+     * @param pos
+     * @param varName
+     */
+    public void mapVarPointsTo(String varNameInDoop, long pos, Name varName ) {
+        if( this.vptMap != null) {
+            if (this.vptMap.containsKey(varNameInDoop)) {
+                Set<String> heapAllocationSet = this.vptMap.get(varNameInDoop);
+                this.reporter.reportVarPointsTo(new VarPointsTo(lineMap.getLineNumber(pos),
+                        lineMap.getColumnNumber(pos),
+                        lineMap.getLineNumber(pos + varName.length()),
+                        lineMap.getColumnNumber(pos + varName.length()),
+                        varNameInDoop,
+                        heapAllocationSet));
+            }
+        }
+        else {
+            this.reporter.reportVarPointsTo(new VarPointsTo(lineMap.getLineNumber(pos),
+                    lineMap.getColumnNumber(pos),
+                    lineMap.getLineNumber(pos + varName.length()),
+                    lineMap.getColumnNumber(pos + varName.length()),
+                    varNameInDoop,
+                    new HashSet<>()));
+        }
+    }
+
+    /**
      * *************************************************************************
      * Visitor methods
      * **************************************************************************
@@ -126,32 +155,14 @@ public class IdentifierScanner extends TreeScanner {
     public void visitVarDef(JCTree.JCVariableDecl tree) {
         if (tree.sym.getEnclosingElement() instanceof MethodSymbol) {
             System.out.println("##########################################################################################################################");
-            System.out.println("Variable name: " + tree.sym.getQualifiedName().toString());
-            System.out.println("Type: " + tree.type);
             String methodSignatureInDoop = this.doopReprBuilder.buildDoopMethodSignature((MethodSymbol)tree.sym.getEnclosingElement());
             String varNameInDoop = this.doopReprBuilder.buildDoopVarName(methodSignatureInDoop, tree.sym.getQualifiedName().toString());
             System.out.println("Variable name in Doop: " + varNameInDoop);
+            System.out.println("Declaring method: " + methodSignatureInDoop);
             System.out.println("##########################################################################################################################");
+            
+            mapVarPointsTo(varNameInDoop, tree.pos, tree.name);
 
-            if( this.vptMap != null) {
-                if (this.vptMap.containsKey(varNameInDoop)) {
-                    Set<String> heapAllocationSet = this.vptMap.get(varNameInDoop);
-                    this.reporter.reportVarPointsTo(new VarPointsTo(lineMap.getLineNumber(tree.pos),
-                                                                    lineMap.getColumnNumber(tree.pos),
-                                                                    lineMap.getLineNumber(tree.pos + tree.name.length()),
-                                                                    lineMap.getColumnNumber(tree.pos + tree.name.length()),
-                                                                    varNameInDoop,
-                                                                    heapAllocationSet));
-                }
-            }
-            else {
-                this.reporter.reportVarPointsTo(new VarPointsTo(lineMap.getLineNumber(tree.pos),
-                                                                lineMap.getColumnNumber(tree.pos),
-                                                                lineMap.getLineNumber(tree.pos + tree.name.length()),
-                                                                lineMap.getColumnNumber(tree.pos + tree.name.length()),
-                                                                varNameInDoop,
-                                                                new HashSet<>()));
-            }
         }
         scan(tree.mods);
         scan(tree.vartype);
@@ -389,38 +400,22 @@ public class IdentifierScanner extends TreeScanner {
 
     @Override
     public void visitIdent(JCTree.JCIdent tree) {
+
+        /**
+         * If identifier is a local variable
+         */
         if (tree.sym != null && tree.sym.isLocal()) {
-            System.out.println("##########################################################################################################################");
-            System.out.println("IDENTIFIER name: " + tree.sym.getQualifiedName().toString());
-            System.out.println("Declaring method signature: " + this.doopReprBuilder.buildDoopMethodSignature((MethodSymbol) tree.sym.getEnclosingElement()));
+
             String methodSignatureInDoop = this.doopReprBuilder.buildDoopMethodSignature((MethodSymbol)tree.sym.getEnclosingElement());
             String varNameInDoop = this.doopReprBuilder.buildDoopVarName(methodSignatureInDoop, tree.sym.getQualifiedName().toString());
-            System.out.println("Qualified name: " + tree.sym.getQualifiedName());
-            System.out.println("Type: " + tree.sym.type);
+            System.out.println("Declaring method signature: " + methodSignatureInDoop);
+            System.out.println("Qualified name: " + varNameInDoop);
             System.out.println("##########################################################################################################################");
 
-            if( this.vptMap != null) {
-                if (this.vptMap.containsKey(varNameInDoop)) {
-                    Set<String> heapAllocationSet = this.vptMap.get(varNameInDoop);
-                    this.reporter.reportVarPointsTo(new VarPointsTo(lineMap.getLineNumber(tree.pos),
-                            lineMap.getColumnNumber(tree.pos),
-                            lineMap.getLineNumber(tree.pos + tree.name.length()),
-                            lineMap.getColumnNumber(tree.pos + tree.name.length()),
-                            varNameInDoop,
-                            heapAllocationSet));
-                }
-            }
-            else {
-                this.reporter.reportVarPointsTo(new VarPointsTo(lineMap.getLineNumber(tree.pos),
-                        lineMap.getColumnNumber(tree.pos),
-                        lineMap.getLineNumber(tree.pos + tree.name.length()),
-                        lineMap.getColumnNumber(tree.pos + tree.name.length()),
-                        varNameInDoop,
-                        new HashSet<>()));
-            }
+            mapVarPointsTo(varNameInDoop, tree.pos, tree.name);
+
         }
         if (tree.sym != null && tree.sym instanceof MethodSymbol) {
-            System.out.println("##########################################################################################################################");
             System.out.println("Identifier: " + tree.name);
             System.out.println("IDENTIFIER name: " + tree.sym.getQualifiedName().toString());
             System.out.println("Method signature: " + this.doopReprBuilder.buildDoopMethodSignature((MethodSymbol) tree.sym));
