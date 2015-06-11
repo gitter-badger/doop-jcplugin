@@ -9,6 +9,7 @@ import doop.HeapAllocation;
 import reporters.ConsoleReporter;
 import reporters.FileReporter;
 import reporters.Reporter;
+import visitors.HeapAllocationScanner;
 import visitors.IdentifierScanner;
 
 import java.io.BufferedReader;
@@ -28,10 +29,9 @@ public class DoopPrinterTaskListener implements TaskListener {
     private static final String DEFAULT_PROJECT = "advancedTest";
     private static final boolean MATCH_DOOP_RESULTS = true;
 
-
     private final JavacTask task;
     private final Reporter reporter;
-    private Map<String, Set<HeapAllocation>> vptMap;
+    private Map<String, Set<String>> vptMap;
 
     /**
      * DoopPrinterTaskListener constructor.
@@ -69,19 +69,19 @@ public class DoopPrinterTaskListener implements TaskListener {
                     String heapAllocation = columns[1].trim();
 
                     if (!vptMap.containsKey(var)) {
-                        Set<HeapAllocation> heapAllocationSet = new HashSet<>();
-                        heapAllocationSet.add(new HeapAllocation(heapAllocation));
+                        Set<String> heapAllocationSet = new HashSet<>();
+                        heapAllocationSet.add(heapAllocation);
                         vptMap.put(var, heapAllocationSet);
                     } else {
-                        Set<HeapAllocation> heapAllocationSet = vptMap.get(var);
-                        heapAllocationSet.add(new HeapAllocation(heapAllocation));
+                        Set<String> heapAllocationSet = vptMap.get(var);
+                        heapAllocationSet.add(heapAllocation);
                     }
                 }
 
                 System.out.println("VarPointsTo map size: " + vptMap.size());
                 System.out.println(vptMap);
                 int counter = 0;
-                for (Set<HeapAllocation> set : vptMap.values())
+                for (Set<String> set : vptMap.values())
                     counter += set.size();
                 System.out.println(counter);
             }
@@ -148,7 +148,9 @@ public class DoopPrinterTaskListener implements TaskListener {
              * Get AST root for this source code file.
              */
             JCTree treeRoot = (JCTree) arg0.getCompilationUnit();
-            treeRoot.accept(new IdentifierScanner(reporter, vptMap, lineMap));
+            HeapAllocationScanner heapAllocationScanner = new HeapAllocationScanner(lineMap);
+            treeRoot.accept(heapAllocationScanner);
+            treeRoot.accept(new IdentifierScanner(reporter, vptMap, lineMap, heapAllocationScanner.getHeapAllocationMap()));
 
             /**
              * Close all files.
