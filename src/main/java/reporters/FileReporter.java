@@ -19,10 +19,19 @@ public class FileReporter implements Reporter {
     private Gson gson = null;
     private Map<Long, Set<VarPointsTo>> varPointsToMap = null;
     private List<MethodInvocation> methodInvocationList = null;
+    private Map<String, Set<HeapAllocation>> heapAllocationMap = null;
     private static final String DEFAULT_OUTPUT_DIR = "/home/anantoni/plugin-output-projects/";
 
     public FileReporter() {
         gson = new Gson();
+    }
+
+    public Map<String, Set<HeapAllocation>> getHeapAllocationMap() {
+        return heapAllocationMap;
+    }
+
+    public void setHeapAllocationMap(Map<String, Set<HeapAllocation>> heapAllocationMap) {
+        this.heapAllocationMap = heapAllocationMap;
     }
 
     @Override
@@ -36,7 +45,7 @@ public class FileReporter implements Reporter {
         if (!this.varPointsToMap.containsKey(line)) {
             Set<VarPointsTo> varPointsToSet = new HashSet<>();
             varPointsToSet.add(varPointsTo);
-            varPointsToMap.put(line, varPointsToSet);
+            this.varPointsToMap.put(line, varPointsToSet);
         }
         else {
             System.out.println("Line: " + line);

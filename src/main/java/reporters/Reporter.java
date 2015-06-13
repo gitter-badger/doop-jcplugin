@@ -14,6 +14,7 @@ import java.lang.reflect.Method;
  * @author anantoni
  */
 public interface Reporter {
+
     void reportVar(int startPos, int endPos, String representation);
 
     void reportVarPointsTo(VarPointsTo varPointsTo);
