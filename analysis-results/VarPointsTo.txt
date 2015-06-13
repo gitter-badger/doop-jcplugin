@@ -1,90 +1,86 @@
- *0, Main.main/new extras.Test/0, *0, Main.main/test1
-  *0, Main.main/new extras.Test/1, *0, Main.main/test1
-  *0, <<string-builder>>, *0, extras.Test2.<init>/$r0
-  *0, java.lang.StringBuilder.toString/new java.lang.String/0, *0, extras.Test2.<init>/$r2
+  *0, <<string-constant>>, *0, extras.Test2.<init>/$stringconstant0
+  *0, <extras.Test: void <init>()>/new extras.Test2/0, *0, extras.Test2.<init>/@this
+  *0, Main.main/new extras.Test2/0, *0, extras.Test2.<init>/@this
+  *0, Main.main/new extras.Test2/1, *0, extras.Test2.<init>/@this
+  *0, Main.main/new extras.Test2/2, *0, extras.Test2.<init>/@this
+  *0, Main.main/new extras.Test2/3, *0, extras.Test2.<init>/@this
+  *0, <<string-builder>>, *0, extras.Test2.<init>/$r2
+  *0, <<string-builder>>, *0, extras.Test2.<init>/$r3
+  *0, java.lang.StringBuilder.toString/new java.lang.String/0, *0, extras.Test2.<init>/$r4
+  *0, Main.main/new extras.Test/0, *0, Main.main/test1
+  *0, Main.foo/new extras.Test/0, *0, Main.main/test1
+  *0, extras.Test2.<init>/new extras.Test/0, *0, java.lang.Object.<init>/@this
+  *0, <extras.Test: void <init>()>/new extras.Test2/0, *0, java.lang.Object.<init>/@this
+  *0, <extras.Test: void <init>()>/new extras.Test/0, *0, java.lang.Object.<init>/@this
+  *0, <extras.Test: void <init>(extras.Test,extras.Test2,extras.Test2)>/new extras.Test/0, *0, java.lang.Object.<init>/@this
   *0, Main.main/new extras.Test/0, *0, java.lang.Object.<init>/@this
   *0, Main.main/new extras.Test2/0, *0, java.lang.Object.<init>/@this
   *0, Main.main/new extras.Test/1, *0, java.lang.Object.<init>/@this
   *0, Main.main/new extras.Test2/1, *0, java.lang.Object.<init>/@this
   *0, Main.main/new extras.Test2/2, *0, java.lang.Object.<init>/@this
   *0, Main.main/new extras.Test2/3, *0, java.lang.Object.<init>/@this
-  *0, extras.Test2.<init>/new extras.Test/0, *0, java.lang.Object.<init>/@this
-  *0, <extras.Test: void <init>()>/new extras.Test2/0, *0, java.lang.Object.<init>/@this
-  *0, <extras.Test: void <init>()>/new extras.Test/0, *0, java.lang.Object.<init>/@this
-  *0, <extras.Test: void <init>(extras.Test,extras.Test2,extras.Test2)>/new extras.Test/0, *0, java.lang.Object.<init>/@this
-  *0, Main.main/new extras.Test2/0, *0, extras.Test2.<init>/@this
-  *0, Main.main/new extras.Test2/1, *0, extras.Test2.<init>/@this
-  *0, Main.main/new extras.Test2/2, *0, extras.Test2.<init>/@this
-  *0, Main.main/new extras.Test2/3, *0, extras.Test2.<init>/@this
-  *0, <extras.Test: void <init>()>/new extras.Test2/0, *0, extras.Test2.<init>/@this
-  *0, Main.main/new extras.Test/0, *0, <extras.Test: void <init>()>/@this
-  *0, Main.main/new extras.Test/1, *0, <extras.Test: void <init>()>/@this
+  *0, Main.foo/new extras.Test/0, *0, java.lang.Object.<init>/@this
   *0, extras.Test2.<init>/new extras.Test/0, *0, <extras.Test: void <init>()>/@this
   *0, <extras.Test: void <init>()>/new extras.Test/0, *0, <extras.Test: void <init>()>/@this
   *0, <extras.Test: void <init>(extras.Test,extras.Test2,extras.Test2)>/new extras.Test/0, *0, <extras.Test: void <init>()>/@this
-  *0, Main.main/new extras.Test/0, *0, <extras.Test: void <init>(extras.Test,extras.Test2,extras.Test2)>/@this
+  *0, Main.main/new extras.Test/0, *0, <extras.Test: void <init>()>/@this
+  *0, Main.foo/new extras.Test/0, *0, <extras.Test: void <init>()>/@this
   *0, Main.main/new extras.Test/1, *0, <extras.Test: void <init>(extras.Test,extras.Test2,extras.Test2)>/@this
   *0, Main.main/new extras.Test/0, *0, <extras.Test: void speak(extras.Test2)>/@this
-  *0, Main.main/new extras.Test/1, *0, <extras.Test: void speak(extras.Test2)>/@this
-  *0, Main.main/new extras.Test/0, *0, Main.main/$r0
-  *0, Main.main/new extras.Test/1, *0, Main.main/$r0
-  *0, Main.main/new extras.Test2/1, *0, Main.main/$r1
-  *0, Main.main/new extras.Test/0, *0, Main.main/test3
-  *0, Main.main/new extras.Test/1, *0, Main.main/test3
-  *0, Main.main/new extras.Test2/0, *0, Main.main/$r2
-  *0, Main.main/new extras.Test2/3, *0, Main.main/$r2
-  *0, Main.main/new extras.Test2/2, *0, Main.main/$r3
+  *0, Main.foo/new extras.Test/0, *0, <extras.Test: void speak(extras.Test2)>/@this
+  *0, <extras.Test: void <init>()>/new extras.Test2/0, *0, extras.Test2.<init>/this
+  *0, Main.main/new extras.Test2/0, *0, extras.Test2.<init>/this
+  *0, Main.main/new extras.Test2/1, *0, extras.Test2.<init>/this
+  *0, Main.main/new extras.Test2/2, *0, extras.Test2.<init>/this
+  *0, Main.main/new extras.Test2/3, *0, extras.Test2.<init>/this
+  *0, <<string-builder>>, *0, extras.Test2.<init>/$r0
+  *0, java.lang.System.initializeSystemClass/new java.io.PrintStream/0, *0, extras.Test2.<init>/$r1
+  *0, <<<null pseudo object>>>, *0, extras.Test2.<init>/$r1
+  *0, extras.Test2.<init>/new extras.Test/0, *0, extras.Test2.<init>/$r5
+  *0, extras.Test2.<init>/new extras.Test/0, *0, java.lang.Object.<init>/l0
+  *0, <extras.Test: void <init>()>/new extras.Test2/0, *0, java.lang.Object.<init>/l0
+  *0, <extras.Test: void <init>()>/new extras.Test/0, *0, java.lang.Object.<init>/l0
+  *0, <extras.Test: void <init>(extras.Test,extras.Test2,extras.Test2)>/new extras.Test/0, *0, java.lang.Object.<init>/l0
   *0, Main.main/new extras.Test/0, *0, java.lang.Object.<init>/l0
   *0, Main.main/new extras.Test2/0, *0, java.lang.Object.<init>/l0
   *0, Main.main/new extras.Test/1, *0, java.lang.Object.<init>/l0
   *0, Main.main/new extras.Test2/1, *0, java.lang.Object.<init>/l0
   *0, Main.main/new extras.Test2/2, *0, java.lang.Object.<init>/l0
   *0, Main.main/new extras.Test2/3, *0, java.lang.Object.<init>/l0
-  *0, extras.Test2.<init>/new extras.Test/0, *0, java.lang.Object.<init>/l0
-  *0, <extras.Test: void <init>()>/new extras.Test2/0, *0, java.lang.Object.<init>/l0
-  *0, <extras.Test: void <init>()>/new extras.Test/0, *0, java.lang.Object.<init>/l0
-  *0, <extras.Test: void <init>(extras.Test,extras.Test2,extras.Test2)>/new extras.Test/0, *0, java.lang.Object.<init>/l0
-  *0, Main.main/new extras.Test2/0, *0, extras.Test2.<init>/this
-  *0, Main.main/new extras.Test2/1, *0, extras.Test2.<init>/this
-  *0, Main.main/new extras.Test2/2, *0, extras.Test2.<init>/this
-  *0, Main.main/new extras.Test2/3, *0, extras.Test2.<init>/this
-  *0, <extras.Test: void <init>()>/new extras.Test2/0, *0, extras.Test2.<init>/this
-  *0, java.lang.System.initializeSystemClass/new java.io.PrintStream/0, *0, extras.Test2.<init>/$r1
-  *0, java.lang.System.initializeSystemClass/new java.io.PrintStream/1, *0, extras.Test2.<init>/$r1
-  *0, <<<null pseudo object>>>, *0, extras.Test2.<init>/$r1
-  *0, extras.Test2.<init>/new extras.Test/0, *0, extras.Test2.<init>/$r3
-  *0, <<string-constant>>, *0, extras.Test2.<init>/$stringconstant0
-  *0, Main.main/new extras.Test/0, *0, <extras.Test: void <init>()>/this
-  *0, Main.main/new extras.Test/1, *0, <extras.Test: void <init>()>/this
+  *0, Main.foo/new extras.Test/0, *0, java.lang.Object.<init>/l0
   *0, extras.Test2.<init>/new extras.Test/0, *0, <extras.Test: void <init>()>/this
   *0, <extras.Test: void <init>()>/new extras.Test/0, *0, <extras.Test: void <init>()>/this
   *0, <extras.Test: void <init>(extras.Test,extras.Test2,extras.Test2)>/new extras.Test/0, *0, <extras.Test: void <init>()>/this
+  *0, Main.main/new extras.Test/0, *0, <extras.Test: void <init>()>/this
+  *0, Main.foo/new extras.Test/0, *0, <extras.Test: void <init>()>/this
   *0, java.lang.System.initializeSystemClass/new java.io.PrintStream/0, *0, <extras.Test: void <init>()>/$r0
-  *0, java.lang.System.initializeSystemClass/new java.io.PrintStream/1, *0, <extras.Test: void <init>()>/$r0
   *0, <<<null pseudo object>>>, *0, <extras.Test: void <init>()>/$r0
   *0, <extras.Test: void <init>()>/new extras.Test2/0, *0, <extras.Test: void <init>()>/$r1
   *0, <extras.Test: void <init>()>/new extras.Test/0, *0, <extras.Test: void <init>()>/$r2
   *0, Main.main/new extras.Test/0, *0, <extras.Test: void <init>(extras.Test,extras.Test2,extras.Test2)>/@param0
-  *0, Main.main/new extras.Test/1, *0, <extras.Test: void <init>(extras.Test,extras.Test2,extras.Test2)>/@param0
+  *0, Main.foo/new extras.Test/0, *0, <extras.Test: void <init>(extras.Test,extras.Test2,extras.Test2)>/@param0
   *0, Main.main/new extras.Test2/1, *0, <extras.Test: void <init>(extras.Test,extras.Test2,extras.Test2)>/@param1
   *0, Main.main/new extras.Test2/2, *0, <extras.Test: void <init>(extras.Test,extras.Test2,extras.Test2)>/@param2
-  *0, Main.main/new extras.Test/0, *0, <extras.Test: void <init>(extras.Test,extras.Test2,extras.Test2)>/this
   *0, Main.main/new extras.Test/1, *0, <extras.Test: void <init>(extras.Test,extras.Test2,extras.Test2)>/this
   *0, Main.main/new extras.Test/0, *0, <extras.Test: void <init>(extras.Test,extras.Test2,extras.Test2)>/myTest
-  *0, Main.main/new extras.Test/1, *0, <extras.Test: void <init>(extras.Test,extras.Test2,extras.Test2)>/myTest
+  *0, Main.foo/new extras.Test/0, *0, <extras.Test: void <init>(extras.Test,extras.Test2,extras.Test2)>/myTest
   *0, Main.main/new extras.Test2/1, *0, <extras.Test: void <init>(extras.Test,extras.Test2,extras.Test2)>/test
   *0, Main.main/new extras.Test2/2, *0, <extras.Test: void <init>(extras.Test,extras.Test2,extras.Test2)>/test2
   *0, <extras.Test: void <init>(extras.Test,extras.Test2,extras.Test2)>/new extras.Test/0, *0, <extras.Test: void <init>(extras.Test,extras.Test2,extras.Test2)>/overloadedTest
   *0, <extras.Test: void <init>(extras.Test,extras.Test2,extras.Test2)>/new extras.Test/0, *0, <extras.Test: void <init>(extras.Test,extras.Test2,extras.Test2)>/$r0
-  *0, Main.main/new extras.Test2/0, *0, <extras.Test: void speak(extras.Test2)>/@param0
   *0, Main.main/new extras.Test2/3, *0, <extras.Test: void speak(extras.Test2)>/@param0
   *0, Main.main/new extras.Test/0, *0, <extras.Test: void speak(extras.Test2)>/this
-  *0, Main.main/new extras.Test/1, *0, <extras.Test: void speak(extras.Test2)>/this
-  *0, Main.main/new extras.Test2/0, *0, <extras.Test: void speak(extras.Test2)>/testParam
+  *0, Main.foo/new extras.Test/0, *0, <extras.Test: void speak(extras.Test2)>/this
   *0, Main.main/new extras.Test2/3, *0, <extras.Test: void speak(extras.Test2)>/testParam
   *0, java.lang.System.initializeSystemClass/new java.io.PrintStream/0, *0, <extras.Test: void speak(extras.Test2)>/$r0
-  *0, java.lang.System.initializeSystemClass/new java.io.PrintStream/1, *0, <extras.Test: void speak(extras.Test2)>/$r0
   *0, <<<null pseudo object>>>, *0, <extras.Test: void speak(extras.Test2)>/$r0
-  *0, Main.main/new extras.Test2/0, *0, <extras.Test: void speak(extras.Test2)>/testLocal
   *0, Main.main/new extras.Test2/3, *0, <extras.Test: void speak(extras.Test2)>/testLocal
   *0, <<string-constant>>, *0, <extras.Test: void speak(extras.Test2)>/$stringconstant0
+  *0, Main.main/new extras.Test/0, *0, Main.main/$r0
+  *0, Main.main/new extras.Test2/1, *0, Main.main/$r1
+  *0, Main.main/new extras.Test/1, *0, Main.main/test3
+  *0, Main.main/new extras.Test2/0, *0, Main.main/$r2
+  *0, Main.main/new extras.Test/1, *0, Main.main/$r3
+  *0, Main.main/new extras.Test2/2, *0, Main.main/$r4
+  *0, Main.main/new extras.Test2/3, *0, Main.main/$r5
+  *0, Main.foo/new extras.Test/0, *0, Main.foo/$r0
