@@ -8,6 +8,8 @@ import com.sun.tools.javac.util.Assert;
 import com.sun.tools.javac.util.List;
 import doop.DoopRepresentationBuilder;
 import doop.HeapAllocation;
+import doop.MethodDeclaration;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,30 +31,37 @@ import java.util.Map;
  * This code and its internal interfaces are subject to change or
  * deletion without notice.</b>
  */
-public class HeapAllocationScanner extends TreeScanner {
+
+/**
+ * InitialScanner scans the compilation unit for heap allocations and method definitions.
+ */
+public class InitialScanner extends TreeScanner {
 
     private final LineMap lineMap;
     private final DoopRepresentationBuilder doopReprBuilder;
     private int heapAllocationCounter;
     private Symbol.MethodSymbol currentMethodSymbol;
+    private String currentMethodDoopSignature;
     private Map<String, Integer> heapAllocationCounterMap = null;
     private Map<String, HeapAllocation> heapAllocationMap = null;
+    private Map<String, MethodDeclaration> methodDeclarationMap = null;
 
     /**
      */
-    public HeapAllocationScanner() {
+    public InitialScanner() {
         this(null);
     }
 
     /**
      * @param lineMap
      */
-    public HeapAllocationScanner(LineMap lineMap) {
+    public InitialScanner(LineMap lineMap) {
         this.doopReprBuilder = DoopRepresentationBuilder.getInstance();
         this.lineMap = lineMap;
         this.heapAllocationCounter = 0;
         this.heapAllocationCounterMap = new HashMap<>();
         this.heapAllocationMap = new HashMap<>();
+        this.methodDeclarationMap = new HashMap<>();
     }
 
     public Map<String, HeapAllocation> getHeapAllocationMap() {
@@ -61,6 +70,14 @@ public class HeapAllocationScanner extends TreeScanner {
 
     public void setHeapAllocationMap(Map<String, HeapAllocation> heapAllocationMap) {
         this.heapAllocationMap = heapAllocationMap;
+    }
+
+    public Map<String, MethodDeclaration> getMethodDeclarationMap() {
+        return methodDeclarationMap;
+    }
+
+    public void setMethodDeclarationMap(Map<String, MethodDeclaration> methodDeclarationMap) {
+        this.methodDeclarationMap = methodDeclarationMap;
     }
 
     /**
@@ -123,9 +140,15 @@ public class HeapAllocationScanner extends TreeScanner {
     @Override
     public void visitMethodDef(JCTree.JCMethodDecl tree) {
         this.currentMethodSymbol = tree.sym;
+        this.currentMethodDoopSignature = this.doopReprBuilder.buildDoopMethodSignature(currentMethodSymbol);
 
         scan(tree.mods);
         scan(tree.restype);
+        methodDeclarationMap.put(this.currentMethodDoopSignature, new MethodDeclaration(lineMap.getLineNumber(tree.pos),
+                                                                                    lineMap.getColumnNumber(tree.pos),
+                                                                                    lineMap.getColumnNumber(tree.pos /*+ tree.restype.type.toString().length()*/),
+                                                                                    currentMethodDoopSignature));
+
         scan(tree.typarams);
         scan(tree.recvparam);
         scan(tree.params);
@@ -277,8 +300,6 @@ public class HeapAllocationScanner extends TreeScanner {
         scan(tree.def);
 
         System.out.println("tree.clazz.type: " + tree.clazz.toString());
-
-        String currentMethodDoopSignature = this.doopReprBuilder.buildDoopMethodSignature(currentMethodSymbol);
 
         String heapAllocation = currentMethodDoopSignature + "/new " + tree.clazz.type.getOriginalType();
 

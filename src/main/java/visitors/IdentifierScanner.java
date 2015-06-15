@@ -8,9 +8,7 @@ import com.sun.tools.javac.tree.TreeScanner;
 import com.sun.tools.javac.util.Assert;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.Name;
-import doop.DoopRepresentationBuilder;
-import doop.HeapAllocation;
-import doop.VarPointsTo;
+import doop.*;
 import reporters.FileReporter;
 import reporters.Reporter;
 
@@ -36,10 +34,12 @@ import java.util.Set;
  */
 public class IdentifierScanner extends TreeScanner {
     private final Map<String, Set<String>> vptMap;
+    private final Map<String, Set<String>> miMap;
     private final Reporter reporter;
     private final LineMap lineMap;
     private final DoopRepresentationBuilder doopReprBuilder;
     private final Map<String, HeapAllocation> heapAllocationMap;
+    private final Map<String, MethodDeclaration>  methodDeclarationMap;
     private int methodInvocationCounter;
     private int constructorInvocationCounter;
     private MethodSymbol currentMethodSymbol;
@@ -49,7 +49,7 @@ public class IdentifierScanner extends TreeScanner {
      * @param reporter
      */
     public IdentifierScanner(Reporter reporter) {
-        this(reporter, null, null, null);
+        this(reporter, null, null, null, null, null);
     }
 
     /**
@@ -58,14 +58,21 @@ public class IdentifierScanner extends TreeScanner {
      * @param vptMap
      * @param lineMap
      */
-    public IdentifierScanner(Reporter reporter, Map<String, Set<String>> vptMap, LineMap lineMap, Map<String, HeapAllocation> heapAllocationMap) {
+    public IdentifierScanner(Reporter reporter, Map<String, Set<String>> vptMap, Map<String, Set<String>> miMap,
+                             LineMap lineMap,
+                             Map<String, HeapAllocation> heapAllocationMap,
+                             Map<String, MethodDeclaration> methodDeclarationMap)
+
+    {
         this.doopReprBuilder = DoopRepresentationBuilder.getInstance();
         this.reporter = reporter;
         this.vptMap = vptMap;
         this.lineMap = lineMap;
+        this.miMap = miMap;
         this.constructorInvocationCounter = 0;
         this.methodInvocationCounter = 0;
         this.heapAllocationMap = heapAllocationMap;
+        this.methodDeclarationMap = methodDeclarationMap;
     }
 
     /**
@@ -112,6 +119,7 @@ public class IdentifierScanner extends TreeScanner {
             if (this.vptMap.containsKey(varNameInDoop)) {
                 Set<String> heapAllocationReprSet = this.vptMap.get(varNameInDoop);
                 Set<HeapAllocation> heapAllocationSet = new HashSet<>();
+
                 for (String heapAllocationRepr : heapAllocationReprSet) {
                     if (heapAllocationMap.containsKey((heapAllocationRepr)))
                         heapAllocationSet.add(heapAllocationMap.get(heapAllocationRepr));
@@ -133,6 +141,41 @@ public class IdentifierScanner extends TreeScanner {
                                                             lineMap.getColumnNumber(pos + varName.length()),
                                                             varNameInDoop,
                                                             new HashSet<>()));
+        }
+    }
+
+    /**
+     * Add CallGraphEdge information to [line : CallGraphEdge] map.
+     *
+     * @param methodInvocationInDoop
+     * @param pos
+     * @param methodName
+     */
+    public void mapMethodInvocation(String methodInvocationInDoop, long pos, String methodName) {
+        if (this.miMap != null) {
+            if (this.miMap.containsKey(methodInvocationInDoop)) {
+                Set<String> methodDeclarationReprSet = this.miMap.get(methodInvocationInDoop);
+                Set<MethodDeclaration> methodDeclarationSet = new HashSet<>();
+
+                for (String methodDeclarationRepr : methodDeclarationReprSet) {
+                    if (methodDeclarationMap.containsKey(methodDeclarationRepr))
+                        methodDeclarationSet.add(methodDeclarationMap.get(methodDeclarationRepr));
+                    else
+                        methodDeclarationSet.add(new MethodDeclaration(methodDeclarationRepr));
+                }
+                this.reporter.reportCallGraphEdge(new CallGraphEdge(lineMap.getLineNumber(pos),
+                        lineMap.getColumnNumber(pos),
+                        lineMap.getColumnNumber(pos + methodName.length()),
+                        methodInvocationInDoop,
+                        methodDeclarationSet));
+            }
+        }
+        else {
+            this.reporter.reportCallGraphEdge(new CallGraphEdge(lineMap.getLineNumber(pos),
+                                                                lineMap.getColumnNumber(pos),
+                                                                lineMap.getColumnNumber(pos + methodName.length()),
+                                                                methodInvocationInDoop,
+                                                                new HashSet<>()));
         }
     }
 
@@ -333,10 +376,14 @@ public class IdentifierScanner extends TreeScanner {
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
-        if (fieldValue instanceof MethodSymbol)
-            System.out.println("\033[35m Method Invocation: \033[0m" + this.doopReprBuilder.buildDoopMethodInvocationInMethod(
-                    this.doopReprBuilder.buildDoopMethodSignature(currentMethodSymbol),
-                    this.doopReprBuilder.buildDoopMethodInvocation((Symbol.MethodSymbol) fieldValue) + "/" + this.methodInvocationCounter++));
+        if (fieldValue instanceof MethodSymbol) {
+            String methodInvocationInDoop = this.doopReprBuilder.buildDoopMethodInvocationInMethod(
+                                                this.doopReprBuilder.buildDoopMethodSignature(currentMethodSymbol),
+                                                this.doopReprBuilder.buildDoopMethodInvocation((Symbol.MethodSymbol) fieldValue) + "/" + this.methodInvocationCounter++);
+
+            System.out.println("\033[35m Method Invocation: \033[0m" + methodInvocationInDoop);
+            mapMethodInvocation(methodInvocationInDoop, tree.pos, fieldValue.toString());
+        }
         scan(tree.args);
     }
 
@@ -350,11 +397,12 @@ public class IdentifierScanner extends TreeScanner {
         String currentMethodDoopSignature = this.doopReprBuilder.buildDoopMethodSignature(currentMethodSymbol);
 
 
-        String heapAllocation = currentMethodDoopSignature + "/new " + tree.clazz.type.getOriginalType();
-
-        System.out.println("\033[35m Method Invocation (Constructor): \033[0m" + this.doopReprBuilder.buildDoopMethodInvocationInMethod(
+        String methodInvocationInDoop = this.doopReprBuilder.buildDoopMethodInvocationInMethod(
                 currentMethodDoopSignature,
-                this.doopReprBuilder.buildDoopMethodInvocation((MethodSymbol) tree.constructor) + "/" + this.constructorInvocationCounter++));
+                this.doopReprBuilder.buildDoopMethodInvocation((MethodSymbol) tree.constructor) + "/" + this.constructorInvocationCounter++);
+
+        System.out.println("\033[35m Method Invocation (Constructor): \033[0m" + methodInvocationInDoop);
+        mapMethodInvocation(methodInvocationInDoop, tree.pos, tree.clazz.type.getOriginalType().toString());
     }
 
     @Override

@@ -1,29 +1,41 @@
 package doop;
 
 /**
- * Created by anantoni on 10/6/2015.
+ * Created by anantoni on 15/6/2015.
  */
-public class HeapAllocation {
+public class MethodDeclaration {
+    private String methodSignature;
     private long startLine;
     private long startColumn;
     private long endLine;
     private long endColumn;
-    private String doopAllocationName = null;
 
-    public HeapAllocation(String doopAllocationName) {
-        this(-1, -1, -1, -1, doopAllocationName);
+    public MethodDeclaration() {
+        this(-1, 1, -1, -1, null);
     }
 
-    public HeapAllocation(long startLine, long startColumn, long endColumn, String doopAllocationName) {
-        this(startLine, startColumn, startLine, endColumn, doopAllocationName);
+    public MethodDeclaration(String methodSignature) {
+        this(-1, -1, -1, -1, methodSignature);
     }
 
-    public HeapAllocation(long startLine, long startColumn, long endLine, long endColumn, String doopAllocationName) {
+    public MethodDeclaration(long startLine, long startColumn, long endColumn, String methodSignature) {
+        this(startLine, startColumn, startLine, endColumn, methodSignature);
+    }
+
+    public MethodDeclaration(long startLine, long startColumn, long endLine, long endColumn, String methodSignature) {
         this.startLine = startLine;
         this.startColumn = startColumn;
         this.endLine = endLine;
         this.endColumn = endColumn;
-        this.doopAllocationName = doopAllocationName;
+        this.methodSignature = methodSignature;
+    }
+
+    public String getMethodSignature() {
+        return methodSignature;
+    }
+
+    public void setMethodSignature(String methodSignature) {
+        this.methodSignature = methodSignature;
     }
 
     public long getStartLine() {
@@ -56,13 +68,5 @@ public class HeapAllocation {
 
     public void setEndColumn(long endColumn) {
         this.endColumn = endColumn;
-    }
-
-    public String getDoopAllocationName() {
-        return doopAllocationName;
-    }
-
-    public void setDoopAllocationName(String doopAllocationName) {
-        this.doopAllocationName = doopAllocationName;
     }
 }

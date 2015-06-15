@@ -5,11 +5,10 @@ import com.sun.source.util.JavacTask;
 import com.sun.source.util.TaskEvent;
 import com.sun.source.util.TaskListener;
 import com.sun.tools.javac.tree.JCTree;
-import doop.HeapAllocation;
 import reporters.ConsoleReporter;
 import reporters.FileReporter;
 import reporters.Reporter;
-import visitors.HeapAllocationScanner;
+import visitors.InitialScanner;
 import visitors.IdentifierScanner;
 
 import java.io.BufferedReader;
@@ -32,6 +31,7 @@ public class DoopPrinterTaskListener implements TaskListener {
     private final JavacTask task;
     private final Reporter reporter;
     private Map<String, Set<String>> vptMap;
+    private Map<String, Set<String>> miMap;
 
     /**
      * DoopPrinterTaskListener constructor.
@@ -72,18 +72,44 @@ public class DoopPrinterTaskListener implements TaskListener {
                         Set<String> heapAllocationSet = new HashSet<>();
                         heapAllocationSet.add(heapAllocation);
                         vptMap.put(var, heapAllocationSet);
-                    } else {
+                    }
+                    else {
                         Set<String> heapAllocationSet = vptMap.get(var);
                         heapAllocationSet.add(heapAllocation);
                     }
                 }
 
                 System.out.println("VarPointsTo map size: " + vptMap.size());
-                System.out.println(vptMap);
+                //System.out.println(vptMap);
+
                 int counter = 0;
                 for (Set<String> set : vptMap.values())
                     counter += set.size();
                 System.out.println(counter);
+
+                this.miMap = new HashMap<>();
+                br = new BufferedReader(new FileReader(DEFAULT_ANALYSIS_RESULTS_DIR + "CallGraphEdge.txt"));
+
+                while ((line = br.readLine()) != null) {
+                    String[] columns = line.split(cvsSplitBy);
+                    assert (columns.length == 4);
+
+                    String methodSignature = columns[3].trim();
+                    String methodInvocation = columns[1].trim();
+
+                    if (!this.miMap.containsKey(methodInvocation)) {
+                        Set<String> methodSignatureSet = new HashSet<>();
+                        methodSignatureSet.add(methodSignature);
+                        this.miMap.put(methodInvocation, methodSignatureSet);
+                    }
+                    else {
+                        Set<String> heapAllocationSet = this.miMap.get(methodInvocation);
+                        heapAllocationSet.add(methodSignature);
+                    }
+                }
+
+                System.out.println("Call Graph Edge map size: " + this.miMap.size());
+                System.out.println(this.miMap);
             }
             /**
              * Otherwise set map field to null and generate empty sets representing doop information such as
@@ -148,9 +174,11 @@ public class DoopPrinterTaskListener implements TaskListener {
              * Get AST root for this source code file.
              */
             JCTree treeRoot = (JCTree) arg0.getCompilationUnit();
-            HeapAllocationScanner heapAllocationScanner = new HeapAllocationScanner(lineMap);
-            treeRoot.accept(heapAllocationScanner);
-            treeRoot.accept(new IdentifierScanner(reporter, vptMap, lineMap, heapAllocationScanner.getHeapAllocationMap()));
+            InitialScanner initialScanner = new InitialScanner(lineMap);
+            treeRoot.accept(initialScanner);
+            treeRoot.accept(new IdentifierScanner(reporter, vptMap, miMap, lineMap,
+                                                    initialScanner.getHeapAllocationMap(),
+                                                    initialScanner.getMethodDeclarationMap()));
 
             /**
              * Close all files.

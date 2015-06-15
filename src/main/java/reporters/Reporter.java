@@ -5,6 +5,7 @@
  */
 package reporters;
 
+import doop.CallGraphEdge;
 import doop.MethodInvocation;
 import doop.VarPointsTo;
 
@@ -19,7 +20,7 @@ public interface Reporter {
 
     void reportVarPointsTo(VarPointsTo varPointsTo);
 
-    void reportMethodInvocation(MethodInvocation methodInvocation);
+    void reportCallGraphEdge(CallGraphEdge callGraphEdge);
 
     void reportFieldAccess(int startPos, int endPos, String representation);
 

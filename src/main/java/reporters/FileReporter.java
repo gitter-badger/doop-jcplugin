@@ -1,9 +1,7 @@
 package reporters;
 
 import com.google.gson.Gson;
-import doop.HeapAllocation;
-import doop.MethodInvocation;
-import doop.VarPointsTo;
+import doop.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import javax.tools.JavaFileObject;
@@ -15,24 +13,19 @@ import java.util.*;
  */
 public class FileReporter implements Reporter {
     private PrintWriter varPointsToWriter = null;
-    private PrintWriter methodInvocationWriter = null;
+    private PrintWriter callGraphEdgeWriter = null;
     private Gson gson = null;
+
     private Map<Long, Set<VarPointsTo>> varPointsToMap = null;
-    private List<MethodInvocation> methodInvocationList = null;
-    private Map<String, Set<HeapAllocation>> heapAllocationMap = null;
+    private Map<Long, Set<CallGraphEdge>> callGraphEdgeMap = null;
+
+//    private Map<String, Set<HeapAllocation>> heapAllocationMap = null;
     private static final String DEFAULT_OUTPUT_DIR = "/home/anantoni/plugin-output-projects/";
 
     public FileReporter() {
         gson = new Gson();
     }
 
-    public Map<String, Set<HeapAllocation>> getHeapAllocationMap() {
-        return heapAllocationMap;
-    }
-
-    public void setHeapAllocationMap(Map<String, Set<HeapAllocation>> heapAllocationMap) {
-        this.heapAllocationMap = heapAllocationMap;
-    }
 
     @Override
     public void reportVar(int startPos, int endPos, String representation) {
@@ -53,25 +46,37 @@ public class FileReporter implements Reporter {
         }
     }
 
-    public void reportHeapAllocation(HeapAllocation heapAllocation) {
-        for (Set<VarPointsTo> varPointsToSet : varPointsToMap.values()) {
-            for (VarPointsTo varPointsTo : varPointsToSet) {
-                Set<HeapAllocation> heapAllocationSet = varPointsTo.getHeapAllocationSet();
-
-                for (HeapAllocation initialHeapAllocation : heapAllocationSet) {
-                    if (initialHeapAllocation.getDoopAllocationName().equals(heapAllocation.getDoopAllocationName())) {
-                        initialHeapAllocation.setStartLine(heapAllocation.getStartLine());
-                        initialHeapAllocation.setEndLine(heapAllocation.getEndLine());
-                        initialHeapAllocation.setStartColumn(heapAllocation.getStartColumn());
-                        initialHeapAllocation.setEndColumn(heapAllocation.getEndColumn());
-                    }
-                }
-            }
-        }
-    }
+//    public void reportHeapAllocation(HeapAllocation heapAllocation) {
+//        for (Set<VarPointsTo> varPointsToSet : varPointsToMap.values()) {
+//            for (VarPointsTo varPointsTo : varPointsToSet) {
+//                Set<HeapAllocation> heapAllocationSet = varPointsTo.getHeapAllocationSet();
+//
+//                for (HeapAllocation initialHeapAllocation : heapAllocationSet) {
+//                    if (initialHeapAllocation.getDoopAllocationName().equals(heapAllocation.getDoopAllocationName())) {
+//                        initialHeapAllocation.setStartLine(heapAllocation.getStartLine());
+//                        initialHeapAllocation.setEndLine(heapAllocation.getEndLine());
+//                        initialHeapAllocation.setStartColumn(heapAllocation.getStartColumn());
+//                        initialHeapAllocation.setEndColumn(heapAllocation.getEndColumn());
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     @Override
-    public void reportMethodInvocation(MethodInvocation methodInvocation) {
+    public void reportCallGraphEdge(CallGraphEdge callGraphEdge) {
+
+        long line = callGraphEdge.getStartLine();
+        if (!this.callGraphEdgeMap.containsKey(line)) {
+            Set<CallGraphEdge> callGraphEdgeSet = new HashSet<>();
+            callGraphEdgeSet.add(callGraphEdge);
+            this.callGraphEdgeMap.put(line, callGraphEdgeSet);
+        }
+        else {
+            System.out.println("Line: " + line);
+            this.callGraphEdgeMap.get(line).add(callGraphEdge);
+        }
+
 
     }
 
@@ -87,16 +92,16 @@ public class FileReporter implements Reporter {
     public void openJSONFiles(JavaFileObject sourceFile, String projectName) {
         try {
             varPointsToMap = new HashMap<>();
-            methodInvocationList = new ArrayList<>();
+            callGraphEdgeMap = new HashMap<>();
 
-            String varPointsToPath = FilenameUtils.concat(DEFAULT_OUTPUT_DIR + projectName, sourceFile.getName().replace(".java", "-VarPointsTo.json"));
-            FileUtils.forceMkdir(new File(FilenameUtils.getFullPath(varPointsToPath)));
+            String varPointsToFilePath = FilenameUtils.concat(DEFAULT_OUTPUT_DIR + projectName, sourceFile.getName().replace(".java", "-VarPointsTo.json"));
+            FileUtils.forceMkdir(new File(FilenameUtils.getFullPath(varPointsToFilePath)));
 
-            String methodInvocationPath = FilenameUtils.concat(DEFAULT_OUTPUT_DIR + projectName, sourceFile.getName().replace(".java", "-MethodInvocation.json"));
-            FileUtils.forceMkdir(new File(FilenameUtils.getFullPath(methodInvocationPath)));
+            String callGraphEdgeFilePath = FilenameUtils.concat(DEFAULT_OUTPUT_DIR + projectName, sourceFile.getName().replace(".java", "-CallGraphEdge.json"));
+            FileUtils.forceMkdir(new File(FilenameUtils.getFullPath(callGraphEdgeFilePath)));
 
-            varPointsToWriter = new PrintWriter(varPointsToPath, "UTF-8");
-            methodInvocationWriter = new PrintWriter(methodInvocationPath, "UTF-8");
+            varPointsToWriter = new PrintWriter(varPointsToFilePath, "UTF-8");
+            callGraphEdgeWriter = new PrintWriter(callGraphEdgeFilePath, "UTF-8");
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -108,6 +113,7 @@ public class FileReporter implements Reporter {
      */
     public void writeJSON() {
         varPointsToWriter.write(gson.toJson(varPointsToMap));
+        callGraphEdgeWriter.write(gson.toJson(callGraphEdgeMap));
     }
 
     /**
@@ -115,6 +121,6 @@ public class FileReporter implements Reporter {
      */
     public void closeJSONFiles() {
         varPointsToWriter.close();
-        methodInvocationWriter.close();
+        callGraphEdgeWriter.close();
     }
 }
