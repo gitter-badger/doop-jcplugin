@@ -1,21 +1,13 @@
-  *0, <extras.Test: void <init>()>/java.io.PrintStream.println/0, *0, <java.io.PrintStream: void println(int)>
-  *0, extras.Test2.<init>/java.io.PrintStream.println/0, *0, <java.io.PrintStream: void println(java.lang.String)>
-  *0, <extras.Test: void speak(extras.Test2)>/java.io.PrintStream.println/0, *0, <java.io.PrintStream: void println(java.lang.String)>
-  *0, extras.Test2.<init>/java.lang.Object.<init>/0, *0, <java.lang.Object: void <init>()>
-  *0, <extras.Test: void <init>()>/java.lang.Object.<init>/0, *0, <java.lang.Object: void <init>()>
-  *0, <extras.Test: void <init>(extras.Test,extras.Test2,extras.Test2)>/java.lang.Object.<init>/0, *0, <java.lang.Object: void <init>()>
+  *0, <extras.Test: void <init>()>/extras.Test2.<init>/1, *0, <extras.Test2: void <init>()>
   *0, Main.main/extras.Test2.<init>/1, *0, <extras.Test2: void <init>()>
   *0, Main.main/extras.Test2.<init>/2, *0, <extras.Test2: void <init>()>
   *0, Main.main/extras.Test2.<init>/3, *0, <extras.Test2: void <init>()>
   *0, Main.main/extras.Test2.<init>/5, *0, <extras.Test2: void <init>()>
-  *0, <extras.Test: void <init>()>/extras.Test2.<init>/1, *0, <extras.Test2: void <init>()>
-  *0, Main.main/extras.Test.<init>/0, *0, <extras.Test: void <init>()>
   *0, extras.Test2.<init>/extras.Test.<init>/2, *0, <extras.Test: void <init>()>
   *0, <extras.Test: void <init>()>/extras.Test.<init>/2, *0, <extras.Test: void <init>()>
   *0, <extras.Test: void <init>(extras.Test,extras.Test2,extras.Test2)>/extras.Test.<init>/1, *0, <extras.Test: void <init>()>
+  *0, Main.main/extras.Test.<init>/0, *0, <extras.Test: void <init>()>
+  *0, Main.foo/extras.Test.<init>/0, *0, <extras.Test: void <init>()>
   *0, Main.main/extras.Test.<init>/4, *0, <extras.Test: void <init>(extras.Test,extras.Test2,extras.Test2)>
   *0, Main.main/extras.Test.speak/0, *0, <extras.Test: void speak(extras.Test2)>
-  *0, extras.Test2.<init>/java.lang.StringBuilder.<init>/1, *0, <java.lang.StringBuilder: void <init>()>
-  *0, extras.Test2.<init>/java.lang.StringBuilder.append/0, *0, <java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>
-  *0, extras.Test2.<init>/java.lang.StringBuilder.append/1, *0, <java.lang.StringBuilder: java.lang.StringBuilder append(int)>
-  *0, extras.Test2.<init>/java.lang.StringBuilder.toString/0, *0, <java.lang.StringBuilder: java.lang.String toString()>
+  *0, Main.main/Main.foo/0, *0, <Main: extras.Test foo()>
