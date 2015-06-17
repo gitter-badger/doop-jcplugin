@@ -114,40 +114,38 @@ public class DoopRepresentationBuilder {
          *
          * Special handling for main method
          */
-        if (methodSymbol.isStatic() && methodSymbol.name.toString().equals("main") &&
-                methodSymbol.params.length() == 1) {
-            Symbol.VarSymbol param = methodSymbol.params.get(0);
-            String paramFQType = buildFQType(param.type.toString(), param.packge());
-            if (paramFQType.equals("java.lang.String[]")) {
-                String fqType = buildFQType(methodSymbol.enclClass().getQualifiedName().toString(), methodSymbol.packge());
-                return fqType + "." + methodSymbol.getQualifiedName().toString();
-            }
+        StringBuilder methodSignature = new StringBuilder();
+        if (methodSymbol.isStatic()) {
+            String fqType = buildFQType(methodSymbol.enclClass().getQualifiedName().toString(), methodSymbol.packge());
+            methodSignature.append(fqType + "." + methodSymbol.getQualifiedName().toString());
         }
-
         /**
          * Constructors and other methods don't need any kind of special handling
          * the only difference is that the method name in the case of constructors
          * is <init>
          */
-        StringBuilder methodSignature = new StringBuilder();
-        methodSignature.append(buildDoopMethodSignatureNoArgs(methodSymbol)).append("(");
+        else {
+            methodSignature.append(buildDoopMethodSignatureNoArgs(methodSymbol)).append("(");
+            methodSignature.insert(0, '<');
+            /**
+             * Append fully qualified types of method arguments
+             */
+            List<Symbol.VarSymbol> parameters = methodSymbol.getParameters();
+            for (int i = 0; i < parameters.size(); i++) {
+                Symbol.VarSymbol param = parameters.get(i);
+                String fqType = buildFQType(param.type.toString(), param.packge());
 
-        /**
-         * Append fully qualified types of method arguments
-         */
-        List<Symbol.VarSymbol> parameters = methodSymbol.getParameters();
-        for (int i = 0; i < parameters.size(); i++) {
-            Symbol.VarSymbol param = parameters.get(i);
-            String fqType = buildFQType(param.type.toString(), param.packge());
+                if (i != parameters.size() - 1)
+                    methodSignature.append(fqType).append(',');
+                else
+                    methodSignature.append(fqType);
+            }
 
-            if (i != parameters.size() - 1)
-                methodSignature.append(fqType).append(',');
-            else
-                methodSignature.append(fqType);
+
+            methodSignature.append(")>");
         }
 
-        methodSignature.insert(0, '<');
-        methodSignature.append(")>");
+
 
         return methodSignature.toString();
     }
