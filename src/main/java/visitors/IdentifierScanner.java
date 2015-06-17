@@ -121,7 +121,7 @@ public class IdentifierScanner extends TreeScanner {
                 Set<HeapAllocation> heapAllocationSet = new HashSet<>();
 
                 for (String heapAllocationRepr : heapAllocationReprSet) {
-                    if (heapAllocationMap.containsKey((heapAllocationRepr)))
+                    if (heapAllocationMap.containsKey(heapAllocationRepr))
                         heapAllocationSet.add(heapAllocationMap.get(heapAllocationRepr));
                     else
                         heapAllocationSet.add(new HeapAllocation(heapAllocationRepr));
@@ -157,17 +157,22 @@ public class IdentifierScanner extends TreeScanner {
                 Set<String> methodDeclarationReprSet = this.miMap.get(methodInvocationInDoop);
                 Set<MethodDeclaration> methodDeclarationSet = new HashSet<>();
 
+                System.out.println(methodDeclarationMap);
                 for (String methodDeclarationRepr : methodDeclarationReprSet) {
                     if (methodDeclarationMap.containsKey(methodDeclarationRepr))
                         methodDeclarationSet.add(methodDeclarationMap.get(methodDeclarationRepr));
                     else
                         methodDeclarationSet.add(new MethodDeclaration(methodDeclarationRepr));
                 }
+
                 this.reporter.reportCallGraphEdge(new CallGraphEdge(lineMap.getLineNumber(pos),
-                        lineMap.getColumnNumber(pos),
-                        lineMap.getColumnNumber(pos + methodName.length()),
-                        methodInvocationInDoop,
-                        methodDeclarationSet));
+                                                                    lineMap.getColumnNumber(pos),
+                                                                    lineMap.getColumnNumber(pos + methodName.length()),
+                                                                    methodInvocationInDoop,
+                                                                    methodDeclarationSet));
+            }
+            else {
+                System.out.println("Method invocation not found");
             }
         }
         else {

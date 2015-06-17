@@ -145,9 +145,11 @@ public class InitialScanner extends TreeScanner {
         scan(tree.mods);
         scan(tree.restype);
         methodDeclarationMap.put(this.currentMethodDoopSignature, new MethodDeclaration(lineMap.getLineNumber(tree.pos),
-                                                                                    lineMap.getColumnNumber(tree.pos),
-                                                                                    lineMap.getColumnNumber(tree.pos /*+ tree.restype.type.toString().length()*/),
-                                                                                    currentMethodDoopSignature));
+                                                                                        lineMap.getColumnNumber(tree.pos),
+                                                                                        lineMap.getColumnNumber(tree.pos + 4),
+                                                                                        currentMethodDoopSignature));
+
+        System.out.println("Method Declaration: " + currentMethodDoopSignature);
 
         scan(tree.typarams);
         scan(tree.recvparam);
