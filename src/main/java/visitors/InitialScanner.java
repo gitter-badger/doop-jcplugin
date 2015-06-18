@@ -2,6 +2,8 @@ package visitors;
 
 import com.sun.source.tree.LineMap;
 import com.sun.tools.javac.code.Symbol;
+import com.sun.tools.javac.code.Symbol.ClassSymbol;
+import com.sun.tools.javac.code.Symbol.MethodSymbol;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeScanner;
 import com.sun.tools.javac.util.Assert;
@@ -11,7 +13,9 @@ import doop.HeapAllocation;
 import doop.MethodDeclaration;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by anantoni on 11/6/2015.
@@ -39,31 +43,53 @@ public class InitialScanner extends TreeScanner {
 
     private final LineMap lineMap;
     private final DoopRepresentationBuilder doopReprBuilder;
-    private int heapAllocationCounter;
-    private Symbol.MethodSymbol currentMethodSymbol;
+
+    private ClassSymbol currentClassSymbol;
+    private Map<String, Integer> methodNamesMap;
+    private MethodSymbol currentMethodSymbol;
     private String currentMethodDoopSignature;
+    private String currentMethodCompactName;
+
+    private int heapAllocationCounter;
     private Map<String, Integer> heapAllocationCounterMap = null;
+
+    /**
+     * The following two maps will be used by the IdentifierScanner.
+     */
     private Map<String, HeapAllocation> heapAllocationMap = null;
     private Map<String, MethodDeclaration> methodDeclarationMap = null;
 
+
     /**
+     * *************************************************************************
+     * Constructors
+     * *************************************************************************
      */
     public InitialScanner() {
         this(null);
     }
 
+
     /**
-     * @param lineMap
+     * @param lineMap holds the line, column information for each symbol.
      */
     public InitialScanner(LineMap lineMap) {
         this.doopReprBuilder = DoopRepresentationBuilder.getInstance();
         this.lineMap = lineMap;
         this.heapAllocationCounter = 0;
+        this.methodNamesMap = new HashMap<>();
         this.heapAllocationCounterMap = new HashMap<>();
         this.heapAllocationMap = new HashMap<>();
         this.methodDeclarationMap = new HashMap<>();
     }
 
+
+
+    /**
+     * *************************************************************************
+     * Getters and Setters
+     * *************************************************************************
+     */
     public Map<String, HeapAllocation> getHeapAllocationMap() {
         return heapAllocationMap;
     }
@@ -80,6 +106,8 @@ public class InitialScanner extends TreeScanner {
         this.methodDeclarationMap = methodDeclarationMap;
     }
 
+
+
     /**
      * Visitor method: Scan a single node.
      *
@@ -88,7 +116,7 @@ public class InitialScanner extends TreeScanner {
     @Override
     public void scan(JCTree tree) {
         if (tree instanceof JCTree.JCIdent) {
-            if (((JCTree.JCIdent) tree).sym instanceof Symbol.MethodSymbol)
+            if (((JCTree.JCIdent) tree).sym instanceof MethodSymbol)
                 System.out.println(((JCTree.JCIdent) tree).sym.getQualifiedName().toString());
         }
         if (tree != null) tree.accept(this);
@@ -104,12 +132,14 @@ public class InitialScanner extends TreeScanner {
         if (trees != null)
             for (List<? extends JCTree> l = trees; l.nonEmpty(); l = l.tail) {
                 if (l.head instanceof JCTree.JCIdent) {
-                    if (((JCTree.JCIdent) l.head).sym instanceof Symbol.MethodSymbol)
+                    if (((JCTree.JCIdent) l.head).sym instanceof MethodSymbol)
                         System.out.println(((JCTree.JCIdent) l.head).sym.getQualifiedName().toString());
                 }
                 scan(l.head);
             }
     }
+
+
 
     /**
      * *************************************************************************
@@ -130,6 +160,25 @@ public class InitialScanner extends TreeScanner {
 
     @Override
     public void visitClassDef(JCTree.JCClassDecl tree) {
+
+        this.currentClassSymbol = tree.sym;
+        /**
+         * Fills the method names map in order to be able to identify overloaded methods.
+         */
+        for (Symbol symbol : this.currentClassSymbol.getEnclosedElements()) {
+            if (symbol instanceof MethodSymbol) {
+                MethodSymbol methodSymbol = (MethodSymbol)symbol;
+                if (!methodNamesMap.containsKey(methodSymbol.getQualifiedName().toString()))
+                    methodNamesMap.put(methodSymbol.getQualifiedName().toString(), 1);
+                else {
+                    int methodNameCounter = methodNamesMap.get(methodSymbol.getQualifiedName().toString());
+                    methodNamesMap.put(methodSymbol.getQualifiedName().toString(), ++methodNameCounter);
+                }
+            }
+        }
+
+        System.out.println("Method names map: " + this.methodNamesMap);
+
         scan(tree.mods);
         scan(tree.typarams);
         scan(tree.extending);
@@ -141,13 +190,15 @@ public class InitialScanner extends TreeScanner {
     public void visitMethodDef(JCTree.JCMethodDecl tree) {
         this.currentMethodSymbol = tree.sym;
         this.currentMethodDoopSignature = this.doopReprBuilder.buildDoopMethodSignature(currentMethodSymbol);
+        this.currentMethodCompactName = this.doopReprBuilder.buildDoopMethodCompactName(currentMethodSymbol);
 
         scan(tree.mods);
         scan(tree.restype);
-        methodDeclarationMap.put(this.currentMethodDoopSignature, new MethodDeclaration(lineMap.getLineNumber(tree.pos),
-                                                                                        lineMap.getColumnNumber(tree.pos),
-                                                                                        lineMap.getColumnNumber(tree.pos + 4),
-                                                                                        currentMethodDoopSignature));
+        methodDeclarationMap.put(this.currentMethodDoopSignature,
+                                    new MethodDeclaration(lineMap.getLineNumber(tree.pos),
+                                                            lineMap.getColumnNumber(tree.pos),
+                                                            lineMap.getColumnNumber(tree.pos + 4),
+                                                            this.currentMethodDoopSignature));
 
         System.out.println("Method Declaration: " + currentMethodDoopSignature);
 
@@ -303,8 +354,25 @@ public class InitialScanner extends TreeScanner {
 
         System.out.println("tree.clazz.type: " + tree.clazz.toString());
 
-        String heapAllocation = currentMethodDoopSignature + "/new " + tree.clazz.type.getOriginalType();
+        for (Symbol symbol : currentClassSymbol.getEnclosedElements()) {
+            System.out.println(symbol.toString());
+        }
 
+        String heapAllocation;
+        /**
+         * If current method is overloaded use its signature to build the heap allocation.
+         */
+        if (this.methodNamesMap.get(this.currentMethodSymbol.getQualifiedName().toString()) > 1)
+            heapAllocation = this.doopReprBuilder.buildDoopHeapAllocation(currentMethodDoopSignature, tree.clazz.type.getOriginalType().toString());
+        /**
+         * Otherwise use its compact name.
+         */
+        else
+            heapAllocation = this.doopReprBuilder.buildDoopHeapAllocation(currentMethodCompactName, tree.clazz.type.getOriginalType().toString());
+
+        /**
+         * Evaluate heap allocation counter within method.
+         */
         if (heapAllocationCounterMap.containsKey(heapAllocation)) {
             heapAllocationCounter = heapAllocationCounterMap.get(heapAllocation) + 1;
             heapAllocationCounterMap.put(heapAllocation, heapAllocationCounter);
@@ -313,13 +381,16 @@ public class InitialScanner extends TreeScanner {
             heapAllocationCounter = 0;
             heapAllocationCounterMap.put(heapAllocation, 0);
         }
+        heapAllocation += "/" + heapAllocationCounter;
 
-        String heapAllocationRepr = heapAllocation + "/" + heapAllocationCounter;
-        heapAllocationMap.put(heapAllocationRepr, new HeapAllocation(lineMap.getLineNumber(tree.clazz.pos),
-                                                                 lineMap.getColumnNumber(tree.clazz.pos),
-                                                                 lineMap.getColumnNumber(tree.clazz.pos + tree.clazz.toString().length()),
-                                                                 heapAllocationRepr));
-        System.out.println("Found HeapAllocation: " + heapAllocationRepr);
+        /**
+         * Report Heap Allocation
+         */
+        heapAllocationMap.put(heapAllocation, new HeapAllocation(lineMap.getLineNumber(tree.clazz.pos),
+                                                                    lineMap.getColumnNumber(tree.clazz.pos),
+                                                                    lineMap.getColumnNumber(tree.clazz.pos + tree.clazz.toString().length()),
+                                                                    heapAllocation));
+        System.out.println("Found HeapAllocation: " + heapAllocation);
     }
 
     @Override

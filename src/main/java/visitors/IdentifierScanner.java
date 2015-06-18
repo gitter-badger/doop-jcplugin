@@ -3,6 +3,7 @@ package visitors;
 import com.sun.source.tree.LineMap;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Symbol.MethodSymbol;
+import com.sun.tools.javac.code.Symbol.VarSymbol;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeScanner;
 import com.sun.tools.javac.util.Assert;
@@ -40,6 +41,10 @@ public class IdentifierScanner extends TreeScanner {
     private final DoopRepresentationBuilder doopReprBuilder;
     private final Map<String, HeapAllocation> heapAllocationMap;
     private final Map<String, MethodDeclaration>  methodDeclarationMap;
+    private Symbol.ClassSymbol currentClassSymbol;
+    private Map<String, Integer> methodNamesMap;
+    private String currentMethodDoopSignature;
+    private String currentMethodCompactName;
     private int methodInvocationCounter;
     private int constructorInvocationCounter;
     private MethodSymbol currentMethodSymbol;
@@ -73,6 +78,7 @@ public class IdentifierScanner extends TreeScanner {
         this.methodInvocationCounter = 0;
         this.heapAllocationMap = heapAllocationMap;
         this.methodDeclarationMap = methodDeclarationMap;
+        this.methodNamesMap = new HashMap<>();
     }
 
     /**
@@ -203,6 +209,24 @@ public class IdentifierScanner extends TreeScanner {
 
     @Override
     public void visitClassDef(JCTree.JCClassDecl tree) {
+        this.currentClassSymbol = tree.sym;
+        /**
+         * Fills the method names map in order to be able to identify overloaded methods.
+         */
+        for (Symbol symbol : this.currentClassSymbol.getEnclosedElements()) {
+            if (symbol instanceof MethodSymbol) {
+                MethodSymbol methodSymbol = (MethodSymbol)symbol;
+                if (!methodNamesMap.containsKey(methodSymbol.getQualifiedName().toString()))
+                    methodNamesMap.put(methodSymbol.getQualifiedName().toString(), 1);
+                else {
+                    int methodNameCounter = methodNamesMap.get(methodSymbol.getQualifiedName().toString());
+                    methodNamesMap.put(methodSymbol.getQualifiedName().toString(), ++methodNameCounter);
+                }
+            }
+        }
+
+        System.out.println("Method names map: " + this.methodNamesMap);
+
         scan(tree.mods);
         scan(tree.typarams);
         scan(tree.extending);
@@ -213,9 +237,11 @@ public class IdentifierScanner extends TreeScanner {
     @Override
     public void visitMethodDef(JCTree.JCMethodDecl tree) {
 
+        this.currentMethodSymbol = tree.sym;
         this.constructorInvocationCounter = 0;
         this.methodInvocationCounter = 0;
-        this.currentMethodSymbol = tree.sym;
+        this.currentMethodDoopSignature = this.doopReprBuilder.buildDoopMethodSignature(currentMethodSymbol);
+        this.currentMethodCompactName = this.doopReprBuilder.buildDoopMethodCompactName(currentMethodSymbol);
 
         scan(tree.mods);
         scan(tree.restype);
@@ -231,10 +257,20 @@ public class IdentifierScanner extends TreeScanner {
     public void visitVarDef(JCTree.JCVariableDecl tree) {
 
         if (tree.sym.isLocal()) {
-            String methodSignatureInDoop = this.doopReprBuilder.buildDoopMethodSignature((MethodSymbol) tree.sym.getEnclosingElement());
-            String varNameInDoop = this.doopReprBuilder.buildDoopVarName(methodSignatureInDoop, tree.sym.getQualifiedName().toString());
+            String varNameInDoop;
+            System.out.println("Current method name:" + this.currentMethodSymbol.name.toString());
+            /**
+             * If current method is overloaded use its signature to build the variable name.
+             */
+            if (this.methodNamesMap.get(this.currentMethodSymbol.getQualifiedName().toString()) > 1)
+                varNameInDoop = this.doopReprBuilder.buildDoopVarName(this.currentMethodDoopSignature, tree.sym.getQualifiedName().toString());
+            /**
+             * Otherwise use its compact name.
+             */
+            else
+                varNameInDoop = this.doopReprBuilder.buildDoopVarName(this.currentMethodCompactName, tree.sym.getQualifiedName().toString());
+
             System.out.println("Variable name in Doop: " + varNameInDoop);
-            System.out.println("Declaring method: " + methodSignatureInDoop);
             System.out.println("##########################################################################################################################");
 
             mapVarPointsTo(varNameInDoop, tree.pos, tree.name);
@@ -490,28 +526,29 @@ public class IdentifierScanner extends TreeScanner {
         /**
          * If identifier is a local variable.
          */
-        if (tree.sym != null && tree.sym.isLocal()) {
-
-            String methodSignatureInDoop = this.doopReprBuilder.buildDoopMethodSignature((MethodSymbol) tree.sym.getEnclosingElement());
-            String varNameInDoop = this.doopReprBuilder.buildDoopVarName(methodSignatureInDoop, tree.sym.getQualifiedName().toString());
-            System.out.println("Declaring method signature: " + methodSignatureInDoop);
-            System.out.println("Qualified name: " + varNameInDoop);
+        if (tree.sym != null && tree.sym instanceof VarSymbol && tree.sym.isLocal()) {
+            String varNameInDoop;
+            if (this.methodNamesMap.get(this.currentMethodSymbol.getQualifiedName().toString()) > 1)
+                varNameInDoop = this.doopReprBuilder.buildDoopVarName(this.currentMethodDoopSignature, tree.sym.getQualifiedName().toString());
+            else
+                varNameInDoop = this.doopReprBuilder.buildDoopVarName(this.currentMethodCompactName, tree.sym.getQualifiedName().toString());
+            System.out.println("Variable name in Doop: " + varNameInDoop);
             System.out.println("##########################################################################################################################");
 
             mapVarPointsTo(varNameInDoop, tree.pos, tree.name);
         }
-        /**
-         * If identifier is a method symbol.
-         */
-        else if (tree.sym != null && tree.sym instanceof MethodSymbol) {
-            System.out.println("Identifier: " + tree.name);
-            System.out.println("IDENTIFIER name: " + tree.sym.getQualifiedName().toString());
-            System.out.println("Method signature: " + this.doopReprBuilder.buildDoopMethodSignature((MethodSymbol) tree.sym));
-            System.out.println("Qualified name: " + tree.sym.getQualifiedName());
-            System.out.println("Type: " + tree.sym.type);
-            System.out.println("Position: " + tree.pos);
-            System.out.println("##########################################################################################################################");
-        }
+//        /**
+//         * If identifier is a method symbol.
+//         */
+//        else if (tree.sym != null && tree.sym instanceof MethodSymbol) {
+//            System.out.println("Identifier: " + tree.name);
+//            System.out.println("IDENTIFIER name: " + tree.sym.getQualifiedName().toString());
+//            System.out.println("Method signature: " + this.doopReprBuilder.buildDoopMethodSignature((MethodSymbol) tree.sym));
+//            System.out.println("Qualified name: " + tree.sym.getQualifiedName());
+//            System.out.println("Type: " + tree.sym.type);
+//            System.out.println("Position: " + tree.pos);
+//            System.out.println("##########################################################################################################################");
+//        }
     }
 
     @Override

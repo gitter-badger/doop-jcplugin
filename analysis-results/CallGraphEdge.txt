@@ -1,27 +1,33 @@
   *0, <extras.Test: void <init>()>/extras.Test2.<init>/1, *0, <extras.Test2: void <init>()>
   *0, <extras.Test: void speak()>/extras.Test2.<init>/0, *0, <extras.Test2: void <init>()>
-  *0, Main.main/extras.Test2.<init>/1, *0, <extras.Test2: void <init>()>
-  *0, Main.main/extras.Test2.<init>/2, *0, <extras.Test2: void <init>()>
-  *0, Main.main/extras.Test2.<init>/3, *0, <extras.Test2: void <init>()>
-  *0, Main.main/extras.Test2.<init>/5, *0, <extras.Test2: void <init>()>
-  *0, Main.bar/extras.Test2.<init>/0, *0, <extras.Test2: void <init>()>
-  *0, Main.main/extras.Test2.speak/2, *0, <extras.Test2: void speak()>
-  *0, Main.buz/extras.Test2.speak/1, *0, <extras.Test2: void speak()>
+  *0, advancedTest.Main.main/extras.Test2.<init>/1, *0, <extras.Test2: void <init>()>
+  *0, advancedTest.Main.main/extras.Test2.<init>/2, *0, <extras.Test2: void <init>()>
+  *0, advancedTest.Main.main/extras.Test2.<init>/3, *0, <extras.Test2: void <init>()>
+  *0, advancedTest.Main.main/extras.Test2.<init>/5, *0, <extras.Test2: void <init>()>
+  *0, advancedTest.Main.bar/extras.Test2.<init>/0, *0, <extras.Test2: void <init>()>
+  *0, <advancedTest.Main: extras.Test buz(int,extras.Test,extras.Test2)>/extras.Test2.<init>/0, *0, <extras.Test2: void <init>()>
+  *0, advancedTest.Main.main/extras.Test2.speak/2, *0, <extras.Test2: void speak()>
+  *0, <advancedTest.Main: extras.Test buz(int,extras.Test,extras.Test2)>/extras.Test2.speak/1, *0, <extras.Test2: void speak()>
+  *0, <advancedTest.Main: extras.Test buz(int,extras.Test,extras.Test2)>/extras.Test2.speak/2, *0, <extras.Test2: void speak()>
   *0, extras.Test2.<init>/extras.Test.<init>/2, *0, <extras.Test: void <init>()>
   *0, <extras.Test: void <init>()>/extras.Test.<init>/2, *0, <extras.Test: void <init>()>
   *0, <extras.Test: void <init>(extras.Test,extras.Test2,extras.Test2)>/extras.Test.<init>/1, *0, <extras.Test: void <init>()>
-  *0, Main.main/extras.Test.<init>/0, *0, <extras.Test: void <init>()>
-  *0, <Main: extras.Test foo()>/extras.Test.<init>/0, *0, <extras.Test: void <init>()>
-  *0, <Main: extras.Test foo(extras.Test,extras.Test2)>/extras.Test.<init>/0, *0, <extras.Test: void <init>()>
-  *0, Main.buz/extras.Test.<init>/0, *0, <extras.Test: void <init>()>
-  *0, Main.main/extras.Test.<init>/4, *0, <extras.Test: void <init>(extras.Test,extras.Test2,extras.Test2)>
-  *0, Main.main/extras.Test.speak/0, *0, <extras.Test: void speak(extras.Test2)>
-  *0, Main.main/extras.Test.speak/1, *0, <extras.Test: void speak(extras.Test2)>
-  *0, Main.main/extras.Test.speak/4, *0, <extras.Test: void speak(extras.Test2)>
-  *0, Main.buz/extras.Test.speak/0, *0, <extras.Test: void speak(extras.Test2)>
-  *0, Main.main/extras.Test.speak/3, *0, <extras.Test: void speak()>
-  *0, Main.main/Main.<init>/6, *0, <Main: void <init>()>
-  *0, Main.main/Main.buz/0, *0, <Main: extras.Test buz(int,extras.Test,extras.Test2)>
-  *0, Main.main/Main.foo/0, *0, <Main: extras.Test foo()>
-  *0, Main.main/Main.foo/1, *0, <Main: extras.Test foo(extras.Test,extras.Test2)>
-  *0, Main.main/Main.bar/0, *0, <Main: extras.Test2 bar(extras.Test2)>
+  *0, advancedTest.Main.main/extras.Test.<init>/0, *0, <extras.Test: void <init>()>
+  *0, <advancedTest.Main: extras.Test foo()>/extras.Test.<init>/0, *0, <extras.Test: void <init>()>
+  *0, <advancedTest.Main: extras.Test foo(extras.Test,extras.Test2)>/extras.Test.<init>/0, *0, <extras.Test: void <init>()>
+  *0, <advancedTest.Main: extras.Test buz()>/extras.Test.<init>/0, *0, <extras.Test: void <init>()>
+  *0, <advancedTest.Main: extras.Test buz(int,extras.Test,extras.Test2)>/extras.Test.<init>/1, *0, <extras.Test: void <init>()>
+  *0, advancedTest.Main.main/extras.Test.<init>/4, *0, <extras.Test: void <init>(extras.Test,extras.Test2,extras.Test2)>
+  *0, advancedTest.Main.main/extras.Test.speak/0, *0, <extras.Test: void speak(extras.Test2)>
+  *0, advancedTest.Main.main/extras.Test.speak/1, *0, <extras.Test: void speak(extras.Test2)>
+  *0, advancedTest.Main.main/extras.Test.speak/4, *0, <extras.Test: void speak(extras.Test2)>
+  *0, <advancedTest.Main: extras.Test buz(int,extras.Test,extras.Test2)>/extras.Test.speak/0, *0, <extras.Test: void speak(extras.Test2)>
+  *0, advancedTest.Main.main/extras.Test.speak/3, *0, <extras.Test: void speak()>
+  *0, <advancedTest.Main: extras.Test buz()>/extras.Test.speak/0, *0, <extras.Test: void speak()>
+  *0, advancedTest.Main.main/advancedTest.Main.<init>/6, *0, <advancedTest.Main: void <init>()>
+  *0, advancedTest.Main.main/advancedTest.Main.<init>/7, *0, <advancedTest.Main: void <init>()>
+  *0, advancedTest.Main.main/advancedTest.Main.buz/1, *0, <advancedTest.Main: extras.Test buz()>
+  *0, advancedTest.Main.main/advancedTest.Main.buz/0, *0, <advancedTest.Main: extras.Test buz(int,extras.Test,extras.Test2)>
+  *0, advancedTest.Main.main/advancedTest.Main.foo/0, *0, <advancedTest.Main: extras.Test foo()>
+  *0, advancedTest.Main.main/advancedTest.Main.foo/1, *0, <advancedTest.Main: extras.Test foo(extras.Test,extras.Test2)>
+  *0, advancedTest.Main.main/advancedTest.Main.bar/0, *0, <advancedTest.Main: extras.Test2 bar(extras.Test2)>

@@ -1,6 +1,7 @@
 package doop;
 
 import com.sun.tools.javac.code.Symbol;
+import com.sun.tools.javac.code.Symbol.MethodSymbol;
 import com.sun.tools.javac.util.List;
 
 /**
@@ -22,6 +23,8 @@ public class DoopRepresentationBuilder {
             instance = new DoopRepresentationBuilder();
         return instance;
     }
+
+
 
     /**
      * Builds the fully qualified name of a type.
@@ -55,6 +58,17 @@ public class DoopRepresentationBuilder {
         return doopMethodSignature + "/" + varQualifiedName;
     }
 
+
+    /**
+     *
+     * @param methodSigOrCmpctName
+     * @param originalType
+     * @return
+     */
+    public String buildDoopHeapAllocation(String methodSigOrCmpctName, String originalType) {
+        return methodSigOrCmpctName + "/new " + originalType;
+    }
+
     /**
      *
      * @param doopMethodSignature  the enclosing method signature
@@ -69,7 +83,12 @@ public class DoopRepresentationBuilder {
     }
 
 
-    public String buildDoopMethodInvocation(Symbol.MethodSymbol methodSymbol) {
+    /**
+     *
+     * @param methodSymbol
+     * @return
+     */
+    public String buildDoopMethodInvocation(MethodSymbol methodSymbol) {
         StringBuilder methodInvocation = new StringBuilder();
 
         String fqType = buildFQType(methodSymbol.enclClass().getQualifiedName().toString(), methodSymbol.packge());
@@ -78,7 +97,12 @@ public class DoopRepresentationBuilder {
         return methodInvocation.toString();
     }
 
-    public StringBuilder buildDoopMethodSignatureNoArgs(Symbol.MethodSymbol methodSymbol) {
+    /**
+     *
+     * @param methodSymbol
+     * @return
+     */
+    public StringBuilder buildDoopMethodSignatureNoArgs(MethodSymbol methodSymbol) {
         /**
          * STEP 1: Build enclosing class name
          * Remove "package." if it exists and replace all occurrences of '.' with '$'.
@@ -90,11 +114,6 @@ public class DoopRepresentationBuilder {
         StringBuilder methodSignatureNoArgs = new StringBuilder();
         String fqType = buildFQType(methodSymbol.enclClass().getQualifiedName().toString(), methodSymbol.packge());
 
-        /**
-         * Constructors and other methods don't need any kind of special handling
-         * the only difference is that the method name for all constructors
-         * is <init>
-         */
         methodSignatureNoArgs.append(fqType + ":").
                                 append(" " +methodSymbol.getReturnType() + " ").
                                 append(methodSymbol.getQualifiedName());
@@ -103,50 +122,50 @@ public class DoopRepresentationBuilder {
     }
 
     /**
-     * Builds the signature of the declaring method of a variable symbol.
+     * Builds the signature of a method based on its method symbol.
      *
-     * @param methodSymbol the symbol of the variable declaration
-     * @return the signature of the declaring method as a string
+     * @param methodSymbol the symbol of the method
+     * @return the signature of the method as a string
      */
-    public String buildDoopMethodSignature(Symbol.MethodSymbol methodSymbol) {
+    public String buildDoopMethodSignature(MethodSymbol methodSymbol) {
         /**
-         * STEP 2: Append method signature: <return_type> <method_name>((<parameter_type>,)*<parameter_type>?)
-         *
-         * Special handling for main method
+         * Append method signature: <return_type> <method_name>((<parameter_type>,)*<parameter_type>?)
          */
         StringBuilder methodSignature = new StringBuilder();
-        if (methodSymbol.isStatic()) {
-            String fqType = buildFQType(methodSymbol.enclClass().getQualifiedName().toString(), methodSymbol.packge());
-            methodSignature.append(fqType + "." + methodSymbol.getQualifiedName().toString());
-        }
+
+        methodSignature.append(buildDoopMethodSignatureNoArgs(methodSymbol)).append("(");
+        methodSignature.insert(0, '<');
+
         /**
-         * Constructors and other methods don't need any kind of special handling
-         * the only difference is that the method name in the case of constructors
-         * is <init>
+         * Append fully qualified types of method arguments
          */
-        else {
-            methodSignature.append(buildDoopMethodSignatureNoArgs(methodSymbol)).append("(");
-            methodSignature.insert(0, '<');
-            /**
-             * Append fully qualified types of method arguments
-             */
-            List<Symbol.VarSymbol> parameters = methodSymbol.getParameters();
-            for (int i = 0; i < parameters.size(); i++) {
-                Symbol.VarSymbol param = parameters.get(i);
-                String fqType = buildFQType(param.type.toString(), param.packge());
+        List<Symbol.VarSymbol> parameters = methodSymbol.getParameters();
+        for (int i = 0; i < parameters.size(); i++) {
+            Symbol.VarSymbol param = parameters.get(i);
+            String fqType = buildFQType(param.type.toString(), param.packge());
 
-                if (i != parameters.size() - 1)
-                    methodSignature.append(fqType).append(',');
-                else
-                    methodSignature.append(fqType);
-            }
-
-
-            methodSignature.append(")>");
+            if (i != parameters.size() - 1)
+                methodSignature.append(fqType).append(',');
+            else
+                methodSignature.append(fqType);
         }
-
-
+        methodSignature.append(")>");
 
         return methodSignature.toString();
+    }
+
+    /**
+     * Builds the signature of the declaring method of a variable symbol.
+     *
+     * @param methodSymbol the symbol of the method
+     * @return the compact name of the method as a string
+     */
+    public String buildDoopMethodCompactName(MethodSymbol methodSymbol) {
+        StringBuilder methodCompactName = new StringBuilder();
+
+        String fqType = buildFQType(methodSymbol.enclClass().getQualifiedName().toString(), methodSymbol.packge());
+        methodCompactName.append(fqType + "." + methodSymbol.getQualifiedName().toString());
+
+        return methodCompactName.toString();
     }
 }
