@@ -82,7 +82,6 @@ public class InitialScanner extends TreeScanner {
     }
 
 
-
     /**
      * *************************************************************************
      * Getters and Setters
@@ -103,7 +102,6 @@ public class InitialScanner extends TreeScanner {
     public void setMethodDeclarationMap(Map<String, MethodDeclaration> methodDeclarationMap) {
         this.methodDeclarationMap = methodDeclarationMap;
     }
-
 
 
     /**
@@ -350,7 +348,7 @@ public class InitialScanner extends TreeScanner {
         scan(tree.args);
         scan(tree.def);
 
-        System.out.println("tree.clazz.type: " + tree.clazz.toString());
+//        System.out.println("tree.clazz.type: " + tree.clazz.toString());
 
         for (Symbol symbol : currentClassSymbol.getEnclosedElements()) {
             System.out.println(symbol.toString());

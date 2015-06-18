@@ -25,7 +25,6 @@ public class DoopRepresentationBuilder {
     }
 
 
-
     /**
      * Builds the fully qualified name of a type.
      *
@@ -57,7 +56,6 @@ public class DoopRepresentationBuilder {
         return doopMethodSignature + "/" + varQualifiedName;
     }
 
-
     /**
      *
      * @param methodSigOrCmpctName
@@ -78,7 +76,6 @@ public class DoopRepresentationBuilder {
 
         return doopMethodSignature + "/" + doopMethodInvocation;
     }
-
 
     /**
      *

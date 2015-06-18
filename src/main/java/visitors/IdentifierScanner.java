@@ -45,9 +45,11 @@ public class IdentifierScanner extends TreeScanner {
     private final Map<String, Integer> methodNamesMap;
     private String currentMethodDoopSignature;
     private String currentMethodCompactName;
-    private int methodInvocationCounter;
     private int constructorInvocationCounter;
     private MethodSymbol currentMethodSymbol;
+
+    private int methodInvocationCounter;
+    private Map<String, Integer> methodInvocationCounterMap = null;
 
     /**
      *
@@ -79,6 +81,7 @@ public class IdentifierScanner extends TreeScanner {
         this.heapAllocationMap = heapAllocationMap;
         this.methodDeclarationMap = methodDeclarationMap;
         this.methodNamesMap = new HashMap<>();
+        this.methodInvocationCounterMap = new HashMap<>();
     }
 
     /**
@@ -89,8 +92,40 @@ public class IdentifierScanner extends TreeScanner {
     @Override
     public void scan(JCTree tree) {
         if (tree instanceof JCTree.JCIdent) {
-            if (((JCTree.JCIdent) tree).sym instanceof MethodSymbol)
-                System.out.println(((JCTree.JCIdent) tree).sym.getQualifiedName().toString());
+            if (((JCTree.JCIdent) tree).sym instanceof MethodSymbol) {
+                String doopMethodInvocation;
+                /**
+                 * If current method is overloaded use its signature to build the variable name.
+                 */
+                if (this.methodNamesMap.get(this.currentMethodSymbol.getQualifiedName().toString()) > 1)
+                    doopMethodInvocation = this.doopReprBuilder.buildDoopMethodInvocationInMethod(this.currentMethodDoopSignature,
+                            this.doopReprBuilder.buildDoopMethodInvocation((Symbol.MethodSymbol) ((JCTree.JCIdent) tree).sym));
+                /**
+                 * Otherwise use its compact name.
+                 */
+                else
+                    doopMethodInvocation = this.doopReprBuilder.buildDoopMethodInvocationInMethod(this.currentMethodCompactName,
+                            this.doopReprBuilder.buildDoopMethodInvocation((Symbol.MethodSymbol) ((JCTree.JCIdent) tree).sym));
+
+                /**
+                 * Evaluate heap allocation counter within method.
+                 */
+                if (methodInvocationCounterMap.containsKey(doopMethodInvocation)) {
+                    methodInvocationCounter = methodInvocationCounterMap.get(doopMethodInvocation) + 1;
+                    methodInvocationCounterMap.put(doopMethodInvocation, methodInvocationCounter);
+                }
+                else {
+                    methodInvocationCounter = 0;
+                    methodInvocationCounterMap.put(doopMethodInvocation, 0);
+                }
+                doopMethodInvocation += "/" + this.methodInvocationCounter;
+
+                System.out.println("\033[35m Method Invocation from scan: \033[0m" + doopMethodInvocation);
+                mapMethodInvocation(doopMethodInvocation,
+                                    tree.pos,
+                                    ((JCTree.JCIdent) tree).sym.name.subName(((JCTree.JCIdent) tree).sym.name.toString().lastIndexOf("."),((JCTree.JCIdent) tree).sym.name.toString().indexOf("(")).toString());
+
+            }
         }
         if (tree != null) tree.accept(this);
     }
@@ -106,11 +141,12 @@ public class IdentifierScanner extends TreeScanner {
             for (List<? extends JCTree> l = trees; l.nonEmpty(); l = l.tail) {
                 if (l.head instanceof JCTree.JCIdent) {
                     if (((JCTree.JCIdent) l.head).sym instanceof MethodSymbol)
-                        System.out.println(((JCTree.JCIdent) l.head).sym.getQualifiedName().toString());
+                        System.out.println("Scan list of nodes: " + ((JCTree.JCIdent) l.head).sym.getQualifiedName().toString());
                 }
                 scan(l.head);
             }
     }
+
 
     /**
      * Add VarPointsTo information to [line : VarPointsTo] map.
@@ -153,39 +189,39 @@ public class IdentifierScanner extends TreeScanner {
     /**
      * Add CallGraphEdge information to [line : CallGraphEdge] map.
      *
-     * @param methodInvocationInDoop
+     * @param doopMethodInvocation
      * @param pos
      * @param methodName
      */
-    private void mapMethodInvocation(String methodInvocationInDoop, long pos, String methodName) {
+    private void mapMethodInvocation(String doopMethodInvocation, long pos, String methodName) {
+
         if (this.miMap != null) {
-            if (this.miMap.containsKey(methodInvocationInDoop)) {
-                Set<String> methodDeclarationReprSet = this.miMap.get(methodInvocationInDoop);
+            if (this.miMap.containsKey(doopMethodInvocation)) {
+                Set<String> methodDeclarationReprSet = this.miMap.get(doopMethodInvocation);
                 Set<MethodDeclaration> methodDeclarationSet = new HashSet<>();
 
-                System.out.println(methodDeclarationMap);
                 for (String methodDeclarationRepr : methodDeclarationReprSet) {
                     if (methodDeclarationMap.containsKey(methodDeclarationRepr))
                         methodDeclarationSet.add(methodDeclarationMap.get(methodDeclarationRepr));
                     else
                         methodDeclarationSet.add(new MethodDeclaration(methodDeclarationRepr));
                 }
-
+                System.out.println("Reported!");
                 this.reporter.reportCallGraphEdge(new CallGraphEdge(lineMap.getLineNumber(pos),
                                                                     lineMap.getColumnNumber(pos),
                                                                     lineMap.getColumnNumber(pos + methodName.length()),
-                                                                    methodInvocationInDoop,
+                                                                    doopMethodInvocation,
                                                                     methodDeclarationSet));
             }
             else {
-                System.out.println("Method invocation not found");
+                System.out.println("Method invocation not found: " + doopMethodInvocation);
             }
         }
         else {
             this.reporter.reportCallGraphEdge(new CallGraphEdge(lineMap.getLineNumber(pos),
                                                                 lineMap.getColumnNumber(pos),
-                                                                lineMap.getColumnNumber(pos + methodName.length()),
-                                                                methodInvocationInDoop,
+                                                                lineMap.getColumnNumber(pos + methodName.length()) ,
+                                                                doopMethodInvocation,
                                                                 new HashSet<>()));
         }
     }
@@ -228,8 +264,6 @@ public class IdentifierScanner extends TreeScanner {
             }
         }
 
-        System.out.println("Method names map: " + this.methodNamesMap);
-
         scan(tree.mods);
         scan(tree.typarams);
         scan(tree.extending);
@@ -261,7 +295,6 @@ public class IdentifierScanner extends TreeScanner {
 
         if (tree.sym.isLocal()) {
             String varNameInDoop;
-            System.out.println("Current method name:" + this.currentMethodSymbol.name.toString());
             /**
              * If current method is overloaded use its signature to build the variable name.
              */
@@ -409,6 +442,7 @@ public class IdentifierScanner extends TreeScanner {
         scan(tree.typeargs);
         scan(tree.meth);
         Class<?> clazz = tree.meth.getClass();
+        scan(tree.args);
         Field field;
         Object fieldValue = null;
 
@@ -431,18 +465,36 @@ public class IdentifierScanner extends TreeScanner {
              */
             if (this.methodNamesMap.get(this.currentMethodSymbol.getQualifiedName().toString()) > 1)
                 doopMethodInvocation = this.doopReprBuilder.buildDoopMethodInvocationInMethod(this.currentMethodDoopSignature,
-                        this.doopReprBuilder.buildDoopMethodInvocation((Symbol.MethodSymbol) fieldValue) + "/" + this.methodInvocationCounter++);
+                        this.doopReprBuilder.buildDoopMethodInvocation((Symbol.MethodSymbol) fieldValue));
             /**
              * Otherwise use its compact name.
              */
             else
                 doopMethodInvocation = this.doopReprBuilder.buildDoopMethodInvocationInMethod(this.currentMethodCompactName,
-                        this.doopReprBuilder.buildDoopMethodInvocation((Symbol.MethodSymbol) fieldValue) + "/" + this.methodInvocationCounter++);
+                        this.doopReprBuilder.buildDoopMethodInvocation((Symbol.MethodSymbol) fieldValue));
 
-            System.out.println("\033[35m Method Invocation: \033[0m" + doopMethodInvocation);
-            mapMethodInvocation(doopMethodInvocation, tree.pos, fieldValue.toString());
+            /**
+             * Evaluate heap allocation counter within method.
+             */
+            if (methodInvocationCounterMap.containsKey(doopMethodInvocation)) {
+                methodInvocationCounter = methodInvocationCounterMap.get(doopMethodInvocation) + 1;
+                methodInvocationCounterMap.put(doopMethodInvocation, methodInvocationCounter);
+            }
+            else {
+                methodInvocationCounter = 0;
+                methodInvocationCounterMap.put(doopMethodInvocation, 0);
+            }
+            doopMethodInvocation += "/" + this.methodInvocationCounter;
+
+            System.out.println("\033[35m Method Invocation from visitApply: \033[0m" + doopMethodInvocation);
+            String methodName = fieldValue.toString();
+            if (methodName.contains("("))
+                methodName = methodName.substring(0, methodName.indexOf("("));
+            if (methodName.contains("."))
+                methodName = methodName.substring(methodName.lastIndexOf("."));
+
+            mapMethodInvocation(doopMethodInvocation, tree.meth.pos, methodName);
         }
-        scan(tree.args);
     }
 
     @Override
@@ -537,13 +589,11 @@ public class IdentifierScanner extends TreeScanner {
 
     @Override
     public void visitSelect(JCTree.JCFieldAccess tree) {
-        System.out.println("Field access/Method invocation: " + tree.toString());
         scan(tree.selected);
     }
 
     @Override
     public void visitReference(JCTree.JCMemberReference tree) {
-        System.out.println("Member reference: " + tree.toString());
         scan(tree.expr);
         scan(tree.typeargs);
     }
@@ -565,18 +615,6 @@ public class IdentifierScanner extends TreeScanner {
 
             mapVarPointsTo(varNameInDoop, tree.pos, tree.name);
         }
-//        /**
-//         * If identifier is a method symbol.
-//         */
-//        else if (tree.sym != null && tree.sym instanceof MethodSymbol) {
-//            System.out.println("Identifier: " + tree.name);
-//            System.out.println("IDENTIFIER name: " + tree.sym.getQualifiedName().toString());
-//            System.out.println("Method signature: " + this.doopReprBuilder.buildDoopMethodSignature((MethodSymbol) tree.sym));
-//            System.out.println("Qualified name: " + tree.sym.getQualifiedName());
-//            System.out.println("Type: " + tree.sym.type);
-//            System.out.println("Position: " + tree.pos);
-//            System.out.println("##########################################################################################################################");
-//        }
     }
 
     @Override
