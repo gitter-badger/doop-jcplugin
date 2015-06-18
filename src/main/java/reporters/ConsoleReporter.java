@@ -6,7 +6,6 @@
 package reporters;
 
 import doop.CallGraphEdge;
-import doop.MethodInvocation;
 import doop.VarPointsTo;
 
 /**
@@ -30,7 +29,7 @@ public class ConsoleReporter implements Reporter {
     }
 
     @Override
-    public void reportFieldAccess(int startPos, int endPos, String representation) {
+    public void reportFieldAccess() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

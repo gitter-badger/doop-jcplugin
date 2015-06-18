@@ -18,7 +18,7 @@ public class HeapAllocation {
         this(startLine, startColumn, startLine, endColumn, doopAllocationName);
     }
 
-    public HeapAllocation(long startLine, long startColumn, long endLine, long endColumn, String doopAllocationName) {
+    private HeapAllocation(long startLine, long startColumn, long endLine, long endColumn, String doopAllocationName) {
         this.startLine = startLine;
         this.startColumn = startColumn;
         this.endLine = endLine;

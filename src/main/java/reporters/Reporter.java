@@ -6,10 +6,7 @@
 package reporters;
 
 import doop.CallGraphEdge;
-import doop.MethodInvocation;
 import doop.VarPointsTo;
-
-import java.lang.reflect.Method;
 
 /**
  * @author anantoni
@@ -22,6 +19,6 @@ public interface Reporter {
 
     void reportCallGraphEdge(CallGraphEdge callGraphEdge);
 
-    void reportFieldAccess(int startPos, int endPos, String representation);
+    void reportFieldAccess();
 
 }

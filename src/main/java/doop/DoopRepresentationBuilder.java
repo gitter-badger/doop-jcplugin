@@ -33,7 +33,7 @@ public class DoopRepresentationBuilder {
      * @param packageSymbol    the package symbol
      * @return fqType          the fully qualified type
      */
-    public String buildFQType(String type, Symbol.PackageSymbol packageSymbol) {
+    private String buildFQType(String type, Symbol.PackageSymbol packageSymbol) {
         StringBuilder fqTypeName = new StringBuilder();
         String packge = packageSymbol.getQualifiedName().toString();
 
@@ -42,8 +42,7 @@ public class DoopRepresentationBuilder {
             fqTypeName.append(packge).append('.').append(type);
         } else
             fqTypeName.append(type);
-        String fqType = fqTypeName.toString();
-        return fqType;
+        return fqTypeName.toString();
     }
 
     /**
@@ -76,10 +75,8 @@ public class DoopRepresentationBuilder {
      * @return                     the string representation of the method invocation in Doop
      */
     public String buildDoopMethodInvocationInMethod(String doopMethodSignature, String doopMethodInvocation) {
-        StringBuilder doopMethodInvocationInMethod = new StringBuilder();
 
-        doopMethodInvocationInMethod.append(doopMethodSignature + "/" + doopMethodInvocation);
-        return doopMethodInvocationInMethod.toString();
+        return doopMethodSignature + "/" + doopMethodInvocation;
     }
 
 
@@ -102,7 +99,7 @@ public class DoopRepresentationBuilder {
      * @param methodSymbol
      * @return
      */
-    public StringBuilder buildDoopMethodSignatureNoArgs(MethodSymbol methodSymbol) {
+    private StringBuilder buildDoopMethodSignatureNoArgs(MethodSymbol methodSymbol) {
         /**
          * STEP 1: Build enclosing class name
          * Remove "package." if it exists and replace all occurrences of '.' with '$'.
@@ -114,8 +111,7 @@ public class DoopRepresentationBuilder {
         StringBuilder methodSignatureNoArgs = new StringBuilder();
         String fqType = buildFQType(methodSymbol.enclClass().getQualifiedName().toString(), methodSymbol.packge());
 
-        methodSignatureNoArgs.append(fqType + ":").
-                                append(" " +methodSymbol.getReturnType() + " ").
+        methodSignatureNoArgs.append(fqType).append(":").append(" ").append(methodSymbol.getReturnType()).append(" ").
                                 append(methodSymbol.getQualifiedName());
 
         return methodSignatureNoArgs;
@@ -164,7 +160,7 @@ public class DoopRepresentationBuilder {
         StringBuilder methodCompactName = new StringBuilder();
 
         String fqType = buildFQType(methodSymbol.enclClass().getQualifiedName().toString(), methodSymbol.packge());
-        methodCompactName.append(fqType + "." + methodSymbol.getQualifiedName().toString());
+        methodCompactName.append(fqType).append(".").append(methodSymbol.getQualifiedName().toString());
 
         return methodCompactName.toString();
     }

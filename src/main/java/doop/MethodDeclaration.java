@@ -22,7 +22,7 @@ public class MethodDeclaration {
         this(startLine, startColumn, startLine, endColumn, methodSignature);
     }
 
-    public MethodDeclaration(long startLine, long startColumn, long endLine, long endColumn, String methodSignature) {
+    private MethodDeclaration(long startLine, long startColumn, long endLine, long endColumn, String methodSignature) {
         this.startLine = startLine;
         this.startColumn = startColumn;
         this.endLine = endLine;

@@ -25,10 +25,10 @@ import java.util.logging.Logger;
 public class DoopPrinterTaskListener implements TaskListener {
     private static final String DEFAULT_REPORTER = "reporters.FileReporter";
     private static final String DEFAULT_ANALYSIS_RESULTS_DIR = "./analysis-results/";
-    private static final String DEFAULT_PROJECT = "advancedTest";
+    public static final String DEFAULT_PROJECT = "advancedTest";
     private static final boolean MATCH_DOOP_RESULTS = true;
 
-    private final JavacTask task;
+//    private final JavacTask task;
     private final Reporter reporter;
     private Map<String, Set<String>> vptMap;
     private Map<String, Set<String>> miMap;
@@ -40,7 +40,7 @@ public class DoopPrinterTaskListener implements TaskListener {
      */
     public DoopPrinterTaskListener(JavacTask javactask) {
 
-        this.task = javactask;
+//        this.task = javactask;
         /**
          * Initialize the reporter.
          */
@@ -117,8 +117,6 @@ public class DoopPrinterTaskListener implements TaskListener {
              */
             else
                 this.vptMap = null;
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(DoopPrinterTaskListener.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(DoopPrinterTaskListener.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
@@ -138,7 +136,7 @@ public class DoopPrinterTaskListener implements TaskListener {
      *
      * @return the initialized reporter
      */
-    protected Reporter initReporter() {
+    private Reporter initReporter() {
         String className = System.getProperty("reporter", DEFAULT_REPORTER);
         try {
             return (Reporter) Class.forName(className).newInstance();
@@ -168,7 +166,7 @@ public class DoopPrinterTaskListener implements TaskListener {
              * Open all necessary json files to write facts.
              */
             if (reporter instanceof FileReporter)
-                ((FileReporter) reporter).openJSONFiles(arg0.getSourceFile(), DEFAULT_PROJECT);
+                ((FileReporter) reporter).openJSONFiles(arg0.getSourceFile());
 
             /**
              * Get AST root for this source code file.

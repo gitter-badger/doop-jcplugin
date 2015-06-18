@@ -2,6 +2,7 @@ package visitors;
 
 import com.sun.source.tree.LineMap;
 import com.sun.tools.javac.code.Symbol;
+import com.sun.tools.javac.code.Symbol.ClassSymbol;
 import com.sun.tools.javac.code.Symbol.MethodSymbol;
 import com.sun.tools.javac.code.Symbol.VarSymbol;
 import com.sun.tools.javac.tree.JCTree;
@@ -10,7 +11,6 @@ import com.sun.tools.javac.util.Assert;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.Name;
 import doop.*;
-import reporters.FileReporter;
 import reporters.Reporter;
 
 import java.lang.reflect.Field;
@@ -41,8 +41,8 @@ public class IdentifierScanner extends TreeScanner {
     private final DoopRepresentationBuilder doopReprBuilder;
     private final Map<String, HeapAllocation> heapAllocationMap;
     private final Map<String, MethodDeclaration>  methodDeclarationMap;
-    private Symbol.ClassSymbol currentClassSymbol;
-    private Map<String, Integer> methodNamesMap;
+    private ClassSymbol currentClassSymbol;
+    private final Map<String, Integer> methodNamesMap;
     private String currentMethodDoopSignature;
     private String currentMethodCompactName;
     private int methodInvocationCounter;
@@ -119,7 +119,7 @@ public class IdentifierScanner extends TreeScanner {
      * @param pos
      * @param varName
      */
-    public void mapVarPointsTo(String varNameInDoop, long pos, Name varName) {
+    private void mapVarPointsTo(String varNameInDoop, long pos, Name varName) {
 
         if (this.vptMap != null) {
             if (this.vptMap.containsKey(varNameInDoop)) {
@@ -157,7 +157,7 @@ public class IdentifierScanner extends TreeScanner {
      * @param pos
      * @param methodName
      */
-    public void mapMethodInvocation(String methodInvocationInDoop, long pos, String methodName) {
+    private void mapMethodInvocation(String methodInvocationInDoop, long pos, String methodName) {
         if (this.miMap != null) {
             if (this.miMap.containsKey(methodInvocationInDoop)) {
                 Set<String> methodDeclarationReprSet = this.miMap.get(methodInvocationInDoop);
@@ -209,6 +209,9 @@ public class IdentifierScanner extends TreeScanner {
 
     @Override
     public void visitClassDef(JCTree.JCClassDecl tree) {
+        /**
+         * TODO: Consider multiple nested classes, lose current class symbol and regain it.
+         */
         this.currentClassSymbol = tree.sym;
         /**
          * Fills the method names map in order to be able to identify overloaded methods.
@@ -412,18 +415,27 @@ public class IdentifierScanner extends TreeScanner {
         try {
             field = clazz.getField("sym");
             fieldValue = field.get(tree.meth);
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
+        } catch (NoSuchFieldException | IllegalAccessException e) {
             e.printStackTrace();
         }
         if (fieldValue instanceof MethodSymbol) {
-            String methodInvocationInDoop = this.doopReprBuilder.buildDoopMethodInvocationInMethod(
-                                                this.doopReprBuilder.buildDoopMethodSignature(currentMethodSymbol),
-                                                this.doopReprBuilder.buildDoopMethodInvocation((Symbol.MethodSymbol) fieldValue) + "/" + this.methodInvocationCounter++);
+            String doopMethodInvocation;
+            /**
+             * If current method is overloaded use its signature to build the variable name.
+             */
+            if (this.methodNamesMap.get(this.currentMethodSymbol.getQualifiedName().toString()) > 1)
+                doopMethodInvocation = this.doopReprBuilder.buildDoopMethodInvocationInMethod(
+                        this.currentMethodDoopSignature,
+                        this.doopReprBuilder.buildDoopMethodInvocation((Symbol.MethodSymbol) fieldValue) + "/" + this.methodInvocationCounter++);
+            /**
+             * Otherwise use its compact name.
+             */
+            else
+                doopMethodInvocation = this.doopReprBuilder.buildDoopMethodInvocationInMethod(this.currentMethodCompactName,
+                        this.doopReprBuilder.buildDoopMethodInvocation((Symbol.MethodSymbol) fieldValue) + "/" + this.methodInvocationCounter++);
 
-            System.out.println("\033[35m Method Invocation: \033[0m" + methodInvocationInDoop);
-            mapMethodInvocation(methodInvocationInDoop, tree.pos, fieldValue.toString());
+            System.out.println("\033[35m Method Invocation: \033[0m" + doopMethodInvocation);
+            mapMethodInvocation(doopMethodInvocation, tree.pos, fieldValue.toString());
         }
         scan(tree.args);
     }
@@ -435,15 +447,23 @@ public class IdentifierScanner extends TreeScanner {
         scan(tree.clazz);
         scan(tree.args);
         scan(tree.def);
-        String currentMethodDoopSignature = this.doopReprBuilder.buildDoopMethodSignature(currentMethodSymbol);
 
-
-        String methodInvocationInDoop = this.doopReprBuilder.buildDoopMethodInvocationInMethod(
-                currentMethodDoopSignature,
+        String doopMethodInvocation;
+        /**
+         * If current method is overloaded use its signature to build the variable name.
+         */
+        if (this.methodNamesMap.get(this.currentMethodSymbol.getQualifiedName().toString()) > 1)
+            doopMethodInvocation = this.doopReprBuilder.buildDoopMethodInvocationInMethod(this.currentMethodDoopSignature,
                 this.doopReprBuilder.buildDoopMethodInvocation((MethodSymbol) tree.constructor) + "/" + this.constructorInvocationCounter++);
+        /**
+         * Otherwise use its compact name.
+         */
+        else
+            doopMethodInvocation = this.doopReprBuilder.buildDoopMethodInvocationInMethod(this.currentMethodCompactName,
+                    this.doopReprBuilder.buildDoopMethodInvocation((MethodSymbol) tree.constructor) + "/" + this.constructorInvocationCounter++);
 
-        System.out.println("\033[35m Method Invocation (Constructor): \033[0m" + methodInvocationInDoop);
-        mapMethodInvocation(methodInvocationInDoop, tree.pos, tree.clazz.type.getOriginalType().toString());
+        System.out.println("\033[35m Method Invocation (Constructor): \033[0m" + doopMethodInvocation);
+        mapMethodInvocation(doopMethodInvocation, tree.pos, tree.clazz.type.getOriginalType().toString());
     }
 
     @Override
@@ -451,7 +471,7 @@ public class IdentifierScanner extends TreeScanner {
         scan(tree.annotations);
         scan(tree.elemtype);
         scan(tree.dims);
-        tree.dimAnnotations.stream().forEach((annos) -> scan(annos));
+        tree.dimAnnotations.stream().forEach(this::scan);
         scan(tree.elems);
     }
 

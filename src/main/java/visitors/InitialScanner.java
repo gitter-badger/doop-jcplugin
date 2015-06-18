@@ -13,9 +13,7 @@ import doop.HeapAllocation;
 import doop.MethodDeclaration;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by anantoni on 11/6/2015.
@@ -45,7 +43,7 @@ public class InitialScanner extends TreeScanner {
     private final DoopRepresentationBuilder doopReprBuilder;
 
     private ClassSymbol currentClassSymbol;
-    private Map<String, Integer> methodNamesMap;
+    private final Map<String, Integer> methodNamesMap;
     private MethodSymbol currentMethodSymbol;
     private String currentMethodDoopSignature;
     private String currentMethodCompactName;
@@ -398,7 +396,7 @@ public class InitialScanner extends TreeScanner {
         scan(tree.annotations);
         scan(tree.elemtype);
         scan(tree.dims);
-        tree.dimAnnotations.stream().forEach((annos) -> scan(annos));
+        tree.dimAnnotations.stream().forEach(this::scan);
         scan(tree.elems);
     }
 

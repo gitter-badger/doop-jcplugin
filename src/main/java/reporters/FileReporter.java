@@ -81,23 +81,22 @@ public class FileReporter implements Reporter {
     }
 
     @Override
-    public void reportFieldAccess(int startPos, int endPos, String representation) {
+    public void reportFieldAccess() {
 
     }
 
     /**
      * @param sourceFile   the source file object of the currently processed compilation unit.
-     * @param projectName  the fileName of the currently processed compilation unit.
      */
-    public void openJSONFiles(JavaFileObject sourceFile, String projectName) {
+    public void openJSONFiles(JavaFileObject sourceFile) {
         try {
             varPointsToMap = new HashMap<>();
             callGraphEdgeMap = new HashMap<>();
 
-            String varPointsToFilePath = FilenameUtils.concat(DEFAULT_OUTPUT_DIR + projectName, sourceFile.getName().replace(".java", "-VarPointsTo.json"));
+            String varPointsToFilePath = FilenameUtils.concat(DEFAULT_OUTPUT_DIR + plugins.DoopPrinterTaskListener.DEFAULT_PROJECT, sourceFile.getName().replace(".java", "-VarPointsTo.json"));
             FileUtils.forceMkdir(new File(FilenameUtils.getFullPath(varPointsToFilePath)));
 
-            String callGraphEdgeFilePath = FilenameUtils.concat(DEFAULT_OUTPUT_DIR + projectName, sourceFile.getName().replace(".java", "-CallGraphEdge.json"));
+            String callGraphEdgeFilePath = FilenameUtils.concat(DEFAULT_OUTPUT_DIR + plugins.DoopPrinterTaskListener.DEFAULT_PROJECT, sourceFile.getName().replace(".java", "-CallGraphEdge.json"));
             FileUtils.forceMkdir(new File(FilenameUtils.getFullPath(callGraphEdgeFilePath)));
 
             varPointsToWriter = new PrintWriter(varPointsToFilePath, "UTF-8");
