@@ -464,6 +464,8 @@ public class IdentifierScanner extends TreeScanner {
         Field field;
         Object fieldValue = null;
 
+        System.out.println(tree.meth.toString());
+
         try {
             field = clazz.getField("sym");
             fieldValue = field.get(tree.meth);
@@ -472,10 +474,6 @@ public class IdentifierScanner extends TreeScanner {
         }
 
         if (fieldValue instanceof MethodSymbol && scanForInvocations) {
-            /**
-             * Method Invocation:
-             */
-
 
             String doopMethodInvocation;
             /**
@@ -496,10 +494,11 @@ public class IdentifierScanner extends TreeScanner {
                 methodName = methodName.substring(0, methodName.indexOf("("));
             if (methodName.contains("."))
                 methodName = methodName.substring(methodName.lastIndexOf("."));
+
+
             /**
              * Evaluate heap allocation counter within method.
              */
-
             if (!doopMethodInvocation.endsWith("<init>")) {
                 if (methodInvocationCounterMap.containsKey(methodName)) {
                     methodInvocationCounter = methodInvocationCounterMap.get(methodName) + 1;
@@ -514,10 +513,14 @@ public class IdentifierScanner extends TreeScanner {
                 doopMethodInvocation += "/" + this.constructorInvocationCounter++;
             }
 
+            long invocationPos = 0;
+            if (tree.meth.toString().contains("."))
+                invocationPos = tree.meth.pos + 1;
+            else
+                invocationPos = tree.meth.pos;
+
             System.out.println("\033[35m Method Invocation from visitApply: \033[0m" + doopMethodInvocation);
-
-
-            mapMethodInvocation(doopMethodInvocation, tree.meth.pos, methodName);
+            mapMethodInvocation(doopMethodInvocation, invocationPos, methodName);
         }
     }
 
