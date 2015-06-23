@@ -14,11 +14,6 @@ import doop.VarPointsTo;
 public class ConsoleReporter implements Reporter {
 
     @Override
-    public void reportVar(int startPos, int endPos, String representation) {
-        System.out.println("(" + startPos + ", " + endPos + ")" + " => " + representation);
-    }
-
-    @Override
     public void reportVarPointsTo(VarPointsTo varPointsTo) {
 
     }
@@ -29,7 +24,7 @@ public class ConsoleReporter implements Reporter {
     }
 
     @Override
-    public void reportFieldAccess() {
+    public void reportFieldPointsTo() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

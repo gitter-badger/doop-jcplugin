@@ -48,7 +48,7 @@ public class IdentifierScanner extends TreeScanner {
     private String currentMethodDoopSignature;
     private String currentMethodCompactName;
 
-    private final Map<String, Integer> methodNamesMap;
+    private Map<ClassSymbol, Map<String, Integer>> methodNamesPerClassMap;
     private int constructorInvocationCounter;
 
     private int methodInvocationCounter;
@@ -84,7 +84,7 @@ public class IdentifierScanner extends TreeScanner {
         this.methodInvocationCounter = 0;
         this.heapAllocationMap = heapAllocationMap;
         this.methodDeclarationMap = methodDeclarationMap;
-        this.methodNamesMap = new HashMap<>();
+        this.methodNamesPerClassMap = new HashMap<>();
         this.methodInvocationCounterMap = null;
         this.scanForInvocations = false;
     }
@@ -112,7 +112,7 @@ public class IdentifierScanner extends TreeScanner {
                 /**
                  * If current method is overloaded use its signature to build the variable name.
                  */
-                if (this.methodNamesMap.get(this.currentMethodSymbol.getQualifiedName().toString()) > 1)
+                if (this.methodNamesPerClassMap.get(this.currentClassSymbol).get(this.currentMethodSymbol.getQualifiedName().toString()) > 1)
                     doopMethodInvocation = this.doopReprBuilder.buildDoopMethodInvocationInMethod(this.currentMethodDoopSignature,
                             this.doopReprBuilder.buildDoopMethodInvocation((Symbol.MethodSymbol) ((JCTree.JCIdent) tree).sym));
                 /**
@@ -259,23 +259,26 @@ public class IdentifierScanner extends TreeScanner {
 
     @Override
     public void visitClassDef(JCTree.JCClassDecl tree) {
-        /**
-         * TODO: Consider multiple nested classes, lose current class symbol and regain it.
-         */
+
         this.currentClassSymbol = tree.sym;
-        /**
-         * Fills the method names map in order to be able to identify overloaded methods.
-         */
-        for (Symbol symbol : this.currentClassSymbol.getEnclosedElements()) {
-            if (symbol instanceof MethodSymbol) {
-                MethodSymbol methodSymbol = (MethodSymbol)symbol;
-                if (!methodNamesMap.containsKey(methodSymbol.getQualifiedName().toString()))
-                    methodNamesMap.put(methodSymbol.getQualifiedName().toString(), 1);
-                else {
-                    int methodNameCounter = methodNamesMap.get(methodSymbol.getQualifiedName().toString());
-                    methodNamesMap.put(methodSymbol.getQualifiedName().toString(), ++methodNameCounter);
+        Map<String, Integer> methodNamesMap;
+        if (!methodNamesPerClassMap.containsKey(this.currentClassSymbol)) {
+            methodNamesMap = new HashMap<>();
+            /**
+             * Fills the method names map in order to be able to identify overloaded methods for each class.
+             */
+            for (Symbol symbol : this.currentClassSymbol.getEnclosedElements()) {
+                if (symbol instanceof MethodSymbol) {
+                    MethodSymbol methodSymbol = (MethodSymbol) symbol;
+                    if (!methodNamesMap.containsKey(methodSymbol.getQualifiedName().toString()))
+                        methodNamesMap.put(methodSymbol.getQualifiedName().toString(), 1);
+                    else {
+                        int methodNameCounter = methodNamesMap.get(methodSymbol.getQualifiedName().toString());
+                        methodNamesMap.put(methodSymbol.getQualifiedName().toString(), ++methodNameCounter);
+                    }
                 }
             }
+            methodNamesPerClassMap.put(this.currentClassSymbol, methodNamesMap);
         }
 
         scan(tree.mods);
@@ -316,7 +319,7 @@ public class IdentifierScanner extends TreeScanner {
             /**
              * If current method is overloaded use its signature to build the variable name.
              */
-            if (this.methodNamesMap.get(this.currentMethodSymbol.getQualifiedName().toString()) > 1)
+            if (this.methodNamesPerClassMap.get(currentClassSymbol).get(this.currentMethodSymbol.getQualifiedName().toString()) > 1)
                 varNameInDoop = this.doopReprBuilder.buildDoopVarName(this.currentMethodDoopSignature, tree.sym.getQualifiedName().toString());
             /**
              * Otherwise use its compact name.
@@ -479,7 +482,7 @@ public class IdentifierScanner extends TreeScanner {
             /**
              * If current method is overloaded use its signature to build the variable name.
              */
-            if (this.methodNamesMap.get(this.currentMethodSymbol.getQualifiedName().toString()) > 1)
+            if (this.methodNamesPerClassMap.get(this.currentClassSymbol).get(this.currentMethodSymbol.getQualifiedName().toString()) > 1)
                 doopMethodInvocation = this.doopReprBuilder.buildDoopMethodInvocationInMethod(this.currentMethodDoopSignature,
                         this.doopReprBuilder.buildDoopMethodInvocation((Symbol.MethodSymbol) fieldValue));
             /**
@@ -540,7 +543,7 @@ public class IdentifierScanner extends TreeScanner {
             /**
              * If current method is overloaded use its signature to build the variable name.
              */
-            if (this.methodNamesMap.get(this.currentMethodSymbol.getQualifiedName().toString()) > 1)
+            if (this.methodNamesPerClassMap.get(this.currentClassSymbol).get(this.currentMethodSymbol.getQualifiedName().toString()) > 1)
                 doopMethodInvocation = this.doopReprBuilder.buildDoopMethodInvocationInMethod(this.currentMethodDoopSignature,
                         this.doopReprBuilder.buildDoopMethodInvocation((MethodSymbol) tree.constructor) + "/" + this.constructorInvocationCounter++);
             /**
@@ -635,7 +638,7 @@ public class IdentifierScanner extends TreeScanner {
          */
         if (tree.sym != null && tree.sym instanceof VarSymbol && tree.sym.isLocal()) {
             String varNameInDoop;
-            if (this.methodNamesMap.get(this.currentMethodSymbol.getQualifiedName().toString()) > 1)
+            if (this.methodNamesPerClassMap.get(this.currentClassSymbol).get(this.currentMethodSymbol.getQualifiedName().toString()) > 1)
                 varNameInDoop = this.doopReprBuilder.buildDoopVarName(this.currentMethodDoopSignature, tree.sym.getQualifiedName().toString());
             else
                 varNameInDoop = this.doopReprBuilder.buildDoopVarName(this.currentMethodCompactName, tree.sym.getQualifiedName().toString());

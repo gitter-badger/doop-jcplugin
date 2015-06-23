@@ -13,12 +13,8 @@ import doop.VarPointsTo;
  */
 public interface Reporter {
 
-    void reportVar(int startPos, int endPos, String representation);
-
     void reportVarPointsTo(VarPointsTo varPointsTo);
-
     void reportCallGraphEdge(CallGraphEdge callGraphEdge);
-
-    void reportFieldAccess();
+    void reportFieldPointsTo();
 
 }

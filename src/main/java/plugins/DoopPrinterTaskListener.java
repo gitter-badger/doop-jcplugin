@@ -5,6 +5,7 @@ import com.sun.source.util.JavacTask;
 import com.sun.source.util.TaskEvent;
 import com.sun.source.util.TaskListener;
 import com.sun.tools.javac.tree.JCTree;
+import conf.Configuration;
 import reporters.ConsoleReporter;
 import reporters.FileReporter;
 import reporters.Reporter;
@@ -12,7 +13,6 @@ import visitors.InitialScanner;
 import visitors.IdentifierScanner;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
@@ -23,10 +23,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class DoopPrinterTaskListener implements TaskListener {
-    private static final String DEFAULT_REPORTER = "reporters.FileReporter";
-    private static final String DEFAULT_ANALYSIS_RESULTS_DIR = "./analysis-results/";
-    public static final String DEFAULT_PROJECT = "advancedTest";
-    private static final boolean MATCH_DOOP_RESULTS = true;
+
 
 //    private final JavacTask task;
     private final Reporter reporter;
@@ -44,7 +41,7 @@ public class DoopPrinterTaskListener implements TaskListener {
         /**
          * Initialize the reporter.
          */
-        if (DEFAULT_REPORTER.equals("reporters.FileReporter"))
+        if (Configuration.DEFAULT_REPORTER.equals("reporters.FileReporter"))
             this.reporter = initReporter();
         else
             this.reporter = initReporter();
@@ -55,11 +52,11 @@ public class DoopPrinterTaskListener implements TaskListener {
              * If doop results are locally available then create the necessary maps to match static information
              * with doop points-to results.
              */
-            if (MATCH_DOOP_RESULTS) {
+            if (Configuration.MATCH_DOOP_RESULTS) {
                 this.vptMap = new HashMap<>();
                 String line;
                 String cvsSplitBy = ", ";
-                br = new BufferedReader(new FileReader(DEFAULT_ANALYSIS_RESULTS_DIR + "VarPointsTo.txt"));
+                br = new BufferedReader(new FileReader(Configuration.DEFAULT_ANALYSIS_RESULTS_DIR + "VarPointsTo.txt"));
 
                 while ((line = br.readLine()) != null) {
                     String[] columns = line.split(cvsSplitBy);
@@ -79,7 +76,7 @@ public class DoopPrinterTaskListener implements TaskListener {
                     }
                 }
 
-                System.out.println("VarPointsTo map size: " + vptMap.size());
+//                System.out.println("VarPointsTo map size: " + vptMap.size());
                 //System.out.println(vptMap);
 
                 int counter = 0;
@@ -88,7 +85,7 @@ public class DoopPrinterTaskListener implements TaskListener {
                 System.out.println(counter);
 
                 this.miMap = new HashMap<>();
-                br = new BufferedReader(new FileReader(DEFAULT_ANALYSIS_RESULTS_DIR + "CallGraphEdge.txt"));
+                br = new BufferedReader(new FileReader(Configuration.DEFAULT_ANALYSIS_RESULTS_DIR + "CallGraphEdge.txt"));
 
                 while ((line = br.readLine()) != null) {
                     String[] columns = line.split(cvsSplitBy);
@@ -108,8 +105,8 @@ public class DoopPrinterTaskListener implements TaskListener {
                     }
                 }
 
-                System.out.println("Call Graph Edge map size: " + this.miMap.size());
-                System.out.println(this.miMap);
+//                System.out.println("Call Graph Edge map size: " + this.miMap.size());
+//                System.out.println(this.miMap);
             }
             /**
              * Otherwise set map field to null and generate empty sets representing doop information such as
@@ -137,7 +134,7 @@ public class DoopPrinterTaskListener implements TaskListener {
      * @return the initialized reporter
      */
     private Reporter initReporter() {
-        String className = System.getProperty("reporter", DEFAULT_REPORTER);
+        String className = System.getProperty("reporter", Configuration.DEFAULT_REPORTER);
         try {
             return (Reporter) Class.forName(className).newInstance();
         } catch (InstantiationException | IllegalAccessException | ClassNotFoundException ex) {
@@ -166,7 +163,7 @@ public class DoopPrinterTaskListener implements TaskListener {
              * Open all necessary json files to write facts.
              */
             if (reporter instanceof FileReporter)
-                ((FileReporter) reporter).openJSONFiles(arg0.getSourceFile());
+                ((FileReporter) reporter).openJSONReportFiles(arg0.getSourceFile());
 
             /**
              * Get AST root for this source code file.
@@ -182,8 +179,8 @@ public class DoopPrinterTaskListener implements TaskListener {
              * Close all files.
              */
             if (reporter instanceof FileReporter) {
-                ((FileReporter) reporter).writeJSON();
-                ((FileReporter) reporter).closeJSONFiles();
+                ((FileReporter) reporter).writeJSONReport();
+                ((FileReporter) reporter).closeJSONReportFiles();
             }
         }
     }

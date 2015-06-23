@@ -43,7 +43,7 @@ public class InitialScanner extends TreeScanner {
     private final DoopRepresentationBuilder doopReprBuilder;
 
     private ClassSymbol currentClassSymbol;
-    private final Map<String, Integer> methodNamesMap;
+    private Map<ClassSymbol, Map<String, Integer>> methodNamesPerClassMap;
     private MethodSymbol currentMethodSymbol;
     private String currentMethodDoopSignature;
     private String currentMethodCompactName;
@@ -75,7 +75,7 @@ public class InitialScanner extends TreeScanner {
         this.doopReprBuilder = DoopRepresentationBuilder.getInstance();
         this.lineMap = lineMap;
         this.heapAllocationCounter = 0;
-        this.methodNamesMap = new HashMap<>();
+        this.methodNamesPerClassMap = new HashMap<>();
         this.heapAllocationCounterMap = new HashMap<>();
         this.heapAllocationMap = new HashMap<>();
         this.methodDeclarationMap = new HashMap<>();
@@ -111,10 +111,6 @@ public class InitialScanner extends TreeScanner {
      */
     @Override
     public void scan(JCTree tree) {
-        if (tree instanceof JCTree.JCIdent) {
-            if (((JCTree.JCIdent) tree).sym instanceof MethodSymbol)
-                System.out.println(((JCTree.JCIdent) tree).sym.getQualifiedName().toString());
-        }
         if (tree != null) tree.accept(this);
     }
 
@@ -126,15 +122,9 @@ public class InitialScanner extends TreeScanner {
     @Override
     public void scan(List<? extends JCTree> trees) {
         if (trees != null)
-            for (List<? extends JCTree> l = trees; l.nonEmpty(); l = l.tail) {
-                if (l.head instanceof JCTree.JCIdent) {
-                    if (((JCTree.JCIdent) l.head).sym instanceof MethodSymbol)
-                        System.out.println(((JCTree.JCIdent) l.head).sym.getQualifiedName().toString());
-                }
+            for (List<? extends JCTree> l = trees; l.nonEmpty(); l = l.tail)
                 scan(l.head);
-            }
     }
-
 
 
     /**
@@ -158,22 +148,25 @@ public class InitialScanner extends TreeScanner {
     public void visitClassDef(JCTree.JCClassDecl tree) {
 
         this.currentClassSymbol = tree.sym;
-        /**
-         * Fills the method names map in order to be able to identify overloaded methods.
-         */
-        for (Symbol symbol : this.currentClassSymbol.getEnclosedElements()) {
-            if (symbol instanceof MethodSymbol) {
-                MethodSymbol methodSymbol = (MethodSymbol)symbol;
-                if (!methodNamesMap.containsKey(methodSymbol.getQualifiedName().toString()))
-                    methodNamesMap.put(methodSymbol.getQualifiedName().toString(), 1);
-                else {
-                    int methodNameCounter = methodNamesMap.get(methodSymbol.getQualifiedName().toString());
-                    methodNamesMap.put(methodSymbol.getQualifiedName().toString(), ++methodNameCounter);
+        Map<String, Integer> methodNamesMap;
+        if (!methodNamesPerClassMap.containsKey(this.currentClassSymbol)) {
+            methodNamesMap = new HashMap<>();
+            /**
+             * Fills the method names map in order to be able to identify overloaded methods for each class.
+             */
+            for (Symbol symbol : this.currentClassSymbol.getEnclosedElements()) {
+                if (symbol instanceof MethodSymbol) {
+                    MethodSymbol methodSymbol = (MethodSymbol)symbol;
+                    if (!methodNamesMap.containsKey(methodSymbol.getQualifiedName().toString()))
+                        methodNamesMap.put(methodSymbol.getQualifiedName().toString(), 1);
+                    else {
+                        int methodNameCounter = methodNamesMap.get(methodSymbol.getQualifiedName().toString());
+                        methodNamesMap.put(methodSymbol.getQualifiedName().toString(), ++methodNameCounter);
+                    }
                 }
             }
+            methodNamesPerClassMap.put(this.currentClassSymbol, methodNamesMap);
         }
-
-        System.out.println("Method names map: " + this.methodNamesMap);
 
         scan(tree.mods);
         scan(tree.typarams);
@@ -195,8 +188,6 @@ public class InitialScanner extends TreeScanner {
                                                             lineMap.getColumnNumber(tree.pos),
                                                             lineMap.getColumnNumber(tree.pos + tree.name.toString().length()),
                                                             this.currentMethodDoopSignature));
-
-        System.out.println("Method Declaration: " + currentMethodDoopSignature);
 
         scan(tree.typarams);
         scan(tree.recvparam);
@@ -348,17 +339,11 @@ public class InitialScanner extends TreeScanner {
         scan(tree.args);
         scan(tree.def);
 
-//        System.out.println("tree.clazz.type: " + tree.clazz.toString());
-
-        for (Symbol symbol : currentClassSymbol.getEnclosedElements()) {
-            System.out.println(symbol.toString());
-        }
-
         String heapAllocation;
         /**
          * If current method is overloaded use its signature to build the heap allocation.
          */
-        if (this.methodNamesMap.get(this.currentMethodSymbol.getQualifiedName().toString()) > 1)
+        if (this.methodNamesPerClassMap.get(this.currentClassSymbol).get(this.currentMethodSymbol.getQualifiedName().toString()) > 1)
             heapAllocation = this.doopReprBuilder.buildDoopHeapAllocation(currentMethodDoopSignature, tree.clazz.type.getOriginalType().toString());
         /**
          * Otherwise use its compact name.
