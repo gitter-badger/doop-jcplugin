@@ -24,8 +24,6 @@ import java.util.logging.Logger;
 
 class DoopPrinterTaskListener implements TaskListener {
 
-
-//    private final JavacTask task;
     private final Reporter reporter;
     private Map<String, Set<String>> vptMap;
     private Map<String, Set<String>> miMap;
@@ -36,7 +34,6 @@ class DoopPrinterTaskListener implements TaskListener {
      */
     public DoopPrinterTaskListener() {
 
-//        this.task = javactask;
         /**
          * Initialize the reporter.
          */
@@ -75,9 +72,6 @@ class DoopPrinterTaskListener implements TaskListener {
                     }
                 }
 
-//                System.out.println("VarPointsTo map size: " + vptMap.size());
-                //System.out.println(vptMap);
-
                 int counter = 0;
                 for (Set<String> set : vptMap.values())
                     counter += set.size();
@@ -103,9 +97,6 @@ class DoopPrinterTaskListener implements TaskListener {
                         heapAllocationSet.add(methodSignature);
                     }
                 }
-
-//                System.out.println("Call Graph Edge map size: " + this.miMap.size());
-//                System.out.println(this.miMap);
             }
             /**
              * Otherwise set map field to null and generate empty sets representing doop information such as

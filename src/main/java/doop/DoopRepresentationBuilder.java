@@ -4,6 +4,8 @@ import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Symbol.MethodSymbol;
 import com.sun.tools.javac.util.List;
 
+import static com.sun.tools.javac.code.Symbol.*;
+
 /**
  * Created by anantoni on 14/5/2015.
  */
@@ -32,7 +34,7 @@ public class DoopRepresentationBuilder {
      * @param packageSymbol    the package symbol
      * @return fqType          the fully qualified type
      */
-    private String buildFQType(String type, Symbol.PackageSymbol packageSymbol) {
+    private String buildFQType(String type, PackageSymbol packageSymbol) {
         StringBuilder fqTypeName = new StringBuilder();
         String packge = packageSymbol.getQualifiedName().toString();
 
@@ -92,9 +94,21 @@ public class DoopRepresentationBuilder {
     }
 
     /**
-     *
-     * @param methodSymbol
-     * @return
+     * @param varSymbol the VarSymbol corresponding to the field
+     * @return the signature of the field without args as a string
+     */
+    public String buildDoopFieldSignature(VarSymbol varSymbol) {
+        StringBuilder fieldSignature = new StringBuilder();
+
+        String fqType = buildFQType(varSymbol.enclClass().getQualifiedName().toString(), varSymbol.packge());
+        fieldSignature.append("<").append(fqType).append(": ").append(varSymbol.type).append(" ").append(varSymbol.getQualifiedName()).append(">");
+
+        return fieldSignature.toString();
+    }
+
+    /**
+     * @param methodSymbol the MethodSymbol corresponding to the method
+     * @return the signature of the method without args as a string
      */
     private StringBuilder buildDoopMethodSignatureNoArgs(MethodSymbol methodSymbol) {
         /**
@@ -134,7 +148,7 @@ public class DoopRepresentationBuilder {
          */
         List<Symbol.VarSymbol> parameters = methodSymbol.getParameters();
         for (int i = 0; i < parameters.size(); i++) {
-            Symbol.VarSymbol param = parameters.get(i);
+            VarSymbol param = parameters.get(i);
             String fqType = buildFQType(param.type.toString(), param.packge());
 
             if (i != parameters.size() - 1)
