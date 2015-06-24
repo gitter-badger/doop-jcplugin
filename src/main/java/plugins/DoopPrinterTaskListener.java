@@ -27,6 +27,7 @@ class DoopPrinterTaskListener implements TaskListener {
     private final Reporter reporter;
     private Map<String, Set<String>> vptMap;
     private Map<String, Set<String>> miMap;
+    private Map<Set<String>, Set<String>> ifptMap;
 
     /**
      * DoopPrinterTaskListener constructor.
@@ -97,6 +98,32 @@ class DoopPrinterTaskListener implements TaskListener {
                         heapAllocationSet.add(methodSignature);
                     }
                 }
+
+                this.ifptMap = new HashMap<>();
+                br = new BufferedReader(new FileReader(Configuration.DEFAULT_ANALYSIS_RESULTS_DIR + "InstanceFieldPointsTo.txt"));
+
+                while ((line = br.readLine()) != null) {
+                    String[] columns = line.split(cvsSplitBy);
+                    assert (columns.length == 5);
+
+                    String fieldSignature = columns[2].trim();
+                    String baseHeapAllocation = columns[1].trim();
+                    String heapAllocation = columns[4].trim();
+
+                    Set<String> fieldOfHeapAllocation = new HashSet<>();
+                    fieldOfHeapAllocation.add(baseHeapAllocation);
+                    fieldOfHeapAllocation.add(fieldSignature);
+
+                    if (!this.ifptMap.containsKey(fieldOfHeapAllocation)) {
+                        Set<String> heapAllocationSet = new HashSet<>();
+                        heapAllocationSet.add(heapAllocation);
+                        this.ifptMap.put(fieldOfHeapAllocation, heapAllocationSet);
+                    }
+                    else {
+                        Set<String> heapAllocationSet = this.ifptMap.get(fieldOfHeapAllocation);
+                        heapAllocationSet.add(heapAllocation);
+                    }
+                }
             }
             /**
              * Otherwise set map field to null and generate empty sets representing doop information such as
@@ -161,7 +188,7 @@ class DoopPrinterTaskListener implements TaskListener {
             JCTree treeRoot = (JCTree) arg0.getCompilationUnit();
             InitialScanner initialScanner = new InitialScanner(lineMap);
             treeRoot.accept(initialScanner);
-            treeRoot.accept(new IdentifierScanner(reporter, vptMap, miMap, lineMap,
+            treeRoot.accept(new IdentifierScanner(reporter, vptMap, miMap, ifptMap, lineMap,
                                                     initialScanner.getHeapAllocationMap(),
                                                     initialScanner.getMethodDeclarationMap()));
 

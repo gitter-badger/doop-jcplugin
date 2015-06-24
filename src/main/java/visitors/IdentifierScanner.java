@@ -12,6 +12,7 @@ import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.Name;
 import doop.*;
 import reporters.Reporter;
+import util.Position;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -36,6 +37,7 @@ import java.util.Set;
 public class IdentifierScanner extends TreeScanner {
     private final Map<String, Set<String>> vptMap;
     private final Map<String, Set<String>> miMap;
+    private final Map<Set<String>, Set<String>> ifptMap;
     private final Reporter reporter;
     private final LineMap lineMap;
     private final DoopRepresentationBuilder doopReprBuilder;
@@ -60,17 +62,21 @@ public class IdentifierScanner extends TreeScanner {
      * @param reporter
      */
     public IdentifierScanner(Reporter reporter) {
-        this(reporter, null, null, null, null, null);
+        this(reporter, null, null, null, null, null, null);
     }
 
     /**
      *
      * @param reporter
      * @param vptMap
+     * @param miMap
+     * @param ifptMap
      * @param lineMap
+     * @param heapAllocationMap
+     * @param methodDeclarationMap
      */
     public IdentifierScanner(Reporter reporter, Map<String, Set<String>> vptMap, Map<String, Set<String>> miMap,
-                             LineMap lineMap,
+                             Map<Set<String>, Set<String>> ifptMap, LineMap lineMap,
                              Map<String, HeapAllocation> heapAllocationMap,
                              Map<String, MethodDeclaration> methodDeclarationMap)
 
@@ -78,6 +84,7 @@ public class IdentifierScanner extends TreeScanner {
         this.doopReprBuilder = DoopRepresentationBuilder.getInstance();
         this.reporter = reporter;
         this.vptMap = vptMap;
+        this.ifptMap = ifptMap;
         this.lineMap = lineMap;
         this.miMap = miMap;
         this.constructorInvocationCounter = 0;
@@ -621,7 +628,17 @@ public class IdentifierScanner extends TreeScanner {
 
     @Override
     public void visitSelect(JCTree.JCFieldAccess tree) {
-        scan(tree.selected);
+
+        public void visitSelect(JCTree.JCFieldAccess tree) {
+            scan(tree.selected);
+            if (tree.sym != null && tree.sym instanceof VarSymbol) {
+                System.out.println(tree.sym.getClass());
+                String fieldSignature = this.doopReprBuilder.buildDoopFieldSignature((VarSymbol) tree.sym);
+                System.out.println("Field Signature: " + fieldSignature);
+
+                if (ifptMap.)
+            }
+        }
     }
 
     @Override

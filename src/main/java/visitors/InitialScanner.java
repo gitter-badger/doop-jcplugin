@@ -14,6 +14,9 @@ import doop.MethodDeclaration;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+
+import util.Position;
 
 import static com.sun.tools.javac.code.Symbol.*;
 import static com.sun.tools.javac.tree.JCTree.*;
@@ -51,6 +54,8 @@ public class InitialScanner extends TreeScanner {
     private String currentMethodDoopSignature;
     private String currentMethodCompactName;
 
+    private Map<String, Set<Position>> fieldSignatureMap;
+
     private int heapAllocationCounter;
     private Map<String, Integer> heapAllocationCounterMap = null;
 
@@ -82,6 +87,7 @@ public class InitialScanner extends TreeScanner {
         this.heapAllocationCounterMap = new HashMap<>();
         this.heapAllocationMap = new HashMap<>();
         this.methodDeclarationMap = new HashMap<>();
+        this.fieldSignatureMap = new HashMap<>();
     }
 
 
@@ -106,6 +112,13 @@ public class InitialScanner extends TreeScanner {
         this.methodDeclarationMap = methodDeclarationMap;
     }
 
+    public Map<String, Set<Position>> getFieldSignatureMap() {
+        return fieldSignatureMap;
+    }
+
+    public void setFieldSignatureMap(Map<String, Set<Position>> fieldSignatureMap) {
+        this.fieldSignatureMap = fieldSignatureMap;
+    }
 
     /**
      * Visitor method: Scan a single node.
@@ -445,6 +458,12 @@ public class InitialScanner extends TreeScanner {
             System.out.println(tree.sym.getClass());
             String fieldSignature = this.doopReprBuilder.buildDoopFieldSignature((VarSymbol) tree.sym);
             System.out.println("Field Signature: " + fieldSignature);
+
+            if (fieldSignatureMap.containsKey(fieldSignature)) {
+                fieldSignatureMap.get(fieldSignature).add(new Position(lineMap.getLineNumber(((VarSymbol) tree.sym).pos),
+                                                                        lineMap.getColumnNumber(((VarSymbol) tree.sym).pos),
+                                                                        lineMap.getColumnNumber(((VarSymbol) tree.sym).pos + tree.sym.getQualifiedName().toString().length())));
+            }
         }
     }
 
