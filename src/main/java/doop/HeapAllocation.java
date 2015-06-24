@@ -3,6 +3,7 @@ package doop;
 /**
  * Created by anantoni on 10/6/2015.
  */
+@SuppressWarnings("unused")
 public class HeapAllocation {
     private long startLine;
     private long startColumn;

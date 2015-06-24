@@ -3,6 +3,7 @@ package doop;
 /**
  * Created by anantoni on 15/6/2015.
  */
+@SuppressWarnings("unused")
 public class MethodDeclaration {
     private String methodSignature;
     private long startLine;

@@ -22,7 +22,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class DoopPrinterTaskListener implements TaskListener {
+class DoopPrinterTaskListener implements TaskListener {
 
 
 //    private final JavacTask task;
@@ -33,9 +33,8 @@ public class DoopPrinterTaskListener implements TaskListener {
     /**
      * DoopPrinterTaskListener constructor.
      *
-     * @param javactask
      */
-    public DoopPrinterTaskListener(JavacTask javactask) {
+    public DoopPrinterTaskListener() {
 
 //        this.task = javactask;
         /**

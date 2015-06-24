@@ -10,6 +10,7 @@ import java.util.Set;
 /**
  * @author anantoni
  */
+@SuppressWarnings("unused")
 public class VarPointsTo {
     private long startLine;
     private long startColumn;

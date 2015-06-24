@@ -24,7 +24,7 @@ public class ConsoleReporter implements Reporter {
     }
 
     @Override
-    public void reportFieldPointsTo() {
+    public void reportInstanceFieldPointsTo() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

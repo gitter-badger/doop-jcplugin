@@ -48,7 +48,7 @@ public class IdentifierScanner extends TreeScanner {
     private String currentMethodDoopSignature;
     private String currentMethodCompactName;
 
-    private Map<ClassSymbol, Map<String, Integer>> methodNamesPerClassMap;
+    private final Map<ClassSymbol, Map<String, Integer>> methodNamesPerClassMap;
     private int constructorInvocationCounter;
 
     private int methodInvocationCounter;
@@ -516,7 +516,7 @@ public class IdentifierScanner extends TreeScanner {
                 doopMethodInvocation += "/" + this.constructorInvocationCounter++;
             }
 
-            long invocationPos = 0;
+            long invocationPos;
             if (tree.meth.toString().contains("."))
                 invocationPos = tree.meth.pos + 1;
             else

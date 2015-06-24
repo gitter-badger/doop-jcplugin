@@ -15,6 +15,6 @@ public interface Reporter {
 
     void reportVarPointsTo(VarPointsTo varPointsTo);
     void reportCallGraphEdge(CallGraphEdge callGraphEdge);
-    void reportFieldPointsTo();
+    void reportInstanceFieldPointsTo();
 
 }

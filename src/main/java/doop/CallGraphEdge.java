@@ -5,6 +5,7 @@ import java.util.Set;
 /**
  * Created by anantoni on 15/6/2015.
  */
+@SuppressWarnings("unused")
 public class CallGraphEdge {
 
     private long startLine;

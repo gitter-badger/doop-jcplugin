@@ -12,6 +12,6 @@ public class DoopPrinterPlugin implements Plugin {
 
     @Override
     public void init(JavacTask task, String... arg1) {
-        task.addTaskListener(new DoopPrinterTaskListener(task));
+        task.addTaskListener(new DoopPrinterTaskListener());
     }
 }

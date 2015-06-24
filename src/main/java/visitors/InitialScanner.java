@@ -43,7 +43,7 @@ public class InitialScanner extends TreeScanner {
     private final DoopRepresentationBuilder doopReprBuilder;
 
     private ClassSymbol currentClassSymbol;
-    private Map<ClassSymbol, Map<String, Integer>> methodNamesPerClassMap;
+    private final Map<ClassSymbol, Map<String, Integer>> methodNamesPerClassMap;
     private MethodSymbol currentMethodSymbol;
     private String currentMethodDoopSignature;
     private String currentMethodCompactName;

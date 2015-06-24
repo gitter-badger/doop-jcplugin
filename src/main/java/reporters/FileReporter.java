@@ -20,8 +20,6 @@ public class FileReporter implements Reporter {
     private Map<Long, Set<VarPointsTo>> varPointsToMap = null;
     private Map<Long, Set<CallGraphEdge>> callGraphEdgeMap = null;
 
-
-
     public FileReporter() {
         gson = new Gson();
     }
@@ -56,7 +54,7 @@ public class FileReporter implements Reporter {
     }
 
     @Override
-    public void reportFieldPointsTo() {
+    public void reportInstanceFieldPointsTo() {
 
     }
 
