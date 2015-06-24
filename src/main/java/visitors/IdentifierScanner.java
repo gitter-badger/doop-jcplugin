@@ -10,6 +10,7 @@ import com.sun.tools.javac.tree.TreeScanner;
 import com.sun.tools.javac.util.Assert;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.Name;
+import com.sun.tools.javac.util.Pair;
 import doop.*;
 import reporters.Reporter;
 import util.Position;
@@ -19,6 +20,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import static com.sun.tools.javac.tree.JCTree.*;
 
 /**
  * A subclass of Tree.Visitor, this class defines
@@ -37,13 +40,14 @@ import java.util.Set;
 public class IdentifierScanner extends TreeScanner {
     private final Map<String, Set<String>> vptMap;
     private final Map<String, Set<String>> miMap;
-    private final Map<Set<String>, Set<String>> ifptMap;
+    private final Map<Pair<String, String>, Set<String>> ifptMap;
     private final Reporter reporter;
     private final LineMap lineMap;
     private final DoopRepresentationBuilder doopReprBuilder;
 
     private final Map<String, HeapAllocation> heapAllocationMap;
     private final Map<String, MethodDeclaration>  methodDeclarationMap;
+    private final Map<String, Set<Position>> fieldSignatureMap;
 
     private MethodSymbol currentMethodSymbol;
     private ClassSymbol currentClassSymbol;
@@ -62,7 +66,7 @@ public class IdentifierScanner extends TreeScanner {
      * @param reporter
      */
     public IdentifierScanner(Reporter reporter) {
-        this(reporter, null, null, null, null, null, null);
+        this(reporter, null, null, null, null, null, null, null);
     }
 
     /**
@@ -76,9 +80,10 @@ public class IdentifierScanner extends TreeScanner {
      * @param methodDeclarationMap
      */
     public IdentifierScanner(Reporter reporter, Map<String, Set<String>> vptMap, Map<String, Set<String>> miMap,
-                             Map<Set<String>, Set<String>> ifptMap, LineMap lineMap,
+                             Map<Pair<String, String>, Set<String>> ifptMap, LineMap lineMap,
                              Map<String, HeapAllocation> heapAllocationMap,
-                             Map<String, MethodDeclaration> methodDeclarationMap)
+                             Map<String, MethodDeclaration> methodDeclarationMap,
+                             Map<String, Set<Position>> fieldSignatureMap)
 
     {
         this.doopReprBuilder = DoopRepresentationBuilder.getInstance();
@@ -91,6 +96,7 @@ public class IdentifierScanner extends TreeScanner {
         this.methodInvocationCounter = 0;
         this.heapAllocationMap = heapAllocationMap;
         this.methodDeclarationMap = methodDeclarationMap;
+        this.fieldSignatureMap = fieldSignatureMap;
         this.methodNamesPerClassMap = new HashMap<>();
         this.methodInvocationCounterMap = null;
         this.scanForInvocations = false;
@@ -113,21 +119,21 @@ public class IdentifierScanner extends TreeScanner {
      * @param tree
      */
     public void scanForMethodInvocation(JCTree tree) {
-        if (tree instanceof JCTree.JCIdent) {
-            if (((JCTree.JCIdent) tree).sym instanceof MethodSymbol) {
+        if (tree instanceof JCIdent) {
+            if (((JCIdent) tree).sym instanceof MethodSymbol) {
                 String doopMethodInvocation;
                 /**
                  * If current method is overloaded use its signature to build the variable name.
                  */
                 if (this.methodNamesPerClassMap.get(this.currentClassSymbol).get(this.currentMethodSymbol.getQualifiedName().toString()) > 1)
                     doopMethodInvocation = this.doopReprBuilder.buildDoopMethodInvocationInMethod(this.currentMethodDoopSignature,
-                            this.doopReprBuilder.buildDoopMethodInvocation((Symbol.MethodSymbol) ((JCTree.JCIdent) tree).sym));
+                            this.doopReprBuilder.buildDoopMethodInvocation((Symbol.MethodSymbol) ((JCIdent) tree).sym));
                 /**
                  * Otherwise use its compact name.
                  */
                 else
                     doopMethodInvocation = this.doopReprBuilder.buildDoopMethodInvocationInMethod(this.currentMethodCompactName,
-                            this.doopReprBuilder.buildDoopMethodInvocation((Symbol.MethodSymbol) ((JCTree.JCIdent) tree).sym));
+                            this.doopReprBuilder.buildDoopMethodInvocation((Symbol.MethodSymbol) ((JCIdent) tree).sym));
 
                 /**
                  * Evaluate heap allocation counter within method.
@@ -145,7 +151,7 @@ public class IdentifierScanner extends TreeScanner {
                 System.out.println("\033[35m Method Invocation from scan: \033[0m" + doopMethodInvocation);
                 mapMethodInvocation(doopMethodInvocation,
                                     tree.pos,
-                                    ((JCTree.JCIdent) tree).sym.name.subName(((JCTree.JCIdent) tree).sym.name.toString().lastIndexOf("."),((JCTree.JCIdent) tree).sym.name.toString().indexOf("(")).toString());
+                                    ((JCIdent) tree).sym.name.subName(((JCIdent) tree).sym.name.toString().lastIndexOf("."),((JCIdent) tree).sym.name.toString().indexOf("(")).toString());
 
             }
         }
@@ -161,9 +167,9 @@ public class IdentifierScanner extends TreeScanner {
     public void scan(List<? extends JCTree> trees) {
         if (trees != null)
             for (List<? extends JCTree> l = trees; l.nonEmpty(); l = l.tail) {
-                if (l.head instanceof JCTree.JCIdent) {
-                    if (((JCTree.JCIdent) l.head).sym instanceof MethodSymbol)
-                        System.out.println("Scan list of nodes: " + ((JCTree.JCIdent) l.head).sym.getQualifiedName().toString());
+                if (l.head instanceof JCIdent) {
+                    if (((JCIdent) l.head).sym instanceof MethodSymbol)
+                        System.out.println("Scan list of nodes: " + ((JCIdent) l.head).sym.getQualifiedName().toString());
                 }
                 scan(l.head);
             }
@@ -253,19 +259,19 @@ public class IdentifierScanner extends TreeScanner {
      * **************************************************************************
      */
     @Override
-    public void visitTopLevel(JCTree.JCCompilationUnit tree) {
+    public void visitTopLevel(JCCompilationUnit tree) {
         scan(tree.packageAnnotations);
         scan(tree.pid);
         scan(tree.defs);
     }
 
     @Override
-    public void visitImport(JCTree.JCImport tree) {
+    public void visitImport(JCImport tree) {
         scan(tree.qualid);
     }
 
     @Override
-    public void visitClassDef(JCTree.JCClassDecl tree) {
+    public void visitClassDef(JCClassDecl tree) {
 
         this.currentClassSymbol = tree.sym;
         Map<String, Integer> methodNamesMap;
@@ -296,7 +302,7 @@ public class IdentifierScanner extends TreeScanner {
     }
 
     @Override
-    public void visitMethodDef(JCTree.JCMethodDecl tree) {
+    public void visitMethodDef(JCMethodDecl tree) {
 
         this.scanForInvocations = true;
         this.currentMethodSymbol = tree.sym;
@@ -319,7 +325,7 @@ public class IdentifierScanner extends TreeScanner {
     }
 
     @Override
-    public void visitVarDef(JCTree.JCVariableDecl tree) {
+    public void visitVarDef(JCVariableDecl tree) {
 
         if (tree.sym.isLocal()) {
             String varNameInDoop;
@@ -347,31 +353,31 @@ public class IdentifierScanner extends TreeScanner {
     }
 
     @Override
-    public void visitSkip(JCTree.JCSkip tree) {
+    public void visitSkip(JCSkip tree) {
     }
 
     /**
      * @param tree
      */
     @Override
-    public void visitBlock(JCTree.JCBlock tree) {
+    public void visitBlock(JCBlock tree) {
         scan(tree.stats);
     }
 
     @Override
-    public void visitDoLoop(JCTree.JCDoWhileLoop tree) {
+    public void visitDoLoop(JCDoWhileLoop tree) {
         scan(tree.body);
         scan(tree.cond);
     }
 
     @Override
-    public void visitWhileLoop(JCTree.JCWhileLoop tree) {
+    public void visitWhileLoop(JCWhileLoop tree) {
         scan(tree.cond);
         scan(tree.body);
     }
 
     @Override
-    public void visitForLoop(JCTree.JCForLoop tree) {
+    public void visitForLoop(JCForLoop tree) {
         scan(tree.init);
         scan(tree.cond);
         scan(tree.step);
@@ -379,37 +385,37 @@ public class IdentifierScanner extends TreeScanner {
     }
 
     @Override
-    public void visitForeachLoop(JCTree.JCEnhancedForLoop tree) {
+    public void visitForeachLoop(JCEnhancedForLoop tree) {
         scan(tree.var);
         scan(tree.expr);
         scan(tree.body);
     }
 
     @Override
-    public void visitLabelled(JCTree.JCLabeledStatement tree) {
+    public void visitLabelled(JCLabeledStatement tree) {
         scan(tree.body);
     }
 
     @Override
-    public void visitSwitch(JCTree.JCSwitch tree) {
+    public void visitSwitch(JCSwitch tree) {
         scan(tree.selector);
         scan(tree.cases);
     }
 
     @Override
-    public void visitCase(JCTree.JCCase tree) {
+    public void visitCase(JCCase tree) {
         scan(tree.pat);
         scan(tree.stats);
     }
 
     @Override
-    public void visitSynchronized(JCTree.JCSynchronized tree) {
+    public void visitSynchronized(JCSynchronized tree) {
         scan(tree.lock);
         scan(tree.body);
     }
 
     @Override
-    public void visitTry(JCTree.JCTry tree) {
+    public void visitTry(JCTry tree) {
         scan(tree.resources);
         scan(tree.body);
         scan(tree.catchers);
@@ -417,56 +423,56 @@ public class IdentifierScanner extends TreeScanner {
     }
 
     @Override
-    public void visitCatch(JCTree.JCCatch tree) {
+    public void visitCatch(JCCatch tree) {
         scan(tree.param);
         scan(tree.body);
     }
 
     @Override
-    public void visitConditional(JCTree.JCConditional tree) {
+    public void visitConditional(JCConditional tree) {
         scan(tree.cond);
         scan(tree.truepart);
         scan(tree.falsepart);
     }
 
     @Override
-    public void visitIf(JCTree.JCIf tree) {
+    public void visitIf(JCIf tree) {
         scan(tree.cond);
         scan(tree.thenpart);
         scan(tree.elsepart);
     }
 
     @Override
-    public void visitExec(JCTree.JCExpressionStatement tree) {
+    public void visitExec(JCExpressionStatement tree) {
         scan(tree.expr);
     }
 
     @Override
-    public void visitBreak(JCTree.JCBreak tree) {
+    public void visitBreak(JCBreak tree) {
     }
 
     @Override
-    public void visitContinue(JCTree.JCContinue tree) {
+    public void visitContinue(JCContinue tree) {
     }
 
     @Override
-    public void visitReturn(JCTree.JCReturn tree) {
+    public void visitReturn(JCReturn tree) {
         scan(tree.expr);
     }
 
     @Override
-    public void visitThrow(JCTree.JCThrow tree) {
+    public void visitThrow(JCThrow tree) {
         scan(tree.expr);
     }
 
     @Override
-    public void visitAssert(JCTree.JCAssert tree) {
+    public void visitAssert(JCAssert tree) {
         scan(tree.cond);
         scan(tree.detail);
     }
 
     @Override
-    public void visitApply(JCTree.JCMethodInvocation tree) {
+    public void visitApply(JCMethodInvocation tree) {
         scan(tree.typeargs);
         scan(tree.meth);
         Class<?> clazz = tree.meth.getClass();
@@ -535,7 +541,7 @@ public class IdentifierScanner extends TreeScanner {
     }
 
     @Override
-    public void visitNewClass(JCTree.JCNewClass tree) {
+    public void visitNewClass(JCNewClass tree) {
         scan(tree.encl);
         scan(tree.typeargs);
         scan(tree.clazz);
@@ -566,7 +572,7 @@ public class IdentifierScanner extends TreeScanner {
     }
 
     @Override
-    public void visitNewArray(JCTree.JCNewArray tree) {
+    public void visitNewArray(JCNewArray tree) {
         scan(tree.annotations);
         scan(tree.elemtype);
         scan(tree.dims);
@@ -575,80 +581,93 @@ public class IdentifierScanner extends TreeScanner {
     }
 
     @Override
-    public void visitLambda(JCTree.JCLambda tree) {
+    public void visitLambda(JCLambda tree) {
         scan(tree.body);
         scan(tree.params);
     }
 
     @Override
-    public void visitParens(JCTree.JCParens tree) {
+    public void visitParens(JCParens tree) {
         scan(tree.expr);
     }
 
     @Override
-    public void visitAssign(JCTree.JCAssign tree) {
+    public void visitAssign(JCAssign tree) {
         scan(tree.lhs);
         scan(tree.rhs);
     }
 
     @Override
-    public void visitAssignop(JCTree.JCAssignOp tree) {
+    public void visitAssignop(JCAssignOp tree) {
         scan(tree.lhs);
         scan(tree.rhs);
     }
 
     @Override
-    public void visitUnary(JCTree.JCUnary tree) {
+    public void visitUnary(JCUnary tree) {
         scan(tree.arg);
     }
 
     @Override
-    public void visitBinary(JCTree.JCBinary tree) {
+    public void visitBinary(JCBinary tree) {
         scan(tree.lhs);
         scan(tree.rhs);
     }
 
     @Override
-    public void visitTypeCast(JCTree.JCTypeCast tree) {
+    public void visitTypeCast(JCTypeCast tree) {
         scan(tree.clazz);
         scan(tree.expr);
     }
 
     @Override
-    public void visitTypeTest(JCTree.JCInstanceOf tree) {
+    public void visitTypeTest(JCInstanceOf tree) {
         scan(tree.expr);
         scan(tree.clazz);
     }
 
     @Override
-    public void visitIndexed(JCTree.JCArrayAccess tree) {
+    public void visitIndexed(JCArrayAccess tree) {
         scan(tree.indexed);
         scan(tree.index);
     }
 
     @Override
-    public void visitSelect(JCTree.JCFieldAccess tree) {
+    public void visitSelect(JCFieldAccess tree) {
+        scan(tree.selected);
+        if (tree.sym != null && tree.sym instanceof VarSymbol) {
+            System.out.println(tree.sym.getClass());
+            String fieldSignature = this.doopReprBuilder.buildDoopFieldSignature((VarSymbol) tree.sym);
 
-        public void visitSelect(JCTree.JCFieldAccess tree) {
-            scan(tree.selected);
-            if (tree.sym != null && tree.sym instanceof VarSymbol) {
-                System.out.println(tree.sym.getClass());
-                String fieldSignature = this.doopReprBuilder.buildDoopFieldSignature((VarSymbol) tree.sym);
-                System.out.println("Field Signature: " + fieldSignature);
+            for (Pair<String, String> baseHeapAllocationField : this.ifptMap.keySet()) {
+                if (baseHeapAllocationField.snd.equals(fieldSignature)) {
+                    Set<HeapAllocation> heapAllocationSet = new HashSet<>();
+                    Set<String> heapAllocationAsStringSet = this.ifptMap.get(baseHeapAllocationField);
 
-                if (ifptMap.)
+                    for (String heapAllocationAsString : heapAllocationAsStringSet)
+                        if (this.heapAllocationMap.containsKey(heapAllocationAsString))
+                            heapAllocationSet.add(this.heapAllocationMap.get(heapAllocationAsString));
+                    
+
+                    if (this.heapAllocationMap.get(baseHeapAllocationField.fst) != null) {
+                        this.reporter.reportInstanceFieldPointsTo(new InstanceFieldPointsTo(fieldSignature,
+                                this.heapAllocationMap.get(baseHeapAllocationField.fst),
+                                heapAllocationSet,
+                                this.fieldSignatureMap.get(fieldSignature)));
+                    }
+                }
             }
         }
     }
 
     @Override
-    public void visitReference(JCTree.JCMemberReference tree) {
+    public void visitReference(JCMemberReference tree) {
         scan(tree.expr);
         scan(tree.typeargs);
     }
 
     @Override
-    public void visitIdent(JCTree.JCIdent tree) {
+    public void visitIdent(JCIdent tree) {
 
         /**
          * If identifier is a local variable.
@@ -667,74 +686,74 @@ public class IdentifierScanner extends TreeScanner {
     }
 
     @Override
-    public void visitLiteral(JCTree.JCLiteral tree) {
+    public void visitLiteral(JCLiteral tree) {
     }
 
     @Override
-    public void visitTypeIdent(JCTree.JCPrimitiveTypeTree tree) {
+    public void visitTypeIdent(JCPrimitiveTypeTree tree) {
     }
 
     @Override
-    public void visitTypeArray(JCTree.JCArrayTypeTree tree) {
+    public void visitTypeArray(JCArrayTypeTree tree) {
         scan(tree.elemtype);
     }
 
     @Override
-    public void visitTypeApply(JCTree.JCTypeApply tree) {
+    public void visitTypeApply(JCTypeApply tree) {
         scan(tree.clazz);
         scan(tree.arguments);
     }
 
     @Override
-    public void visitTypeUnion(JCTree.JCTypeUnion tree) {
+    public void visitTypeUnion(JCTypeUnion tree) {
         scan(tree.alternatives);
     }
 
     @Override
-    public void visitTypeIntersection(JCTree.JCTypeIntersection tree) {
+    public void visitTypeIntersection(JCTypeIntersection tree) {
         scan(tree.bounds);
     }
 
     @Override
-    public void visitTypeParameter(JCTree.JCTypeParameter tree) {
+    public void visitTypeParameter(JCTypeParameter tree) {
         scan(tree.annotations);
         scan(tree.bounds);
     }
 
     @Override
-    public void visitWildcard(JCTree.JCWildcard tree) {
+    public void visitWildcard(JCWildcard tree) {
         scan(tree.kind);
         if (tree.inner != null)
             scan(tree.inner);
     }
 
     @Override
-    public void visitTypeBoundKind(JCTree.TypeBoundKind that) {
+    public void visitTypeBoundKind(TypeBoundKind that) {
     }
 
     @Override
-    public void visitModifiers(JCTree.JCModifiers tree) {
+    public void visitModifiers(JCModifiers tree) {
         scan(tree.annotations);
     }
 
     @Override
-    public void visitAnnotation(JCTree.JCAnnotation tree) {
+    public void visitAnnotation(JCAnnotation tree) {
         scan(tree.annotationType);
         scan(tree.args);
     }
 
     @Override
-    public void visitAnnotatedType(JCTree.JCAnnotatedType tree) {
+    public void visitAnnotatedType(JCAnnotatedType tree) {
         scan(tree.annotations);
         scan(tree.underlyingType);
     }
 
     @Override
-    public void visitErroneous(JCTree.JCErroneous tree) {
+    public void visitErroneous(JCErroneous tree) {
     }
 
     @Override
-    public void visitLetExpr(JCTree.LetExpr tree) {
+    public void visitLetExpr(LetExpr tree) {
         scan(tree.defs);
         scan(tree.expr);
     }

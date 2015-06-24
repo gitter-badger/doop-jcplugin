@@ -6,7 +6,9 @@
 package reporters;
 
 import doop.CallGraphEdge;
+import doop.InstanceFieldPointsTo;
 import doop.VarPointsTo;
+import sun.security.jca.GetInstance;
 
 /**
  * @author anantoni
@@ -15,6 +17,6 @@ public interface Reporter {
 
     void reportVarPointsTo(VarPointsTo varPointsTo);
     void reportCallGraphEdge(CallGraphEdge callGraphEdge);
-    void reportInstanceFieldPointsTo();
+    void reportInstanceFieldPointsTo(InstanceFieldPointsTo instanceFieldPointsTo);
 
 }

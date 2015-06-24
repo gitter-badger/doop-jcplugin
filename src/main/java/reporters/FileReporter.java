@@ -15,10 +15,12 @@ import java.util.*;
 public class FileReporter implements Reporter {
     private PrintWriter varPointsToWriter = null;
     private PrintWriter callGraphEdgeWriter = null;
+    private PrintWriter instanceFieldPointsToWriter = null;
     private Gson gson = null;
 
     private Map<Long, Set<VarPointsTo>> varPointsToMap = null;
     private Map<Long, Set<CallGraphEdge>> callGraphEdgeMap = null;
+    private Map<Long, Set<InstanceFieldPointsTo>> instanceFieldPointsToMap = null;
 
     public FileReporter() {
         gson = new Gson();
@@ -54,8 +56,18 @@ public class FileReporter implements Reporter {
     }
 
     @Override
-    public void reportInstanceFieldPointsTo() {
+    public void reportInstanceFieldPointsTo(InstanceFieldPointsTo instanceFieldPointsTo) {
+        long line = instanceFieldPointsTo.getBaseHeapAllocation().getStartLine();
 
+        if (!this.instanceFieldPointsToMap.containsKey(line)) {
+            Set<InstanceFieldPointsTo> instanceFieldPointsToSet = new HashSet<>();
+            instanceFieldPointsToSet.add(instanceFieldPointsTo);
+            this.instanceFieldPointsToMap.put(line, instanceFieldPointsToSet);
+        }
+        else {
+            System.out.println("Line: " + line);
+            this.instanceFieldPointsToMap.get(line).add(instanceFieldPointsTo);
+        }
     }
 
     /**
@@ -63,8 +75,9 @@ public class FileReporter implements Reporter {
      */
     public void openJSONReportFiles(JavaFileObject sourceFile) {
         try {
-            varPointsToMap = new HashMap<>();
-            callGraphEdgeMap = new HashMap<>();
+            this.varPointsToMap = new HashMap<>();
+            this.callGraphEdgeMap = new HashMap<>();
+            this.instanceFieldPointsToMap = new HashMap<>();
 
             String varPointsToFilePath = FilenameUtils.concat(Configuration.DEFAULT_OUTPUT_DIR + Configuration.SELECTED_PROJECT, sourceFile.getName().replace(".java", "-VarPointsTo.json"));
             FileUtils.forceMkdir(new File(FilenameUtils.getFullPath(varPointsToFilePath)));
@@ -72,8 +85,12 @@ public class FileReporter implements Reporter {
             String callGraphEdgeFilePath = FilenameUtils.concat(Configuration.DEFAULT_OUTPUT_DIR + Configuration.SELECTED_PROJECT, sourceFile.getName().replace(".java", "-CallGraphEdge.json"));
             FileUtils.forceMkdir(new File(FilenameUtils.getFullPath(callGraphEdgeFilePath)));
 
-            varPointsToWriter = new PrintWriter(varPointsToFilePath, "UTF-8");
-            callGraphEdgeWriter = new PrintWriter(callGraphEdgeFilePath, "UTF-8");
+            String instanceFieldPointsToFilePath = FilenameUtils.concat(Configuration.DEFAULT_OUTPUT_DIR + Configuration.SELECTED_PROJECT, sourceFile.getName().replace(".java", "-InstanceFieldPointsTo.json"));
+            FileUtils.forceMkdir(new File(FilenameUtils.getFullPath(callGraphEdgeFilePath)));
+
+            this.varPointsToWriter = new PrintWriter(varPointsToFilePath, "UTF-8");
+            this.callGraphEdgeWriter = new PrintWriter(callGraphEdgeFilePath, "UTF-8");
+            this.instanceFieldPointsToWriter = new PrintWriter(instanceFieldPointsToFilePath, "UTF-8");
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -84,15 +101,17 @@ public class FileReporter implements Reporter {
      * Writes the JSON files for this particular compilation unit.
      */
     public void writeJSONReport() {
-        varPointsToWriter.write(gson.toJson(varPointsToMap));
-        callGraphEdgeWriter.write(gson.toJson(callGraphEdgeMap));
+        this.varPointsToWriter.write(gson.toJson(varPointsToMap));
+        this.callGraphEdgeWriter.write(gson.toJson(callGraphEdgeMap));
+        this.instanceFieldPointsToWriter.write(gson.toJson(instanceFieldPointsToMap));
     }
 
     /**
      * Closes the JSON files generated for this particular compilation unit.
      */
     public void closeJSONReportFiles() {
-        varPointsToWriter.close();
-        callGraphEdgeWriter.close();
+        this.varPointsToWriter.close();
+        this.callGraphEdgeWriter.close();
+        this.instanceFieldPointsToWriter.close();
     }
 }

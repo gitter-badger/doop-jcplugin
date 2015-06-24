@@ -11,23 +11,19 @@ public class InstanceFieldPointsTo {
 
     private String fieldSignature = null;
     private Set<HeapAllocation> heapAllocationSet = null;
-    private Set<Position> occurences = null;
-    private String baseHeapAllocation = null;
-
-    public Set<Position> getOccurences() {
-        return occurences;
-    }
+    private Set<Position> occurrences = null;
+    private HeapAllocation baseHeapAllocation = null;
 
     /**
      * Constructs a VarPointsTo with a variable name and a heapAllocationSet and its line and column number in the source
      * code level.
      *
      */
-    public InstanceFieldPointsTo(String fieldSignature, String baseHeapAllocation, Set<HeapAllocation> haepAllocationSet, Set<Position> occurences) {
+    public InstanceFieldPointsTo(String fieldSignature, HeapAllocation baseHeapAllocation, Set<HeapAllocation> heapAllocationSet, Set<Position> occurrences) {
         this.fieldSignature = fieldSignature;
         this.heapAllocationSet = heapAllocationSet;
         this.baseHeapAllocation = baseHeapAllocation;
-        this.occurences = occurences;
+        this.occurrences = occurrences;
     }
 
     public String getFieldSignature() {
@@ -46,15 +42,19 @@ public class InstanceFieldPointsTo {
         this.heapAllocationSet = heapAllocationSet;
     }
 
-    public void setOccurences(Set<Position> occurences) {
-        this.occurences = occurences;
+    public Set<Position> getOccurrences() {
+        return occurrences;
     }
 
-    public String getBaseHeapAllocation() {
+    public void setOccurrences(Set<Position> occurrences) {
+        this.occurrences = occurrences;
+    }
+
+    public HeapAllocation getBaseHeapAllocation() {
         return baseHeapAllocation;
     }
 
-    public void setBaseHeapAllocation(String baseHeapAllocation) {
+    public void setBaseHeapAllocation(HeapAllocation baseHeapAllocation) {
         this.baseHeapAllocation = baseHeapAllocation;
     }
 }

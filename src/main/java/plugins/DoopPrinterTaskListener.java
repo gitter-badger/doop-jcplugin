@@ -1,10 +1,10 @@
 package plugins;
 
 import com.sun.source.tree.LineMap;
-import com.sun.source.util.JavacTask;
 import com.sun.source.util.TaskEvent;
 import com.sun.source.util.TaskListener;
 import com.sun.tools.javac.tree.JCTree;
+import com.sun.tools.javac.util.Pair;
 import conf.Configuration;
 import reporters.ConsoleReporter;
 import reporters.FileReporter;
@@ -27,7 +27,7 @@ class DoopPrinterTaskListener implements TaskListener {
     private final Reporter reporter;
     private Map<String, Set<String>> vptMap;
     private Map<String, Set<String>> miMap;
-    private Map<Set<String>, Set<String>> ifptMap;
+    private Map<Pair<String, String>, Set<String>> ifptMap;
 
     /**
      * DoopPrinterTaskListener constructor.
@@ -110,20 +110,19 @@ class DoopPrinterTaskListener implements TaskListener {
                     String baseHeapAllocation = columns[1].trim();
                     String heapAllocation = columns[4].trim();
 
-                    Set<String> fieldOfHeapAllocation = new HashSet<>();
-                    fieldOfHeapAllocation.add(baseHeapAllocation);
-                    fieldOfHeapAllocation.add(fieldSignature);
+                    Pair<String, String> baseHeapAllocationField = new Pair<>(baseHeapAllocation, fieldSignature);
 
-                    if (!this.ifptMap.containsKey(fieldOfHeapAllocation)) {
+                    if (!this.ifptMap.containsKey(baseHeapAllocationField)) {
                         Set<String> heapAllocationSet = new HashSet<>();
                         heapAllocationSet.add(heapAllocation);
-                        this.ifptMap.put(fieldOfHeapAllocation, heapAllocationSet);
+                        this.ifptMap.put(baseHeapAllocationField, heapAllocationSet);
                     }
                     else {
-                        Set<String> heapAllocationSet = this.ifptMap.get(fieldOfHeapAllocation);
+                        Set<String> heapAllocationSet = this.ifptMap.get(baseHeapAllocationField);
                         heapAllocationSet.add(heapAllocation);
                     }
                 }
+                System.out.println(this.ifptMap);
             }
             /**
              * Otherwise set map field to null and generate empty sets representing doop information such as
@@ -160,6 +159,7 @@ class DoopPrinterTaskListener implements TaskListener {
         }
     }
 
+
     /**
      * After the ANALYZE task for each compilation unit the identifier scanner is called to identify variables and
      * method invocations.
@@ -190,7 +190,8 @@ class DoopPrinterTaskListener implements TaskListener {
             treeRoot.accept(initialScanner);
             treeRoot.accept(new IdentifierScanner(reporter, vptMap, miMap, ifptMap, lineMap,
                                                     initialScanner.getHeapAllocationMap(),
-                                                    initialScanner.getMethodDeclarationMap()));
+                                                    initialScanner.getMethodDeclarationMap(),
+                                                    initialScanner.getFieldSignatureMap()));
 
             /**
              * Close all files.
