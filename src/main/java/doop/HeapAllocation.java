@@ -36,7 +36,7 @@ public class HeapAllocation {
     }
 
     public long getStartColumn() {
-        return startColumn;
+        return this.startColumn;
     }
 
     public void setStartColumn(long startColumn) {
@@ -44,7 +44,7 @@ public class HeapAllocation {
     }
 
     public long getEndLine() {
-        return endLine;
+        return this.endLine;
     }
 
     public void setEndLine(long endLine) {
@@ -52,7 +52,7 @@ public class HeapAllocation {
     }
 
     public long getEndColumn() {
-        return endColumn;
+        return this.endColumn;
     }
 
     public void setEndColumn(long endColumn) {
@@ -60,7 +60,7 @@ public class HeapAllocation {
     }
 
     public String getDoopAllocationName() {
-        return doopAllocationName;
+        return this.doopAllocationName;
     }
 
     public void setDoopAllocationName(String doopAllocationName) {

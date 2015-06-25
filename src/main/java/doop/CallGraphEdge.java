@@ -38,7 +38,7 @@ public class CallGraphEdge {
     }
 
     public long getStartColumn() {
-        return startColumn;
+        return this.startColumn;
     }
 
     public void setStartColumn(long startColumn) {
@@ -46,7 +46,7 @@ public class CallGraphEdge {
     }
 
     public long getEndLine() {
-        return endLine;
+        return this.endLine;
     }
 
     public void setEndLine(long endLine) {
@@ -54,7 +54,7 @@ public class CallGraphEdge {
     }
 
     public long getEndColumn() {
-        return endColumn;
+        return this.endColumn;
     }
 
     public void setEndColumn(long endColumn) {
@@ -62,7 +62,7 @@ public class CallGraphEdge {
     }
 
     public String getMethodInvocationInDoop() {
-        return methodInvocationInDoop;
+        return this.methodInvocationInDoop;
     }
 
     public void setMethodInvocationInDoop(String methodInvocationInDoop) {
@@ -70,7 +70,7 @@ public class CallGraphEdge {
     }
 
     public Set<MethodDeclaration> getMethodDeclarationSet() {
-        return methodDeclarationSet;
+        return this.methodDeclarationSet;
     }
 
     public void setMethodDeclarationSet(Set<MethodDeclaration> methodDeclarationSet) {

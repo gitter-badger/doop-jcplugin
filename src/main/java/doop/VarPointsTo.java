@@ -21,7 +21,7 @@ public class VarPointsTo {
     private Set<HeapAllocation> heapAllocationSet = null;
 
     public long getStartLine() {
-        return startLine;
+        return this.startLine;
     }
 
     public void setStartLine(long startLine) {
@@ -29,7 +29,7 @@ public class VarPointsTo {
     }
 
     public long getStartColumn() {
-        return startColumn;
+        return this.startColumn;
     }
 
     public void setStartColumn(long startColumn) {
@@ -37,7 +37,7 @@ public class VarPointsTo {
     }
 
     public long getEndLine() {
-        return endLine;
+        return this.endLine;
     }
 
     public void setEndLine(long endLine) {
@@ -45,7 +45,7 @@ public class VarPointsTo {
     }
 
     public long getEndColumn() {
-        return endColumn;
+        return this.endColumn;
     }
 
     public void setEndColumn(long endColumn) {
@@ -53,7 +53,7 @@ public class VarPointsTo {
     }
 
     public String getVarName() {
-        return varName;
+        return this.varName;
     }
 
     public void setVarName(String varName) {

@@ -27,7 +27,7 @@ public class InstanceFieldPointsTo {
     }
 
     public String getFieldSignature() {
-        return fieldSignature;
+        return this.fieldSignature;
     }
 
     public void setFieldSignature(String fieldSignature) {
@@ -35,7 +35,7 @@ public class InstanceFieldPointsTo {
     }
 
     public Set<HeapAllocation> getHeapAllocationSet() {
-        return heapAllocationSet;
+        return this.heapAllocationSet;
     }
 
     public void setHeapAllocationSet(Set<HeapAllocation> heapAllocationSet) {
@@ -43,7 +43,7 @@ public class InstanceFieldPointsTo {
     }
 
     public Set<Position> getOccurrences() {
-        return occurrences;
+        return this.occurrences;
     }
 
     public void setOccurrences(Set<Position> occurrences) {
@@ -51,7 +51,7 @@ public class InstanceFieldPointsTo {
     }
 
     public HeapAllocation getBaseHeapAllocation() {
-        return baseHeapAllocation;
+        return this.baseHeapAllocation;
     }
 
     public void setBaseHeapAllocation(HeapAllocation baseHeapAllocation) {

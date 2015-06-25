@@ -62,19 +62,19 @@ class DoopPrinterTaskListener implements TaskListener {
                     String var = columns[3].trim();
                     String heapAllocation = columns[1].trim();
 
-                    if (!vptMap.containsKey(var)) {
+                    if (!this.vptMap.containsKey(var)) {
                         Set<String> heapAllocationSet = new HashSet<>();
                         heapAllocationSet.add(heapAllocation);
-                        vptMap.put(var, heapAllocationSet);
+                        this.vptMap.put(var, heapAllocationSet);
                     }
                     else {
-                        Set<String> heapAllocationSet = vptMap.get(var);
+                        Set<String> heapAllocationSet = this.vptMap.get(var);
                         heapAllocationSet.add(heapAllocation);
                     }
                 }
 
                 int counter = 0;
-                for (Set<String> set : vptMap.values())
+                for (Set<String> set : this.vptMap.values())
                     counter += set.size();
                 System.out.println(counter);
 
@@ -179,8 +179,8 @@ class DoopPrinterTaskListener implements TaskListener {
             /**
              * Open all necessary json files to write facts.
              */
-            if (reporter instanceof FileReporter)
-                ((FileReporter) reporter).openJSONReportFiles(arg0.getSourceFile());
+            if (this.reporter instanceof FileReporter)
+                ((FileReporter) this.reporter).openJSONReportFiles(arg0.getSourceFile());
 
             /**
              * Get AST root for this source code file.
@@ -188,17 +188,17 @@ class DoopPrinterTaskListener implements TaskListener {
             JCTree treeRoot = (JCTree) arg0.getCompilationUnit();
             InitialScanner initialScanner = new InitialScanner(lineMap);
             treeRoot.accept(initialScanner);
-            treeRoot.accept(new IdentifierScanner(reporter, vptMap, miMap, ifptMap, lineMap,
+            treeRoot.accept(new IdentifierScanner(this.reporter, this.vptMap, this.miMap, this.ifptMap,
+                                                    lineMap,
                                                     initialScanner.getHeapAllocationMap(),
                                                     initialScanner.getMethodDeclarationMap(),
                                                     initialScanner.getFieldSignatureMap()));
-
             /**
              * Close all files.
              */
-            if (reporter instanceof FileReporter) {
-                ((FileReporter) reporter).writeJSONReport();
-                ((FileReporter) reporter).closeJSONReportFiles();
+            if (this.reporter instanceof FileReporter) {
+                ((FileReporter) this.reporter).writeJSONReport();
+                ((FileReporter) this.reporter).closeJSONReportFiles();
             }
         }
     }

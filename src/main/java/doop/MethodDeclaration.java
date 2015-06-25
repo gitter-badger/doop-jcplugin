@@ -32,7 +32,7 @@ public class MethodDeclaration {
     }
 
     public String getMethodSignature() {
-        return methodSignature;
+        return this.methodSignature;
     }
 
     public void setMethodSignature(String methodSignature) {
@@ -40,7 +40,7 @@ public class MethodDeclaration {
     }
 
     public long getStartLine() {
-        return startLine;
+        return this.startLine;
     }
 
     public void setStartLine(long startLine) {
@@ -56,7 +56,7 @@ public class MethodDeclaration {
     }
 
     public long getEndLine() {
-        return endLine;
+        return this.endLine;
     }
 
     public void setEndLine(long endLine) {
@@ -64,7 +64,7 @@ public class MethodDeclaration {
     }
 
     public long getEndColumn() {
-        return endColumn;
+        return this.endColumn;
     }
 
     public void setEndColumn(long endColumn) {

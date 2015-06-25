@@ -23,11 +23,17 @@ public class FileReporter implements Reporter {
     private Map<Long, Set<InstanceFieldPointsTo>> instanceFieldPointsToMap = null;
 
     public FileReporter() {
-        gson = new Gson();
+        this.gson = new Gson();
     }
 
+    /**
+     * Adds the VarPointsTo object to the [line:{VarPointsTo}] map.
+     *
+     * @param varPointsTo
+     */
     @Override
     public void reportVarPointsTo(VarPointsTo varPointsTo) {
+
         long line = varPointsTo.getStartLine();
         if (!this.varPointsToMap.containsKey(line)) {
             Set<VarPointsTo> varPointsToSet = new HashSet<>();
@@ -40,6 +46,11 @@ public class FileReporter implements Reporter {
         }
     }
 
+    /**
+     * Adds the CallGraphEdge object to the [line:{CallGraphEdge}] map.
+     *
+     * @param callGraphEdge
+     */
     @Override
     public void reportCallGraphEdge(CallGraphEdge callGraphEdge) {
 
@@ -55,10 +66,15 @@ public class FileReporter implements Reporter {
         }
     }
 
+    /**
+     * Adds the instanceFieldPointsTo object to the [line:{InstanceFieldPointsTo}] map.
+     *
+     * @param instanceFieldPointsTo
+     */
     @Override
     public void reportInstanceFieldPointsTo(InstanceFieldPointsTo instanceFieldPointsTo) {
-        long line = instanceFieldPointsTo.getBaseHeapAllocation().getStartLine();
 
+        long line = instanceFieldPointsTo.getBaseHeapAllocation().getStartLine();
         if (!this.instanceFieldPointsToMap.containsKey(line)) {
             Set<InstanceFieldPointsTo> instanceFieldPointsToSet = new HashSet<>();
             instanceFieldPointsToSet.add(instanceFieldPointsTo);
@@ -71,22 +87,27 @@ public class FileReporter implements Reporter {
     }
 
     /**
-     * @param sourceFile   the source file object of the currently processed compilation unit.
+     * @param sourceFile the source file object of the currently processed compilation unit.
      */
     public void openJSONReportFiles(JavaFileObject sourceFile) {
         try {
+
             this.varPointsToMap = new HashMap<>();
             this.callGraphEdgeMap = new HashMap<>();
             this.instanceFieldPointsToMap = new HashMap<>();
 
-            String varPointsToFilePath = FilenameUtils.concat(Configuration.DEFAULT_OUTPUT_DIR + Configuration.SELECTED_PROJECT, sourceFile.getName().replace(".java", "-VarPointsTo.json"));
+            String varPointsToFilePath = FilenameUtils.concat(Configuration.DEFAULT_OUTPUT_DIR + Configuration.SELECTED_PROJECT,
+                                                                sourceFile.getName().replace(".java", "-VarPointsTo.json"));
+
+            String callGraphEdgeFilePath = FilenameUtils.concat(Configuration.DEFAULT_OUTPUT_DIR + Configuration.SELECTED_PROJECT,
+                                                                sourceFile.getName().replace(".java", "-CallGraphEdge.json"));
+
+            String instanceFieldPointsToFilePath = FilenameUtils.concat(Configuration.DEFAULT_OUTPUT_DIR + Configuration.SELECTED_PROJECT,
+                                                                sourceFile.getName().replace(".java", "-InstanceFieldPointsTo.json"));
+
             FileUtils.forceMkdir(new File(FilenameUtils.getFullPath(varPointsToFilePath)));
-
-            String callGraphEdgeFilePath = FilenameUtils.concat(Configuration.DEFAULT_OUTPUT_DIR + Configuration.SELECTED_PROJECT, sourceFile.getName().replace(".java", "-CallGraphEdge.json"));
             FileUtils.forceMkdir(new File(FilenameUtils.getFullPath(callGraphEdgeFilePath)));
-
-            String instanceFieldPointsToFilePath = FilenameUtils.concat(Configuration.DEFAULT_OUTPUT_DIR + Configuration.SELECTED_PROJECT, sourceFile.getName().replace(".java", "-InstanceFieldPointsTo.json"));
-            FileUtils.forceMkdir(new File(FilenameUtils.getFullPath(callGraphEdgeFilePath)));
+            FileUtils.forceMkdir(new File(FilenameUtils.getFullPath(instanceFieldPointsToFilePath)));
 
             this.varPointsToWriter = new PrintWriter(varPointsToFilePath, "UTF-8");
             this.callGraphEdgeWriter = new PrintWriter(callGraphEdgeFilePath, "UTF-8");
@@ -101,9 +122,9 @@ public class FileReporter implements Reporter {
      * Writes the JSON files for this particular compilation unit.
      */
     public void writeJSONReport() {
-        this.varPointsToWriter.write(gson.toJson(varPointsToMap));
-        this.callGraphEdgeWriter.write(gson.toJson(callGraphEdgeMap));
-        this.instanceFieldPointsToWriter.write(gson.toJson(instanceFieldPointsToMap));
+        this.varPointsToWriter.write(this.gson.toJson(this.varPointsToMap));
+        this.callGraphEdgeWriter.write(this.gson.toJson(this.callGraphEdgeMap));
+        this.instanceFieldPointsToWriter.write(this.gson.toJson(this.instanceFieldPointsToMap));
     }
 
     /**
