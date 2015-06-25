@@ -647,9 +647,10 @@ public class IdentifierScanner extends TreeScanner {
                     for (String heapAllocationAsString : heapAllocationAsStringSet)
                         if (this.heapAllocationMap.containsKey(heapAllocationAsString))
                             heapAllocationSet.add(this.heapAllocationMap.get(heapAllocationAsString));
-                    
 
+                    System.out.println(this.fieldSignatureMap);
                     if (this.heapAllocationMap.get(baseHeapAllocationField.fst) != null) {
+
                         this.reporter.reportInstanceFieldPointsTo(new InstanceFieldPointsTo(fieldSignature,
                                 this.heapAllocationMap.get(baseHeapAllocationField.fst),
                                 heapAllocationSet,

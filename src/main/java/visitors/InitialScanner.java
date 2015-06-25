@@ -13,6 +13,7 @@ import doop.HeapAllocation;
 import doop.MethodDeclaration;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -460,9 +461,19 @@ public class InitialScanner extends TreeScanner {
             System.out.println("Field Signature: " + fieldSignature);
 
             if (fieldSignatureMap.containsKey(fieldSignature)) {
-                fieldSignatureMap.get(fieldSignature).add(new Position(lineMap.getLineNumber(((VarSymbol) tree.sym).pos),
-                                                                        lineMap.getColumnNumber(((VarSymbol) tree.sym).pos),
-                                                                        lineMap.getColumnNumber(((VarSymbol) tree.sym).pos + tree.sym.getQualifiedName().toString().length())));
+                if (lineMap.getLineNumber(((VarSymbol) tree.sym).pos) > 0)
+                    fieldSignatureMap.get(fieldSignature).add(new Position(lineMap.getLineNumber(((VarSymbol) tree.sym).pos),
+                                                                           lineMap.getColumnNumber(((VarSymbol) tree.sym).pos),
+                                                                           lineMap.getColumnNumber(((VarSymbol) tree.sym).pos + tree.sym.getQualifiedName().toString().length())));
+            }
+            else {
+                Set<Position> positionSet = new HashSet<>();
+                if (lineMap.getLineNumber(((VarSymbol) tree.sym).pos) > 0)
+                    positionSet.add(new Position(lineMap.getLineNumber(((VarSymbol) tree.sym).pos),
+                                                 lineMap.getColumnNumber(((VarSymbol) tree.sym).pos),
+                                                 lineMap.getColumnNumber(((VarSymbol) tree.sym).pos + tree.sym.getQualifiedName().toString().length())));
+
+                fieldSignatureMap.put(fieldSignature, positionSet);
             }
         }
     }

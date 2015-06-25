@@ -1,7 +1,6 @@
 package doop;
 
 import util.Position;
-
 import java.util.Set;
 
 /**
