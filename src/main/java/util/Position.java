@@ -51,4 +51,8 @@ public class Position {
     public void setEndColumn(long endColumn) {
         this.endColumn = endColumn;
     }
+
+    public String toString() {
+        return "(" + this.startLine + ", " + this.startColumn + ", " + this.endColumn + ")";
+    }
 }
