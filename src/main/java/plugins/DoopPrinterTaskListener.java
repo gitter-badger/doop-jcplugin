@@ -107,8 +107,8 @@ class DoopPrinterTaskListener implements TaskListener {
                     assert (columns.length == 5);
 
                     String fieldSignature = columns[2].trim();
-                    String baseHeapAllocation = columns[1].trim();
-                    String heapAllocation = columns[4].trim();
+                    String baseHeapAllocation = columns[4].trim();
+                    String heapAllocation = columns[1].trim();
 
                     Pair<String, String> baseHeapAllocationField = new Pair<>(baseHeapAllocation, fieldSignature);
 
@@ -158,7 +158,6 @@ class DoopPrinterTaskListener implements TaskListener {
             return new ConsoleReporter();
         }
     }
-
 
     /**
      * After the ANALYZE task for each compilation unit the identifier scanner is called to identify variables and
