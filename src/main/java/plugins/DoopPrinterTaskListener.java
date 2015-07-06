@@ -26,7 +26,7 @@ class DoopPrinterTaskListener implements TaskListener {
 
     private final Reporter reporter;
     private Map<String, Set<String>> vptMap;
-    private Map<String, Set<String>> miMap;
+    private Map<String, Set<String>> cgeMap;
     private Map<Pair<String, String>, Set<String>> ifptMap;
 
     /**
@@ -78,7 +78,7 @@ class DoopPrinterTaskListener implements TaskListener {
                     counter += set.size();
                 System.out.println(counter);
 
-                this.miMap = new HashMap<>();
+                this.cgeMap = new HashMap<>();
                 br = new BufferedReader(new FileReader(Configuration.DEFAULT_ANALYSIS_RESULTS_DIR + "CallGraphEdge.txt"));
 
                 while ((line = br.readLine()) != null) {
@@ -88,13 +88,13 @@ class DoopPrinterTaskListener implements TaskListener {
                     String methodSignature = columns[3].trim();
                     String methodInvocation = columns[1].trim();
 
-                    if (!this.miMap.containsKey(methodInvocation)) {
+                    if (!this.cgeMap.containsKey(methodInvocation)) {
                         Set<String> methodSignatureSet = new HashSet<>();
                         methodSignatureSet.add(methodSignature);
-                        this.miMap.put(methodInvocation, methodSignatureSet);
+                        this.cgeMap.put(methodInvocation, methodSignatureSet);
                     }
                     else {
-                        Set<String> heapAllocationSet = this.miMap.get(methodInvocation);
+                        Set<String> heapAllocationSet = this.cgeMap.get(methodInvocation);
                         heapAllocationSet.add(methodSignature);
                     }
                 }
@@ -128,8 +128,11 @@ class DoopPrinterTaskListener implements TaskListener {
              * Otherwise set map field to null and generate empty sets representing doop information such as
              * heap allocation sets for varPointsTo. The empty sets will be filled later by another Java application.
              */
-            else
+            else {
                 this.vptMap = null;
+                this.cgeMap = null;
+                this.ifptMap = null;
+            }
         } catch (IOException ex) {
             Logger.getLogger(DoopPrinterTaskListener.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
@@ -160,9 +163,8 @@ class DoopPrinterTaskListener implements TaskListener {
     }
 
     /**
-     * After the ANALYZE task for each compilation unit the identifier scanner is called to identify variables and
-     * method invocations.
-     *
+     * After the ANALYZE task for each compilation unit the initial scanner is called to identify method declarations
+     * heap allocations
      * @param arg0 the finished TaskEvent
      */
     @Override
@@ -182,18 +184,18 @@ class DoopPrinterTaskListener implements TaskListener {
                 ((FileReporter) this.reporter).openJSONReportFiles(arg0.getSourceFile());
 
             /**
-             * Get AST root for this source code file.
+             * Get the AST root for this source code file.
              */
             JCTree treeRoot = (JCTree) arg0.getCompilationUnit();
             InitialScanner initialScanner = new InitialScanner(lineMap);
             treeRoot.accept(initialScanner);
-            treeRoot.accept(new IdentifierScanner(this.reporter, this.vptMap, this.miMap, this.ifptMap,
+            treeRoot.accept(new IdentifierScanner(this.reporter, this.vptMap, this.cgeMap, this.ifptMap,
                                                     lineMap,
                                                     initialScanner.getHeapAllocationMap(),
                                                     initialScanner.getMethodDeclarationMap(),
                                                     initialScanner.getFieldSignatureMap()));
             /**
-             * Close all files.
+             * Write and close all files.
              */
             if (this.reporter instanceof FileReporter) {
                 ((FileReporter) this.reporter).writeJSONReport();

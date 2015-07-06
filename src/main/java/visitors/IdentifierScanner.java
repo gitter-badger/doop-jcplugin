@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.sun.tools.javac.tree.JCTree.*;
 
@@ -39,7 +40,7 @@ import static com.sun.tools.javac.tree.JCTree.*;
  */
 public class IdentifierScanner extends TreeScanner {
     private final Map<String, Set<String>> vptMap;
-    private final Map<String, Set<String>> miMap;
+    private final Map<String, Set<String>> cfeMap;
     private final Map<Pair<String, String>, Set<String>> ifptMap;
     private final Reporter reporter;
     private final LineMap lineMap;
@@ -73,13 +74,13 @@ public class IdentifierScanner extends TreeScanner {
      *
      * @param reporter
      * @param vptMap
-     * @param miMap
+     * @param cfeMap
      * @param ifptMap
      * @param lineMap
      * @param heapAllocationMap
      * @param methodDeclarationMap
      */
-    public IdentifierScanner(Reporter reporter, Map<String, Set<String>> vptMap, Map<String, Set<String>> miMap,
+    public IdentifierScanner(Reporter reporter, Map<String, Set<String>> vptMap, Map<String, Set<String>> cfeMap,
                              Map<Pair<String, String>, Set<String>> ifptMap, LineMap lineMap,
                              Map<String, HeapAllocation> heapAllocationMap,
                              Map<String, MethodDeclaration> methodDeclarationMap,
@@ -91,7 +92,7 @@ public class IdentifierScanner extends TreeScanner {
         this.vptMap = vptMap;
         this.ifptMap = ifptMap;
         this.lineMap = lineMap;
-        this.miMap = miMap;
+        this.cfeMap = cfeMap;
         this.constructorInvocationCounter = 0;
         this.methodInvocationCounter = 0;
         this.heapAllocationMap = heapAllocationMap;
@@ -110,51 +111,6 @@ public class IdentifierScanner extends TreeScanner {
      */
     @Override
     public void scan(JCTree tree) {
-        if (tree != null) tree.accept(this);
-    }
-
-    /**
-     * Visitor method: Scan a single node for a method Invocation.
-     *
-     * @param tree
-     */
-    public void scanForMethodInvocation(JCTree tree) {
-        if (tree instanceof JCIdent) {
-            if (((JCIdent) tree).sym instanceof MethodSymbol) {
-                String doopMethodInvocation;
-                /**
-                 * If current method is overloaded use its signature to build the variable name.
-                 */
-                if (this.methodNamesPerClassMap.get(this.currentClassSymbol).get(this.currentMethodSymbol.getQualifiedName().toString()) > 1)
-                    doopMethodInvocation = this.doopReprBuilder.buildDoopMethodInvocationInMethod(this.currentMethodDoopSignature,
-                            this.doopReprBuilder.buildDoopMethodInvocation((Symbol.MethodSymbol) ((JCIdent) tree).sym));
-                /**
-                 * Otherwise use its compact name.
-                 */
-                else
-                    doopMethodInvocation = this.doopReprBuilder.buildDoopMethodInvocationInMethod(this.currentMethodCompactName,
-                            this.doopReprBuilder.buildDoopMethodInvocation((Symbol.MethodSymbol) ((JCIdent) tree).sym));
-
-                /**
-                 * Evaluate heap allocation counter within method.
-                 */
-                if (methodInvocationCounterMap.containsKey(doopMethodInvocation)) {
-                    methodInvocationCounter = methodInvocationCounterMap.get(doopMethodInvocation) + 1;
-                    methodInvocationCounterMap.put(doopMethodInvocation, methodInvocationCounter);
-                }
-                else {
-                    methodInvocationCounter = 0;
-                    methodInvocationCounterMap.put(doopMethodInvocation, 0);
-                }
-                doopMethodInvocation += "/" + this.methodInvocationCounter;
-
-                System.out.println("\033[35m Method Invocation from scan: \033[0m" + doopMethodInvocation);
-                mapMethodInvocation(doopMethodInvocation,
-                                    tree.pos,
-                                    ((JCIdent) tree).sym.name.subName(((JCIdent) tree).sym.name.toString().lastIndexOf("."),((JCIdent) tree).sym.name.toString().indexOf("(")).toString());
-
-            }
-        }
         if (tree != null) tree.accept(this);
     }
 
@@ -179,15 +135,18 @@ public class IdentifierScanner extends TreeScanner {
     /**
      * Add VarPointsTo information to [line : VarPointsTo] map.
      *
-     * @param varNameInDoop
+     * @param doopVarName
      * @param pos
      * @param varName
      */
-    private void mapVarPointsTo(String varNameInDoop, long pos, Name varName) {
+    private void mapVarPointsTo(String doopVarName, long pos, Name varName) {
 
+        /**
+         * If the VarPointsTo map is not null, try to match the doop variable name with doop VarPointsTo facts.
+         */
         if (this.vptMap != null) {
-            if (this.vptMap.containsKey(varNameInDoop)) {
-                Set<String> heapAllocationReprSet = this.vptMap.get(varNameInDoop);
+            if (this.vptMap.containsKey(doopVarName)) {
+                Set<String> heapAllocationReprSet = this.vptMap.get(doopVarName);
                 Set<HeapAllocation> heapAllocationSet = new HashSet<>();
 
                 for (String heapAllocationRepr : heapAllocationReprSet) {
@@ -200,16 +159,19 @@ public class IdentifierScanner extends TreeScanner {
                                                                 lineMap.getColumnNumber(pos),
                                                                 lineMap.getLineNumber(pos + varName.length()),
                                                                 lineMap.getColumnNumber(pos + varName.length()),
-                                                                varNameInDoop,
+                                                                doopVarName,
                                                                 heapAllocationSet));
             }
         }
+        /**
+         * Else report a VarPointsTo object with an empty points-to heap allocation set.
+         */
         else {
             this.reporter.reportVarPointsTo(new VarPointsTo(lineMap.getLineNumber(pos),
                                                             lineMap.getColumnNumber(pos),
                                                             lineMap.getLineNumber(pos + varName.length()),
                                                             lineMap.getColumnNumber(pos + varName.length()),
-                                                            varNameInDoop,
+                                                            doopVarName,
                                                             new HashSet<>()));
         }
     }
@@ -223,9 +185,12 @@ public class IdentifierScanner extends TreeScanner {
      */
     private void mapMethodInvocation(String doopMethodInvocation, long pos, String methodName) {
 
-        if (this.miMap != null) {
-            if (this.miMap.containsKey(doopMethodInvocation)) {
-                Set<String> methodDeclarationReprSet = this.miMap.get(doopMethodInvocation);
+        /**
+         * If the CallGraphEdge Map is not set to null, try to match the doop method invocation representation with doop CallGraphEdge facts.
+         */
+        if (this.cfeMap != null) {
+            if (this.cfeMap.containsKey(doopMethodInvocation)) {
+                Set<String> methodDeclarationReprSet = this.cfeMap.get(doopMethodInvocation);
                 Set<MethodDeclaration> methodDeclarationSet = new HashSet<>();
 
                 for (String methodDeclarationRepr : methodDeclarationReprSet) {
@@ -244,6 +209,9 @@ public class IdentifierScanner extends TreeScanner {
             else
                 System.out.println("Method invocation not found: " + doopMethodInvocation);
         }
+        /**
+         * Else report a CallGraphEdge object with an empty possibly called declaration set.
+         */
         else {
             this.reporter.reportCallGraphEdge(new CallGraphEdge(lineMap.getLineNumber(pos),
                                                                 lineMap.getColumnNumber(pos),
@@ -634,30 +602,31 @@ public class IdentifierScanner extends TreeScanner {
 
     @Override
     public void visitSelect(JCFieldAccess tree) {
+
+        /**
+         *  Report InstanceFieldPointsTo
+         *  Need to report an InstanceFieldPointTO object with empty possibly pointed-to heap allocation set.
+         */
         scan(tree.selected);
         if (tree.sym != null && tree.sym instanceof VarSymbol) {
             System.out.println(tree.sym.getClass());
             String fieldSignature = this.doopReprBuilder.buildDoopFieldSignature((VarSymbol) tree.sym);
 
-            for (Pair<String, String> baseHeapAllocationField : this.ifptMap.keySet()) {
-                if (baseHeapAllocationField.snd.equals(fieldSignature)) {
-                    Set<HeapAllocation> heapAllocationSet = new HashSet<>();
-                    Set<String> heapAllocationAsStringSet = this.ifptMap.get(baseHeapAllocationField);
+            this.ifptMap.keySet().stream().filter(baseHeapAllocationField -> baseHeapAllocationField.snd.equals(fieldSignature)).forEach(baseHeapAllocationField -> {
+                Set<HeapAllocation> heapAllocationSet = new HashSet<>();
+                Set<String> heapAllocationAsStringSet = this.ifptMap.get(baseHeapAllocationField);
 
-                    for (String heapAllocationAsString : heapAllocationAsStringSet)
-                        if (this.heapAllocationMap.containsKey(heapAllocationAsString))
-                            heapAllocationSet.add(this.heapAllocationMap.get(heapAllocationAsString));
+                heapAllocationSet.addAll(heapAllocationAsStringSet.stream().filter(heapAllocationAsString -> this.heapAllocationMap.containsKey(heapAllocationAsString)).map(this.heapAllocationMap::get).collect(Collectors.toList()));
 
-                    System.out.println(this.fieldSignatureMap);
-                    if (this.heapAllocationMap.get(baseHeapAllocationField.fst) != null) {
+                System.out.println(this.fieldSignatureMap);
+                if (this.heapAllocationMap.get(baseHeapAllocationField.fst) != null) {
 
-                        this.reporter.reportInstanceFieldPointsTo(new InstanceFieldPointsTo(fieldSignature,
-                                this.heapAllocationMap.get(baseHeapAllocationField.fst),
-                                heapAllocationSet,
-                                this.fieldSignatureMap.get(fieldSignature)));
-                    }
+                    this.reporter.reportInstanceFieldPointsTo(new InstanceFieldPointsTo(fieldSignature,
+                            this.heapAllocationMap.get(baseHeapAllocationField.fst),
+                            heapAllocationSet,
+                            this.fieldSignatureMap.get(fieldSignature)));
                 }
-            }
+            });
         }
     }
 

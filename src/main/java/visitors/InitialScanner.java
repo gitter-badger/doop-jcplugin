@@ -149,6 +149,10 @@ public class InitialScanner extends TreeScanner {
      * Visitor methods
      * **************************************************************************
      */
+    /**
+     *
+     * @param tree
+     */
     @Override
     public void visitTopLevel(JCCompilationUnit tree) {
         scan(tree.packageAnnotations);
@@ -156,11 +160,20 @@ public class InitialScanner extends TreeScanner {
         scan(tree.defs);
     }
 
+    /**
+     *
+     * @param tree
+     */
     @Override
     public void visitImport(JCImport tree) {
         scan(tree.qualid);
     }
 
+    /**
+     * Visit class declaration AST node.
+     *
+     * @param tree
+     */
     @Override
     public void visitClassDef(JCClassDecl tree) {
 
@@ -192,6 +205,11 @@ public class InitialScanner extends TreeScanner {
         scan(tree.defs);
     }
 
+    /**
+     * Visit method declaration AST node.
+     *
+     * @param tree
+     */
     @Override
     public void visitMethodDef(JCMethodDecl tree) {
         this.currentMethodSymbol = tree.sym;
@@ -214,6 +232,11 @@ public class InitialScanner extends TreeScanner {
         scan(tree.body);
     }
 
+    /**
+     * Visit variable declaration AST node.
+     *
+     * @param tree
+     */
     @Override
     public void visitVarDef(JCVariableDecl tree) {
         scan(tree.mods);
@@ -234,18 +257,30 @@ public class InitialScanner extends TreeScanner {
         scan(tree.stats);
     }
 
+    /**
+     *
+     * @param tree
+     */
     @Override
     public void visitDoLoop(JCDoWhileLoop tree) {
         scan(tree.body);
         scan(tree.cond);
     }
 
+    /**
+     *
+     * @param tree
+     */
     @Override
     public void visitWhileLoop(JCWhileLoop tree) {
         scan(tree.cond);
         scan(tree.body);
     }
 
+    /**
+     *
+     * @param tree
+     */
     @Override
     public void visitForLoop(JCForLoop tree) {
         scan(tree.init);
@@ -254,6 +289,10 @@ public class InitialScanner extends TreeScanner {
         scan(tree.body);
     }
 
+    /**
+     *
+     * @param tree
+     */
     @Override
     public void visitForeachLoop(JCEnhancedForLoop tree) {
         scan(tree.var);
@@ -348,6 +387,11 @@ public class InitialScanner extends TreeScanner {
         scan(tree.args);
     }
 
+    /**
+     * Visit "new Klass()" AST node.
+     *
+     * @param tree
+     */
     @Override
     public void visitNewClass(JCNewClass tree) {
         scan(tree.encl);
@@ -452,6 +496,11 @@ public class InitialScanner extends TreeScanner {
         scan(tree.index);
     }
 
+    /**
+     * Visit field access AST node.
+     *
+     * @param tree
+     */
     @Override
     public void visitSelect(JCFieldAccess tree) {
         scan(tree.selected);

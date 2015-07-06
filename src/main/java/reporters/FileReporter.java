@@ -87,6 +87,8 @@ public class FileReporter implements Reporter {
     }
 
     /**
+     * Create the necessary json files in a replicated project structure.
+     *
      * @param sourceFile the source file object of the currently processed compilation unit.
      */
     public void openJSONReportFiles(JavaFileObject sourceFile) {
