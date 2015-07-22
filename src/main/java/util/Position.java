@@ -8,6 +8,7 @@ public class Position {
     private long startColumn;
     private long endLine;
     private long endColumn;
+    private String compilationUnitName;
 
     public Position(long startLine, long startColumn, long endColumn) {
         this(startLine, startColumn, startLine, endColumn);
@@ -52,7 +53,13 @@ public class Position {
         this.endColumn = endColumn;
     }
 
+    public String getCompilationUnitName() {
+        return this.compilationUnitName;
+    }
+
     public String toString() {
         return "(" + this.startLine + ", " + this.startColumn + ", " + this.endColumn + ")";
     }
+
+
 }
