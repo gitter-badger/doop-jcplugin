@@ -74,3 +74,5 @@ release.properties
 json-output
 .idea
 analysis-results
+build
+.gradle/
