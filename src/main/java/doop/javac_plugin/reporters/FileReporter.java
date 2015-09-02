@@ -2,9 +2,9 @@ package doop.javac_plugin.reporters;
 
 import com.google.gson.Gson;
 import doop.javac_plugin.conf.Configuration;
-import doop.javac_plugin.representations.CallGraphEdge;
-import doop.javac_plugin.representations.InstanceFieldPointsTo;
-import doop.javac_plugin.representations.VarPointsTo;
+import doop.javac_plugin.representation.CallGraphEdge;
+import doop.javac_plugin.representation.InstanceFieldPointsTo;
+import doop.javac_plugin.representation.VarPointsTo;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import javax.tools.JavaFileObject;

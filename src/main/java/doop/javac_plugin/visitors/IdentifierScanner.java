@@ -12,7 +12,7 @@ import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.Name;
 import com.sun.tools.javac.util.Pair;
 import doop.javac_plugin.reporters.Reporter;
-import doop.javac_plugin.representations.*;
+import doop.javac_plugin.representation.*;
 import doop.javac_plugin.util.Position;
 
 import java.lang.reflect.Field;

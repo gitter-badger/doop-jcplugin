@@ -5,9 +5,9 @@
  */
 package doop.javac_plugin.reporters;
 
-import doop.javac_plugin.representations.CallGraphEdge;
-import doop.javac_plugin.representations.InstanceFieldPointsTo;
-import doop.javac_plugin.representations.VarPointsTo;
+import doop.javac_plugin.representation.CallGraphEdge;
+import doop.javac_plugin.representation.InstanceFieldPointsTo;
+import doop.javac_plugin.representation.VarPointsTo;
 
 /**
  * @author anantoni

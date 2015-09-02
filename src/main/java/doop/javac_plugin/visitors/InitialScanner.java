@@ -8,9 +8,9 @@ import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeScanner;
 import com.sun.tools.javac.util.Assert;
 import com.sun.tools.javac.util.List;
-import doop.javac_plugin.representations.DoopRepresentationBuilder;
-import doop.javac_plugin.representations.HeapAllocation;
-import doop.javac_plugin.representations.MethodDeclaration;
+import doop.javac_plugin.representation.DoopRepresentationBuilder;
+import doop.javac_plugin.representation.HeapAllocation;
+import doop.javac_plugin.representation.MethodDeclaration;
 
 import java.util.HashMap;
 import java.util.HashSet;
