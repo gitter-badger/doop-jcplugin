@@ -1,4 +1,4 @@
-package symbols;
+package doop.javac_plugin.symbols;
 
 import java.util.Set;
 

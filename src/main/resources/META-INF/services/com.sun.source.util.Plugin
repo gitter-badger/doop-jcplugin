@@ -1,1 +1,1 @@
-plugins.DoopPrinterPlugin
+doop.javac_plugin.plugins.DoopPrinterPlugin

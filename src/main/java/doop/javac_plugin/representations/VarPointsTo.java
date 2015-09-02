@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package doop;
+package doop.javac_plugin.representations;
 
 import java.util.Set;
 

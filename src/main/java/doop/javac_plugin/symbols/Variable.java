@@ -1,7 +1,6 @@
-package symbols;
+package doop.javac_plugin.symbols;
 
-import jdk.nashorn.internal.ir.Symbol;
-import util.Position;
+import doop.javac_plugin.util.Position;
 
 import java.util.ArrayList;
 

@@ -1,7 +1,8 @@
-package symbols;
+package doop.javac_plugin.symbols;
 
-import util.Position;
+import doop.javac_plugin.util.Position;
 
+import java.lang.*;
 import java.util.ArrayList;
 
 /**

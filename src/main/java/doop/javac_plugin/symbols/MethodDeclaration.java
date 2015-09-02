@@ -1,4 +1,4 @@
-package doop;
+package doop.javac_plugin.symbols;
 
 /**
  * Created by anantoni on 15/6/2015.

@@ -3,12 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package reporters;
+package doop.javac_plugin.reporters;
 
-import doop.CallGraphEdge;
-import doop.InstanceFieldPointsTo;
-import doop.VarPointsTo;
-import sun.security.jca.GetInstance;
+import doop.javac_plugin.representations.CallGraphEdge;
+import doop.javac_plugin.representations.InstanceFieldPointsTo;
+import doop.javac_plugin.representations.VarPointsTo;
 
 /**
  * @author anantoni

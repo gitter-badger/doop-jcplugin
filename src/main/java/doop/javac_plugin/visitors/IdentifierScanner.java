@@ -1,4 +1,4 @@
-package visitors;
+package doop.javac_plugin.visitors;
 
 import com.sun.source.tree.LineMap;
 import com.sun.tools.javac.code.Symbol;
@@ -11,9 +11,9 @@ import com.sun.tools.javac.util.Assert;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.Name;
 import com.sun.tools.javac.util.Pair;
-import doop.*;
-import reporters.Reporter;
-import util.Position;
+import doop.javac_plugin.reporters.Reporter;
+import doop.javac_plugin.representations.*;
+import doop.javac_plugin.util.Position;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;

@@ -1,4 +1,4 @@
-package doop;
+package doop.javac_plugin.representations;
 
 import java.util.Set;
 

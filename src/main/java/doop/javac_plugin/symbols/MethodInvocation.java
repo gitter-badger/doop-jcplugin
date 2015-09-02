@@ -1,6 +1,6 @@
-package symbols;
+package doop.javac_plugin.symbols;
 
-import util.Position;
+import doop.javac_plugin.util.Position;
 
 /**
  * Created by anantoni on 22/7/2015.

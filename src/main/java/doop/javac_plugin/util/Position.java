@@ -1,4 +1,4 @@
-package util;
+package doop.javac_plugin.util;
 
 /**
  * Created by anantoni on 24/6/2015.

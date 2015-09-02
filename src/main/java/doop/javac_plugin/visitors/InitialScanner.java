@@ -1,4 +1,4 @@
-package visitors;
+package doop.javac_plugin.visitors;
 
 import com.sun.source.tree.LineMap;
 import com.sun.tools.javac.code.Symbol;
@@ -8,16 +8,16 @@ import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeScanner;
 import com.sun.tools.javac.util.Assert;
 import com.sun.tools.javac.util.List;
-import doop.DoopRepresentationBuilder;
-import doop.HeapAllocation;
-import doop.MethodDeclaration;
+import doop.javac_plugin.representations.DoopRepresentationBuilder;
+import doop.javac_plugin.representations.HeapAllocation;
+import doop.javac_plugin.representations.MethodDeclaration;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import util.Position;
+import doop.javac_plugin.util.Position;
 
 import static com.sun.tools.javac.code.Symbol.*;
 import static com.sun.tools.javac.tree.JCTree.*;

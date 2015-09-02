@@ -1,4 +1,4 @@
-package doop;
+package doop.javac_plugin.representations;
 
 /**
  * Created by anantoni on 10/6/2015.

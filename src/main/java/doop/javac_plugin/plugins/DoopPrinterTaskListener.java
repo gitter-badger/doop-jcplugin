@@ -1,16 +1,16 @@
-package plugins;
+package doop.javac_plugin.plugins;
 
 import com.sun.source.tree.LineMap;
 import com.sun.source.util.TaskEvent;
 import com.sun.source.util.TaskListener;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.util.Pair;
-import conf.Configuration;
-import reporters.ConsoleReporter;
-import reporters.FileReporter;
-import reporters.Reporter;
-import visitors.InitialScanner;
-import visitors.IdentifierScanner;
+import doop.javac_plugin.conf.Configuration;
+import doop.javac_plugin.reporters.ConsoleReporter;
+import doop.javac_plugin.reporters.FileReporter;
+import doop.javac_plugin.reporters.Reporter;
+import doop.javac_plugin.visitors.InitialScanner;
+import doop.javac_plugin.visitors.IdentifierScanner;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -38,7 +38,7 @@ class DoopPrinterTaskListener implements TaskListener {
         /**
          * Initialize the reporter.
          */
-        if (Configuration.DEFAULT_REPORTER.equals("reporters.FileReporter"))
+        if (Configuration.DEFAULT_REPORTER.equals("doop.javac_plugin.conf.reporters.FileReporter"))
             this.reporter = initReporter();
         else
             this.reporter = initReporter();
