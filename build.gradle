@@ -1,0 +1,63 @@
+buildscript {
+
+    /* We need these to support the provided/system maven scope */
+
+    /* this is the https://github.com/nebula-plugins/gradle-extra-configurations-plugin */
+    repositories { jcenter() }
+
+    dependencies {
+        classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:2.2.+'
+    }
+
+    /* there is also the https://github.com/spring-projects/gradle-plugins/tree/master/propdeps-plugin */
+}
+
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'provided-base' //from gradle-extra-configurations-plugin
+apply plugin: 'ivy-publish'
+
+group = 'plast-lab'
+version = '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+def javaHome = System.getProperties()['java.home']
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.4'
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+repositories {
+     mavenCentral()
+}
+
+dependencies {
+    compile 'com.google.code.gson:gson:2.3.1'
+    compile 'commons-io:commons-io:2.4'
+    provided files("${javaHome}/../lib/tools.jar")
+}
+
+publishing {
+    repositories {
+        ivy {
+            name "local-ivy-repo"
+            url "../ivy-repo"
+        }
+    }
+
+    publications {
+
+        doopJavacPlugin(IvyPublication) {
+            organisation "$group"
+            module "${project.name}"
+            revision "$version"
+            from components.java
+        }
+    }
+}
