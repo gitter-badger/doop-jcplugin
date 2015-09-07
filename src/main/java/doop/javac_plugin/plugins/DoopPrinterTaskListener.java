@@ -181,7 +181,7 @@ class DoopPrinterTaskListener implements TaskListener {
              * Open all necessary json files to write facts.
              */
             if (this.reporter instanceof FileReporter)
-                ((FileReporter) this.reporter).openJSONReportFiles(arg0.getSourceFile());
+                ((FileReporter) this.reporter).deprecatedOpenJSONReportFiles(arg0.getSourceFile());
 
             /**
              * Get the AST root for this source code file.

@@ -1,5 +1,6 @@
 package doop.javac_plugin.representation;
 
+import doop.javac_plugin.symbols.HeapAllocation;
 import doop.javac_plugin.util.Position;
 import java.util.Set;
 

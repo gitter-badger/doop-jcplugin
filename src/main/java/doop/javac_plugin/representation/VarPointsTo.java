@@ -5,6 +5,8 @@
  */
 package doop.javac_plugin.representation;
 
+import doop.javac_plugin.symbols.HeapAllocation;
+
 import java.util.Set;
 
 /**

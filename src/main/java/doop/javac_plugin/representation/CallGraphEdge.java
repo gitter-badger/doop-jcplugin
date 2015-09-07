@@ -1,5 +1,7 @@
 package doop.javac_plugin.representation;
 
+import doop.javac_plugin.symbols.MethodDeclaration;
+
 import java.util.Set;
 
 /**

@@ -93,7 +93,7 @@ public class FileReporter implements Reporter {
      *
      * @param sourceFile the source file object of the currently processed compilation unit.
      */
-    public void openJSONReportFiles(JavaFileObject sourceFile) {
+    public void deprecatedOpenJSONReportFiles(JavaFileObject sourceFile) {
         try {
 
             this.varPointsToMap = new HashMap<>();
@@ -120,6 +120,18 @@ public class FileReporter implements Reporter {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void openJSONReportFile(JavaFileObject sourceFile) {
+        this.varPointsToMap = new HashMap<>();
+        this.callGraphEdgeMap = new HashMap<>();
+        this.instanceFieldPointsToMap = new HashMap<>();
+
+        String reportFilePath = FilenameUtils.concat(Configuration.DEFAULT_OUTPUT_DIR + Configuration.SELECTED_PROJECT,
+                                                        sourceFile.getName().replace("/", ".").replace(".java", ".json"));
+
+        System.out.println(reportFilePath);
+
     }
 
     /**

@@ -9,14 +9,14 @@ import com.sun.tools.javac.tree.TreeScanner;
 import com.sun.tools.javac.util.Assert;
 import com.sun.tools.javac.util.List;
 import doop.javac_plugin.representation.DoopRepresentationBuilder;
-import doop.javac_plugin.representation.HeapAllocation;
-import doop.javac_plugin.representation.MethodDeclaration;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import doop.javac_plugin.symbols.HeapAllocation;
+import doop.javac_plugin.symbols.MethodDeclaration;
 import doop.javac_plugin.util.Position;
 
 import static com.sun.tools.javac.code.Symbol.*;

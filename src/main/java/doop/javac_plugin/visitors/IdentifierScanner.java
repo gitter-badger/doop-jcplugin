@@ -13,6 +13,8 @@ import com.sun.tools.javac.util.Name;
 import com.sun.tools.javac.util.Pair;
 import doop.javac_plugin.reporters.Reporter;
 import doop.javac_plugin.representation.*;
+import doop.javac_plugin.symbols.HeapAllocation;
+import doop.javac_plugin.symbols.MethodDeclaration;
 import doop.javac_plugin.util.Position;
 
 import java.lang.reflect.Field;
