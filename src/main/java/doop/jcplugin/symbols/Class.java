@@ -1,12 +1,18 @@
-package doop.javac_plugin.symbols;
+package doop.jcplugin.symbols;
 
-import doop.javac_plugin.util.Position;
+import doop.jcplugin.util.Position;
 
 /**
  * Created by anantoni on 22/7/2015.
  */
-public class Class extends SymbolPosition {
+public class Class extends Symbol {
     private String name;
+
+    public Class() {}
+
+    public Class(String name) {
+        this(null, name);
+    }
 
     public Class(Position position, String name) {
         super(position);

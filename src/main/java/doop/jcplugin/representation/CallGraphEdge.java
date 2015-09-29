@@ -1,6 +1,6 @@
-package doop.javac_plugin.representation;
+package doop.jcplugin.representation;
 
-import doop.javac_plugin.symbols.MethodDeclaration;
+import doop.jcplugin.symbols.MethodDeclaration;
 
 import java.util.Set;
 

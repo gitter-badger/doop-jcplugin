@@ -1,4 +1,4 @@
-package doop.javac_plugin.representation;
+package doop.jcplugin.representation;
 
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Symbol.MethodSymbol;

@@ -1,10 +1,10 @@
-package doop.javac_plugin.symbols;
+package doop.jcplugin.symbols;
 
 /**
  * Created by anantoni on 10/6/2015.
  */
 @SuppressWarnings("unused")
-public class HeapAllocation {
+public class HeapAllocation extends Symbol {
     private String heapAllocationID;
     private String type;
     private Method enclosingMethod;
@@ -14,6 +14,8 @@ public class HeapAllocation {
     private long endLine;
     private long endColumn;
     private String doopAllocationName = null;
+
+    public HeapAllocation() {}
 
     public HeapAllocation(String doopAllocationName) {
         this(-1, -1, -1, -1, doopAllocationName);

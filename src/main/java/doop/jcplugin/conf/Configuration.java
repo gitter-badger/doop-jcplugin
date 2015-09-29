@@ -1,4 +1,4 @@
-package doop.javac_plugin.conf;
+package doop.jcplugin.conf;
 
 /**
  * Created by anantoni on 23/6/2015.

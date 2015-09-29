@@ -1,4 +1,4 @@
-package doop.javac_plugin.visitors;
+package doop.jcplugin.visitors;
 
 import com.sun.source.tree.LineMap;
 import com.sun.tools.javac.code.Symbol;
@@ -11,11 +11,12 @@ import com.sun.tools.javac.util.Assert;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.Name;
 import com.sun.tools.javac.util.Pair;
-import doop.javac_plugin.reporters.Reporter;
-import doop.javac_plugin.representation.*;
-import doop.javac_plugin.symbols.HeapAllocation;
-import doop.javac_plugin.symbols.MethodDeclaration;
-import doop.javac_plugin.util.Position;
+import doop.jcplugin.reporters.Reporter;
+import doop.jcplugin.representation.*;
+import doop.jcplugin.symbols.HeapAllocation;
+import doop.jcplugin.symbols.MethodDeclaration;
+import doop.jcplugin.util.Position;
+import doop.jcplugin.util.SourceFileReport;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -243,7 +244,12 @@ public class IdentifierScanner extends TreeScanner {
     @Override
     public void visitClassDef(JCClassDecl tree) {
 
+        /**
+         * Add Class to source file report.
+         */
         this.currentClassSymbol = tree.sym;
+        SourceFileReport.classList.add(new doop.jcplugin.symbols.Class(this.currentClassSymbol.className()));
+
         Map<String, Integer> methodNamesMap;
         if (!methodNamesPerClassMap.containsKey(this.currentClassSymbol)) {
             methodNamesMap = new HashMap<>();

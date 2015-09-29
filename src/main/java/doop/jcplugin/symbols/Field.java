@@ -1,6 +1,6 @@
-package doop.javac_plugin.symbols;
+package doop.jcplugin.symbols;
 
-import doop.javac_plugin.util.Position;
+import doop.jcplugin.util.Position;
 
 import java.lang.*;
 import java.util.ArrayList;
@@ -8,13 +8,15 @@ import java.util.ArrayList;
 /**
  * Created by anantoni on 22/7/2015.
  */
-public class Field extends SymbolPosition {
+public class Field extends Symbol {
     private String signature;
     private String type;
     private Class enclosingClass;
     private boolean isStatic;
     private ArrayList<long[]> defOccurrences;
     private ArrayList<long[]> useOccurrences;
+
+    public Field() {}
 
     public String getSignature() {
         return signature;

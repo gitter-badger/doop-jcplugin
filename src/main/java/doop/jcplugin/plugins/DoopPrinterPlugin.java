@@ -1,4 +1,4 @@
-package doop.javac_plugin.plugins;
+package doop.jcplugin.plugins;
 
 import com.sun.source.util.JavacTask;
 import com.sun.source.util.Plugin;

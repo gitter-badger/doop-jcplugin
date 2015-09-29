@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package doop.javac_plugin.representation;
+package doop.jcplugin.representation;
 
-import doop.javac_plugin.symbols.HeapAllocation;
+import doop.jcplugin.symbols.HeapAllocation;
 
 import java.util.Set;
 

@@ -1,10 +1,10 @@
-package doop.javac_plugin.symbols;
+package doop.jcplugin.symbols;
 
 /**
  * Created by anantoni on 15/6/2015.
  */
 @SuppressWarnings("unused")
-public class MethodDeclaration {
+public class MethodDeclaration extends Symbol {
     private String methodSignature;
     private long startLine;
     private long startColumn;

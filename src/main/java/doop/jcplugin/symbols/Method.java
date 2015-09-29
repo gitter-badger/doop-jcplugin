@@ -1,13 +1,13 @@
-package doop.javac_plugin.symbols;
+package doop.jcplugin.symbols;
 
-import doop.javac_plugin.util.Position;
+import doop.jcplugin.util.Position;
 
 import java.lang.*;
 
 /**
  * Created by anantoni on 22/7/2015.
  */
-public class Method extends SymbolPosition {
+public class Method extends Symbol {
     private String name;
     private Class enclosingClass;
     private String returnType;
@@ -15,6 +15,36 @@ public class Method extends SymbolPosition {
     private String doopMethodDeclaration;
     private String[] args;
     private String[] argTypes;
+
+    public Method() {}
+
+    public Method(Position position) {
+        this(position, null, null, null, null, null, null, null);
+    }
+
+    public Method(Position position, String name) {
+        this(position, name, null, null, null, null, null, null);
+    }
+
+    public Method(Position position, String name, Class enclosingClass) {
+        this(position, name, enclosingClass, null, null, null, null, null);
+    }
+
+    public Method(Position position, String name, Class enclosingClass, String returnType) {
+        this(position, name, enclosingClass, returnType, null, null, null, null);
+    }
+
+    public Method(Position position, String name, Class enclosingClass, String returnType, String signature) {
+        this(position, name, enclosingClass, returnType, signature, null, null, null);
+    }
+
+    public Method(Position position, String name, Class enclosingClass, String returnType, String signature, String doopMethodDeclaration) {
+        this(position, name, enclosingClass, returnType, signature, doopMethodDeclaration, null, null);
+    }
+
+    public Method(Position position, String name, Class enclosingClass, String returnType, String signature, String doopMethodDeclaration, String[] args) {
+        this(position, name, enclosingClass, returnType, signature, doopMethodDeclaration, args, null);
+    }
 
     public Method(Position position, String name, Class enclosingClass, String returnType, String signature, String doopMethodDeclaration,
                     String[] args, String[] argTypes) {

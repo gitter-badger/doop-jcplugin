@@ -1,10 +1,10 @@
-package doop.javac_plugin.reporters;
+package doop.jcplugin.reporters;
 
 import com.google.gson.Gson;
-import doop.javac_plugin.conf.Configuration;
-import doop.javac_plugin.representation.CallGraphEdge;
-import doop.javac_plugin.representation.InstanceFieldPointsTo;
-import doop.javac_plugin.representation.VarPointsTo;
+import doop.jcplugin.conf.Configuration;
+import doop.jcplugin.representation.CallGraphEdge;
+import doop.jcplugin.representation.InstanceFieldPointsTo;
+import doop.jcplugin.representation.VarPointsTo;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import javax.tools.JavaFileObject;
@@ -18,6 +18,7 @@ public class FileReporter implements Reporter {
     private PrintWriter varPointsToWriter = null;
     private PrintWriter callGraphEdgeWriter = null;
     private PrintWriter instanceFieldPointsToWriter = null;
+    private PrintWriter reportFileWriter = null;
     private Gson gson = null;
 
     private Map<Long, Set<VarPointsTo>> varPointsToMap = null;
@@ -122,18 +123,6 @@ public class FileReporter implements Reporter {
         }
     }
 
-    public void openJSONReportFile(JavaFileObject sourceFile) {
-        this.varPointsToMap = new HashMap<>();
-        this.callGraphEdgeMap = new HashMap<>();
-        this.instanceFieldPointsToMap = new HashMap<>();
-
-        String reportFilePath = FilenameUtils.concat(Configuration.DEFAULT_OUTPUT_DIR + Configuration.SELECTED_PROJECT,
-                                                        sourceFile.getName().replace("/", ".").replace(".java", ".json"));
-
-        System.out.println(reportFilePath);
-
-    }
-
     /**
      * Writes the JSON files for this particular compilation unit.
      */
@@ -142,6 +131,28 @@ public class FileReporter implements Reporter {
         this.callGraphEdgeWriter.write(this.gson.toJson(this.callGraphEdgeMap));
         this.instanceFieldPointsToWriter.write(this.gson.toJson(this.instanceFieldPointsToMap));
     }
+
+    public void openJSONReportFile(JavaFileObject sourceFile) {
+        this.varPointsToMap = new HashMap<>();
+        this.callGraphEdgeMap = new HashMap<>();
+        this.instanceFieldPointsToMap = new HashMap<>();
+
+        String reportFilePath = FilenameUtils.concat(Configuration.DEFAULT_OUTPUT_DIR + Configuration.SELECTED_PROJECT,
+                                                        sourceFile.getName().replace("/", ".").replace(".java", ".json").replaceAll("^\\.+", ""));
+
+        System.out.println(reportFilePath);
+
+
+        try {
+            FileUtils.forceMkdir(new File(FilenameUtils.getFullPath(reportFilePath)));
+            this.reportFileWriter = new PrintWriter(reportFilePath, "UTF-8");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
 
     /**
      * Closes the JSON files generated for this particular compilation unit.

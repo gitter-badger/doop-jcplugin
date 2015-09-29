@@ -1,13 +1,15 @@
-package doop.javac_plugin.symbols;
+package doop.jcplugin.symbols;
 
-import doop.javac_plugin.util.Position;
+import doop.jcplugin.util.Position;
 
 /**
  * Created by anantoni on 22/7/2015.
  */
-public class MethodInvocation extends SymbolPosition {
+public class MethodInvocation extends Symbol {
     private String methodInvocationID;
     private Method invokingMethod;
+
+    public MethodInvocation() {}
 
     public MethodInvocation(Position position) {
         super(position);

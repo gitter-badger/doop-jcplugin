@@ -1,15 +1,17 @@
-package doop.javac_plugin.symbols;
+package doop.jcplugin.symbols;
 
-import doop.javac_plugin.util.Position;
+import doop.jcplugin.util.Position;
 
 /**
  * Created by anantoni on 22/7/2015.
  */
-public class SymbolPosition {
+public class Symbol {
     long[] coordinates;
     String compilationUnitName;
 
-    public SymbolPosition(Position position) {
+    public Symbol() {}
+
+    public Symbol(Position position) {
 
         this.coordinates = new long[4];
         this.coordinates[0] = position.getStartLine();

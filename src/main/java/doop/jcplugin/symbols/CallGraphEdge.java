@@ -1,4 +1,4 @@
-package doop.javac_plugin.symbols;
+package doop.jcplugin.symbols;
 
 import java.util.Set;
 
@@ -16,6 +16,8 @@ public class CallGraphEdge {
     private String methodInvocationInDoop = null;
     private Set<MethodDeclaration> methodDeclarationSet = null;
 
+
+    public CallGraphEdge() {}
 
     public CallGraphEdge(long startLine, long startColumn, long endColumn,
                          String methodInvocationInDoop, Set<MethodDeclaration> methodDeclarationSet)

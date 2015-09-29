@@ -1,4 +1,4 @@
-package doop.javac_plugin.visitors;
+package doop.jcplugin.visitors;
 
 import com.sun.source.tree.LineMap;
 import com.sun.tools.javac.code.Symbol;
@@ -8,16 +8,16 @@ import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeScanner;
 import com.sun.tools.javac.util.Assert;
 import com.sun.tools.javac.util.List;
-import doop.javac_plugin.representation.DoopRepresentationBuilder;
+import doop.jcplugin.representation.DoopRepresentationBuilder;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import doop.javac_plugin.symbols.HeapAllocation;
-import doop.javac_plugin.symbols.MethodDeclaration;
-import doop.javac_plugin.util.Position;
+import doop.jcplugin.symbols.HeapAllocation;
+import doop.jcplugin.symbols.MethodDeclaration;
+import doop.jcplugin.util.Position;
 
 import static com.sun.tools.javac.code.Symbol.*;
 import static com.sun.tools.javac.tree.JCTree.*;
@@ -388,7 +388,7 @@ public class InitialScanner extends TreeScanner {
     }
 
     /**
-     * Visit "new Klass()" AST node.
+     * Visit "new Class()" AST node.
      *
      * @param tree
      */
