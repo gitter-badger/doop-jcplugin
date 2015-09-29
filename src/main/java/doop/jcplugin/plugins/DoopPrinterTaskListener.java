@@ -10,6 +10,7 @@ import doop.jcplugin.reporters.ConsoleReporter;
 import doop.jcplugin.reporters.FileReporter;
 import doop.jcplugin.reporters.Reporter;
 import doop.jcplugin.util.SourceFileReport;
+import doop.jcplugin.visitors.IdentifierScanner;
 import doop.jcplugin.visitors.InitialScanner;
 
 import java.io.BufferedReader;
@@ -22,7 +23,6 @@ import java.util.logging.Logger;
 class DoopPrinterTaskListener implements TaskListener {
 
     private final Reporter reporter;
-
     private Map<String, Set<String>> vptMap;
     private Map<String, Set<String>> cgeMap;
     private Map<Pair<String, String>, Set<String>> ifptMap;
@@ -94,7 +94,6 @@ class DoopPrinterTaskListener implements TaskListener {
              * Open all necessary json files to write facts.
              */
             if (this.reporter instanceof FileReporter) {
-//                ((FileReporter) this.reporter).deprecatedOpenJSONReportFiles(arg0.getSourceFile());
                 ((FileReporter) this.reporter).openJSONReportFile(arg0.getSourceFile());
             }
 
@@ -103,18 +102,14 @@ class DoopPrinterTaskListener implements TaskListener {
              */
             JCTree treeRoot = (JCTree) arg0.getCompilationUnit();
             InitialScanner initialScanner = new InitialScanner(lineMap);
-            /*treeRoot.accept(initialScanner);
-            treeRoot.accept(new IdentifierScanner(this.reporter, this.vptMap, this.cgeMap, this.ifptMap,
-                                                    lineMap,
-                                                    initialScanner.getHeapAllocationMap(),
-                                                    initialScanner.getMethodDeclarationMap(),
-                                                    initialScanner.getFieldSignatureMap()));*/
+            treeRoot.accept(initialScanner);
+            treeRoot.accept(new IdentifierScanner(this.reporter, this.vptMap, this.cgeMap, this.ifptMap, lineMap));
             /**
              * Write and close all files.
              */
             if (this.reporter instanceof FileReporter) {
-                //((FileReporter) this.reporter).writeJSONReport();
-                //((FileReporter) this.reporter).closeJSONReportFiles();
+                ((FileReporter) this.reporter).writeJSONReport();
+                ((FileReporter) this.reporter).closeJSONReportFile();
             }
         }
     }

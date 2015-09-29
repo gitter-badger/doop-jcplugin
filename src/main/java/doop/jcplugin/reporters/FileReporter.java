@@ -5,6 +5,7 @@ import doop.jcplugin.conf.Configuration;
 import doop.jcplugin.representation.CallGraphEdge;
 import doop.jcplugin.representation.InstanceFieldPointsTo;
 import doop.jcplugin.representation.VarPointsTo;
+import doop.jcplugin.util.SourceFileReport;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import javax.tools.JavaFileObject;
@@ -127,9 +128,8 @@ public class FileReporter implements Reporter {
      * Writes the JSON files for this particular compilation unit.
      */
     public void writeJSONReport() {
-        this.varPointsToWriter.write(this.gson.toJson(this.varPointsToMap));
-        this.callGraphEdgeWriter.write(this.gson.toJson(this.callGraphEdgeMap));
-        this.instanceFieldPointsToWriter.write(this.gson.toJson(this.instanceFieldPointsToMap));
+        this.reportFileWriter.write(this.gson.toJson(SourceFileReport.classList));
+        this.reportFileWriter.write(this.gson.toJson(SourceFileReport.methodList));
     }
 
     public void openJSONReportFile(JavaFileObject sourceFile) {
@@ -157,9 +157,7 @@ public class FileReporter implements Reporter {
     /**
      * Closes the JSON files generated for this particular compilation unit.
      */
-    public void closeJSONReportFiles() {
-        this.varPointsToWriter.close();
-        this.callGraphEdgeWriter.close();
-        this.instanceFieldPointsToWriter.close();
+    public void closeJSONReportFile() {
+        this.reportFileWriter.close();
     }
 }
