@@ -14,6 +14,7 @@ import com.sun.tools.javac.util.Pair;
 import doop.jcplugin.reporters.Reporter;
 import doop.jcplugin.representation.*;
 import doop.jcplugin.symbols.HeapAllocation;
+import doop.jcplugin.symbols.Method;
 import doop.jcplugin.symbols.MethodDeclaration;
 import doop.jcplugin.util.Position;
 import doop.jcplugin.util.SourceFileReport;
@@ -287,6 +288,8 @@ public class IdentifierScanner extends TreeScanner {
         this.currentMethodDoopSignature = this.doopReprBuilder.buildDoopMethodSignature(currentMethodSymbol);
         this.currentMethodCompactName = this.doopReprBuilder.buildDoopMethodCompactName(currentMethodSymbol);
         this.methodInvocationCounterMap = new HashMap<>();
+
+        SourceFileReport.methodList.add(new Method(null, this.currentMethodSymbol.name.toString()));
 
         scan(tree.mods);
         scan(tree.restype);
