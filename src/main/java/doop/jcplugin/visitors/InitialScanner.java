@@ -15,8 +15,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import doop.jcplugin.util.SourceFileReport;
 import doop.persistent.elements.HeapAllocation;
-import doop.jcplugin.util.Position;
+import doop.persistent.elements.Method;
+import doop.persistent.elements.Position;
 
 import static com.sun.tools.javac.code.Symbol.*;
 import static com.sun.tools.javac.tree.JCTree.*;
@@ -85,7 +87,6 @@ public class InitialScanner extends TreeScanner {
         this.methodNamesPerClassMap = new HashMap<>();
         this.heapAllocationCounterMap = new HashMap<>();
         this.heapAllocationMap = new HashMap<>();
-        this.methodDeclarationMap = new HashMap<>();
         this.fieldSignatureMap = new HashMap<>();
     }
 
@@ -101,14 +102,6 @@ public class InitialScanner extends TreeScanner {
 
     public void setHeapAllocationMap(Map<String, HeapAllocation> heapAllocationMap) {
         this.heapAllocationMap = heapAllocationMap;
-    }
-
-    public Map<String, MethodDeclaration> getMethodDeclarationMap() {
-        return methodDeclarationMap;
-    }
-
-    public void setMethodDeclarationMap(Map<String, MethodDeclaration> methodDeclarationMap) {
-        this.methodDeclarationMap = methodDeclarationMap;
     }
 
     public Map<String, Set<Position>> getFieldSignatureMap() {
@@ -216,18 +209,20 @@ public class InitialScanner extends TreeScanner {
 
         scan(tree.mods);
         scan(tree.restype);
-        methodDeclarationMap.put(this.currentMethodDoopSignature,
-                                    new MethodDeclaration(lineMap.getLineNumber(tree.pos),
-                                                            lineMap.getColumnNumber(tree.pos),
-                                                            lineMap.getColumnNumber(tree.pos + tree.name.toString().length()),
-                                                            this.currentMethodDoopSignature));
-
         scan(tree.typarams);
         scan(tree.recvparam);
         scan(tree.params);
         scan(tree.thrown);
         scan(tree.defaultValue);
         scan(tree.body);
+
+        Position methodDeclarationPosition = new Position(lineMap.getLineNumber(tree.pos), lineMap.getColumnNumber(tree.pos), lineMap.getColumnNumber(tree.pos + tree.name.toString().length()));
+
+        /**
+         * Add method to source file report.
+         */
+        SourceFileReport.methodList.add(new Method(methodDeclarationPosition));
+
     }
 
     /**
@@ -424,13 +419,13 @@ public class InitialScanner extends TreeScanner {
         heapAllocation += "/" + heapAllocationCounter;
 
         /**
-         * Report Heap Allocation
+         * Add Heap Allocation to source file report.
          */
-        heapAllocationMap.put(heapAllocation, new HeapAllocation(lineMap.getLineNumber(tree.clazz.pos),
-                                                                    lineMap.getColumnNumber(tree.clazz.pos),
-                                                                    lineMap.getColumnNumber(tree.clazz.pos + tree.clazz.toString().length()),
-                                                                    heapAllocation));
-        System.out.println("Found HeapAllocation: " + heapAllocation);
+        Position heapAllocationPosition = new Position(lineMap.getLineNumber(tree.clazz.pos),
+                                                        lineMap.getColumnNumber(tree.clazz.pos),
+                                                        lineMap.getColumnNumber(tree.clazz.pos + tree.clazz.toString().length()));
+
+        SourceFileReport.heapAllocationList.add(new HeapAllocation(heapAllocationPosition, heapAllocation));
     }
 
     @Override
