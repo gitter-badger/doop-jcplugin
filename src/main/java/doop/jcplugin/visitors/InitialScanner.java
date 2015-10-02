@@ -15,8 +15,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import doop.jcplugin.symbols.HeapAllocation;
-import doop.jcplugin.symbols.MethodDeclaration;
+import doop.persistent.elements.HeapAllocation;
 import doop.jcplugin.util.Position;
 
 import static com.sun.tools.javac.code.Symbol.*;
@@ -64,7 +63,6 @@ public class InitialScanner extends TreeScanner {
      * The following two maps will be used by the IdentifierScanner.
      */
     private Map<String, HeapAllocation> heapAllocationMap = null;
-    private Map<String, MethodDeclaration> methodDeclarationMap = null;
 
 
     /**

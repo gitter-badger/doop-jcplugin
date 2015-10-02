@@ -1,7 +1,7 @@
 package doop.jcplugin.representation;
 
-import doop.jcplugin.symbols.MethodDeclaration;
 
+import doop.persistent.elements.Method;
 import java.util.Set;
 
 /**
@@ -16,11 +16,11 @@ public class CallGraphEdge {
     private long endColumn;
 
     private String methodInvocationInDoop = null;
-    private Set<MethodDeclaration> methodDeclarationSet = null;
+    private Set<Method> methodDeclarationSet = null;
 
 
     public CallGraphEdge(long startLine, long startColumn, long endColumn,
-                         String methodInvocationInDoop, Set<MethodDeclaration> methodDeclarationSet)
+                         String methodInvocationInDoop, Set<Method> methodDeclarationSet)
     {
         this.startLine = startLine;
         this.startColumn = startColumn;
@@ -69,13 +69,5 @@ public class CallGraphEdge {
 
     public void setMethodInvocationInDoop(String methodInvocationInDoop) {
         this.methodInvocationInDoop = methodInvocationInDoop;
-    }
-
-    public Set<MethodDeclaration> getMethodDeclarationSet() {
-        return this.methodDeclarationSet;
-    }
-
-    public void setMethodDeclarationSet(Set<MethodDeclaration> methodDeclarationSet) {
-        this.methodDeclarationSet = methodDeclarationSet;
     }
 }

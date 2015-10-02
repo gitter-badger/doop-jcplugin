@@ -9,22 +9,17 @@ import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeScanner;
 import com.sun.tools.javac.util.Assert;
 import com.sun.tools.javac.util.List;
-import com.sun.tools.javac.util.Name;
 import com.sun.tools.javac.util.Pair;
 import doop.jcplugin.reporters.Reporter;
 import doop.jcplugin.representation.*;
-import doop.jcplugin.symbols.HeapAllocation;
-import doop.jcplugin.symbols.Method;
-import doop.jcplugin.symbols.MethodDeclaration;
-import doop.jcplugin.util.Position;
+import doop.persistent.elements.Method;
+import doop.persistent.elements.Variable;
+import doop.persistent.elements.Field;
+import doop.persistent.elements.Class;
 import doop.jcplugin.util.SourceFileReport;
-
-import java.lang.reflect.Field;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static com.sun.tools.javac.tree.JCTree.*;
 
@@ -147,7 +142,7 @@ public class IdentifierScanner extends TreeScanner {
          * Add Class to source file report.
          */
         this.currentClassSymbol = tree.sym;
-        SourceFileReport.classList.add(new doop.jcplugin.symbols.Class(this.currentClassSymbol.className()));
+        SourceFileReport.classList.add(new doop.persistent.elements.Class(this.currentClassSymbol.className()));
 
         Map<String, Integer> methodNamesMap;
         if (!methodNamesPerClassMap.containsKey(this.currentClassSymbol)) {
@@ -348,6 +343,7 @@ public class IdentifierScanner extends TreeScanner {
         scan(tree.detail);
     }
 
+
     @Override
     public void visitApply(JCMethodInvocation tree) {
         scan(tree.typeargs);
@@ -413,6 +409,7 @@ public class IdentifierScanner extends TreeScanner {
                 invocationPos = tree.meth.pos;
 
             System.out.println("\033[35m Method Invocation from visitApply: \033[0m" + doopMethodInvocation);
+            SourceFileReport.invocationList.add(new MethodInvocation(doopMethodInvocation));
 //            mapMethodInvocation(doopMethodInvocation, invocationPos, methodName);
         }
     }
@@ -534,7 +531,7 @@ public class IdentifierScanner extends TreeScanner {
                 varNameInDoop = this.doopReprBuilder.buildDoopVarName(this.currentMethodCompactName, tree.sym.getQualifiedName().toString());
             System.out.println("Variable name in Doop: " + varNameInDoop);
             System.out.println("##########################################################################################################################");
-
+            SourceFileReport.variableList.add(new Variable());
 //            mapVarPointsTo(varNameInDoop, tree.pos, tree.name);
         }
     }

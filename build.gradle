@@ -5,6 +5,7 @@ buildscript {
     /* this is the https://github.com/nebula-plugins/gradle-extra-configurations-plugin */
     repositories { jcenter() }
 
+
     dependencies {
         classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:2.2.+'
     }
@@ -34,10 +35,16 @@ tasks.withType(JavaCompile) {
 }
 
 repositories {
-     mavenCentral()
+    mavenCentral()
+    ivy {
+        name "local-ivy-repo"
+        url "../ivy-repo"
+    }
 }
 
 dependencies {
+    compile "org.codehaus.groovy:groovy-all:2.3.10"            // Groovy
+    compile "plast-lab:doop-persistent:1.0-SNAPSHOT"           // The doop persistent classes
     compile 'com.google.code.gson:gson:2.3.1'
     compile 'commons-io:commons-io:2.4'
     provided files("${javaHome}/../lib/tools.jar")

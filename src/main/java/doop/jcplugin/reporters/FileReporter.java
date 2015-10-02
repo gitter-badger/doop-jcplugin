@@ -16,9 +16,7 @@ import java.util.*;
  * Created by anantoni on 27/4/2015.
  */
 public class FileReporter implements Reporter {
-    private PrintWriter varPointsToWriter = null;
-    private PrintWriter callGraphEdgeWriter = null;
-    private PrintWriter instanceFieldPointsToWriter = null;
+
     private PrintWriter reportFileWriter = null;
     private Gson gson = null;
 
@@ -91,45 +89,12 @@ public class FileReporter implements Reporter {
     }
 
     /**
-     * Create the necessary json files in a replicated project structure.
-     *
-     * @param sourceFile the source file object of the currently processed compilation unit.
-     */
-    public void deprecatedOpenJSONReportFiles(JavaFileObject sourceFile) {
-        try {
-
-            this.varPointsToMap = new HashMap<>();
-            this.callGraphEdgeMap = new HashMap<>();
-            this.instanceFieldPointsToMap = new HashMap<>();
-
-            String varPointsToFilePath = FilenameUtils.concat(Configuration.DEFAULT_OUTPUT_DIR + Configuration.SELECTED_PROJECT,
-                                                                sourceFile.getName().replace(".java", "-VarPointsTo.json"));
-
-            String callGraphEdgeFilePath = FilenameUtils.concat(Configuration.DEFAULT_OUTPUT_DIR + Configuration.SELECTED_PROJECT,
-                                                                sourceFile.getName().replace(".java", "-CallGraphEdge.json"));
-
-            String instanceFieldPointsToFilePath = FilenameUtils.concat(Configuration.DEFAULT_OUTPUT_DIR + Configuration.SELECTED_PROJECT,
-                                                                sourceFile.getName().replace(".java", "-InstanceFieldPointsTo.json"));
-
-            FileUtils.forceMkdir(new File(FilenameUtils.getFullPath(varPointsToFilePath)));
-            FileUtils.forceMkdir(new File(FilenameUtils.getFullPath(callGraphEdgeFilePath)));
-            FileUtils.forceMkdir(new File(FilenameUtils.getFullPath(instanceFieldPointsToFilePath)));
-
-            this.varPointsToWriter = new PrintWriter(varPointsToFilePath, "UTF-8");
-            this.callGraphEdgeWriter = new PrintWriter(callGraphEdgeFilePath, "UTF-8");
-            this.instanceFieldPointsToWriter = new PrintWriter(instanceFieldPointsToFilePath, "UTF-8");
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
      * Writes the JSON files for this particular compilation unit.
      */
     public void writeJSONReport() {
         this.reportFileWriter.write(this.gson.toJson(SourceFileReport.classList));
         this.reportFileWriter.write(this.gson.toJson(SourceFileReport.methodList));
+        this.reportFileWriter.write(this.gson.toJson(SourceFileReport.invocationList));
     }
 
     public void openJSONReportFile(JavaFileObject sourceFile) {
@@ -151,7 +116,6 @@ public class FileReporter implements Reporter {
             e.printStackTrace();
         }
     }
-
 
 
     /**

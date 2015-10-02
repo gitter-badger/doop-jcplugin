@@ -26,7 +26,6 @@ public class DoopRepresentationBuilder {
         return instance;
     }
 
-
     /**
      * Builds the fully qualified name of a type.
      *
