@@ -7,6 +7,9 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import javax.tools.JavaFileObject;
 import java.io.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by anantoni on 27/4/2015.
@@ -25,9 +28,14 @@ public class JSONReporter implements Reporter {
      * Writes the JSON files for this particular compilation unit.
      */
     public void writeJSONReport() {
-        this.reportFileWriter.write(this.gson.toJson(SourceFileReport.classList));
-        this.reportFileWriter.write(this.gson.toJson(SourceFileReport.methodList));
-        this.reportFileWriter.write(this.gson.toJson(SourceFileReport.invocationList));
+        Map<String, List> jsonReport = new HashMap<>();
+        jsonReport.put("Class", SourceFileReport.classList);
+        jsonReport.put("Field", SourceFileReport.fieldList);
+        jsonReport.put("Method", SourceFileReport.methodList);
+        jsonReport.put("Variable", SourceFileReport.variableList);
+        jsonReport.put("HeapAllocation", SourceFileReport.heapAllocationList);
+        jsonReport.put("MethodInvocation", SourceFileReport.invocationList);
+        this.reportFileWriter.write(this.gson.toJson(jsonReport));
     }
 
     public void openJSONReportFile(JavaFileObject sourceFile) {

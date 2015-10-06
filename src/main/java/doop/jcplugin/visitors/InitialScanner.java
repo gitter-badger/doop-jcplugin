@@ -35,11 +35,11 @@ import static com.sun.tools.javac.tree.JCTree.*;
  * scanner, it suffices to override those visitor methods which
  * do some interesting work. The scanner class itself takes care of all
  * navigational aspects.
- * <p>
- * <p><b>This is NOT part of any supported API.
+ *
+ * This is NOT part of any supported API.
  * If you write code that depends on this, you do so at your own risk.
  * This code and its internal interfaces are subject to change or
- * deletion without notice.</b>
+ * deletion without notice.
  */
 
 /**
@@ -155,6 +155,7 @@ public class InitialScanner extends TreeScanner {
      */
     @Override
     public void visitMethodDef(JCMethodDecl tree) {
+
         this.currentMethodSymbol = tree.sym;
         this.currentMethodDoopSignature = this.doopReprBuilder.buildDoopMethodSignature(currentMethodSymbol);
         this.currentMethodCompactName = this.doopReprBuilder.buildDoopMethodCompactName(currentMethodSymbol);
@@ -168,13 +169,19 @@ public class InitialScanner extends TreeScanner {
         scan(tree.defaultValue);
         scan(tree.body);
 
-        Position methodDeclarationPosition = new Position(lineMap.getLineNumber(tree.pos), lineMap.getColumnNumber(tree.pos), lineMap.getColumnNumber(tree.pos + tree.name.toString().length()));
+        Position position = new Position(lineMap.getLineNumber(tree.pos),
+                                                            lineMap.getColumnNumber(tree.pos),
+                                                            lineMap.getColumnNumber(tree.pos + tree.name.toString().length()));
 
         /**
          * Add method to source file report.
          */
-        SourceFileReport.methodList.add(new Method(methodDeclarationPosition, null, null, null, null, null, null, null, null));
-
+        /*SourceFileReport.methodList.add(new Method(position,
+                                                    this.compilationUnitName, null, null, null,
+                                                    this.currentMethodDoopSignature,
+                                                    this.currentMethodCompactName,
+                                                    null,
+                                                    null));*/
     }
 
 
@@ -355,11 +362,11 @@ public class InitialScanner extends TreeScanner {
         /**
          * Add Heap Allocation to source file report.
          */
-        Position heapAllocationPosition = new Position(lineMap.getLineNumber(tree.clazz.pos),
+        Position position = new Position(lineMap.getLineNumber(tree.clazz.pos),
                                                         lineMap.getColumnNumber(tree.clazz.pos),
                                                         lineMap.getColumnNumber(tree.clazz.pos + tree.clazz.toString().length()));
 
-        SourceFileReport.heapAllocationList.add(new HeapAllocation(heapAllocationPosition, heapAllocation, null , null , null));
+        SourceFileReport.heapAllocationList.add(new HeapAllocation(position, this.compilationUnitName, heapAllocation, tree.clazz.type.toString(), null));
     }
 
     @Override

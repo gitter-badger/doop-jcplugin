@@ -8,6 +8,7 @@ import com.sun.tools.javac.util.Pair;
 import doop.jcplugin.conf.Configuration;
 import doop.jcplugin.reporters.JSONReporter;
 import doop.jcplugin.reporters.Reporter;
+import doop.jcplugin.util.SourceFileReport;
 import doop.jcplugin.visitors.IdentifierScanner;
 import doop.jcplugin.visitors.InitialScanner;
 
@@ -74,12 +75,13 @@ class TypeInfoTaskListener implements TaskListener {
              */
             LineMap lineMap = arg0.getCompilationUnit().getLineMap();
 
+            SourceFileReport.initializeSymbolLists();
             /**
              * Visitor passes.
              */
             treeRoot.accept(new InitialScanner(compilationUnitName, lineMap));                     // First pass
 
-            treeRoot.accept(new IdentifierScanner(compilationUnitName, lineMap));     // Second pass
+            //treeRoot.accept(new IdentifierScanner(compilationUnitName, lineMap));     // Second pass
 
             /**
              * Write and close all files.
