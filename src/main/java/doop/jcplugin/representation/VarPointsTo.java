@@ -5,8 +5,7 @@
  */
 package doop.jcplugin.representation;
 
-import doop.jcplugin.elements.HeapAllocation;
-
+import doop.persistent.elements.HeapAllocation;
 import java.util.Set;
 
 /**

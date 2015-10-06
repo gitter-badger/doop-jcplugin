@@ -28,65 +28,6 @@ public class FileReporter implements Reporter {
         this.gson = new Gson();
     }
 
-    /**
-     * Adds the VarPointsTo object to the [line:{VarPointsTo}] map.
-     *
-     * @param varPointsTo
-     */
-    @Override
-    public void reportVarPointsTo(VarPointsTo varPointsTo) {
-
-        long line = varPointsTo.getStartLine();
-        if (!this.varPointsToMap.containsKey(line)) {
-            Set<VarPointsTo> varPointsToSet = new HashSet<>();
-            varPointsToSet.add(varPointsTo);
-            this.varPointsToMap.put(line, varPointsToSet);
-        }
-        else {
-            System.out.println("Line: " + line);
-            this.varPointsToMap.get(line).add(varPointsTo);
-        }
-    }
-
-    /**
-     * Adds the CallGraphEdge object to the [line:{CallGraphEdge}] map.
-     *
-     * @param callGraphEdge
-     */
-    @Override
-    public void reportCallGraphEdge(CallGraphEdge callGraphEdge) {
-
-        long line = callGraphEdge.getStartLine();
-        if (!this.callGraphEdgeMap.containsKey(line)) {
-            Set<CallGraphEdge> callGraphEdgeSet = new HashSet<>();
-            callGraphEdgeSet.add(callGraphEdge);
-            this.callGraphEdgeMap.put(line, callGraphEdgeSet);
-        }
-        else {
-            System.out.println("Line: " + line);
-            this.callGraphEdgeMap.get(line).add(callGraphEdge);
-        }
-    }
-
-    /**
-     * Adds the instanceFieldPointsTo object to the [line:{InstanceFieldPointsTo}] map.
-     *
-     * @param instanceFieldPointsTo
-     */
-    @Override
-    public void reportInstanceFieldPointsTo(InstanceFieldPointsTo instanceFieldPointsTo) {
-
-        long line = instanceFieldPointsTo.getBaseHeapAllocation().getStartLine();
-        if (!this.instanceFieldPointsToMap.containsKey(line)) {
-            Set<InstanceFieldPointsTo> instanceFieldPointsToSet = new HashSet<>();
-            instanceFieldPointsToSet.add(instanceFieldPointsTo);
-            this.instanceFieldPointsToMap.put(line, instanceFieldPointsToSet);
-        }
-        else {
-            System.out.println("Line: " + line);
-            this.instanceFieldPointsToMap.get(line).add(instanceFieldPointsTo);
-        }
-    }
 
     /**
      * Writes the JSON files for this particular compilation unit.

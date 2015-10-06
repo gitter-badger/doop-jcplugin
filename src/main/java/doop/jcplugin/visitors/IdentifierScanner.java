@@ -12,11 +12,10 @@ import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.Pair;
 import doop.jcplugin.reporters.Reporter;
 import doop.jcplugin.representation.*;
-import doop.persistent.elements.Method;
-import doop.persistent.elements.Variable;
-import doop.persistent.elements.Field;
-import doop.persistent.elements.Class;
+import doop.persistent.elements.*;
 import doop.jcplugin.util.SourceFileReport;
+import doop.persistent.elements.Class;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -142,7 +141,7 @@ public class IdentifierScanner extends TreeScanner {
          * Add Class to source file report.
          */
         this.currentClassSymbol = tree.sym;
-        SourceFileReport.classList.add(new doop.persistent.elements.Class(this.currentClassSymbol.className()));
+        SourceFileReport.classList.add(new doop.persistent.elements.Class(null, null, this.currentClassSymbol.className()));
 
         Map<String, Integer> methodNamesMap;
         if (!methodNamesPerClassMap.containsKey(this.currentClassSymbol)) {
@@ -181,8 +180,6 @@ public class IdentifierScanner extends TreeScanner {
         this.currentMethodDoopSignature = this.doopReprBuilder.buildDoopMethodSignature(currentMethodSymbol);
         this.currentMethodCompactName = this.doopReprBuilder.buildDoopMethodCompactName(currentMethodSymbol);
         this.methodInvocationCounterMap = new HashMap<>();
-
-        SourceFileReport.methodList.add(new Method(null, this.currentMethodSymbol.name.toString()));
 
         scan(tree.mods);
         scan(tree.restype);
@@ -348,9 +345,9 @@ public class IdentifierScanner extends TreeScanner {
     public void visitApply(JCMethodInvocation tree) {
         scan(tree.typeargs);
         scan(tree.meth);
-        Class<?> clazz = tree.meth.getClass();
+        java.lang.Class<?> clazz = tree.meth.getClass();
         scan(tree.args);
-        Field field;
+        java.lang.reflect.Field field;
         Object fieldValue = null;
 
         System.out.println(tree.meth.toString());
@@ -409,8 +406,7 @@ public class IdentifierScanner extends TreeScanner {
                 invocationPos = tree.meth.pos;
 
             System.out.println("\033[35m Method Invocation from visitApply: \033[0m" + doopMethodInvocation);
-            SourceFileReport.invocationList.add(new MethodInvocation(doopMethodInvocation));
-//            mapMethodInvocation(doopMethodInvocation, invocationPos, methodName);
+            SourceFileReport.invocationList.add(new MethodInvocation(null, null, doopMethodInvocation, null));
         }
     }
 
@@ -441,7 +437,7 @@ public class IdentifierScanner extends TreeScanner {
                         this.doopReprBuilder.buildDoopMethodInvocation((MethodSymbol) tree.constructor) + "/" + this.constructorInvocationCounter++);
 
             System.out.println("\033[35m Method Invocation (Constructor): \033[0m" + doopMethodInvocation);
-//            mapMethodInvocation(doopMethodInvocation, tree.clazz.pos, tree.clazz.type.getOriginalType().tsym.name.toString());
+            SourceFileReport.invocationList.add(new MethodInvocation(null, null, doopMethodInvocation, null));
         }
     }
 

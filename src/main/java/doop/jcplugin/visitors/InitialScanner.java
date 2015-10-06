@@ -221,7 +221,7 @@ public class InitialScanner extends TreeScanner {
         /**
          * Add method to source file report.
          */
-        SourceFileReport.methodList.add(new Method(methodDeclarationPosition));
+        SourceFileReport.methodList.add(new Method(methodDeclarationPosition, null, null, null, null, null, null, null, null));
 
     }
 
@@ -425,7 +425,7 @@ public class InitialScanner extends TreeScanner {
                                                         lineMap.getColumnNumber(tree.clazz.pos),
                                                         lineMap.getColumnNumber(tree.clazz.pos + tree.clazz.toString().length()));
 
-        SourceFileReport.heapAllocationList.add(new HeapAllocation(heapAllocationPosition, heapAllocation));
+        SourceFileReport.heapAllocationList.add(new HeapAllocation(heapAllocationPosition, heapAllocation, null , null , null));
     }
 
     @Override

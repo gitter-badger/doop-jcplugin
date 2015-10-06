@@ -6,16 +6,12 @@ import com.sun.source.util.TaskListener;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.util.Pair;
 import doop.jcplugin.conf.Configuration;
-import doop.jcplugin.reporters.ConsoleReporter;
 import doop.jcplugin.reporters.FileReporter;
 import doop.jcplugin.reporters.Reporter;
 import doop.jcplugin.util.SourceFileReport;
 import doop.jcplugin.visitors.IdentifierScanner;
 import doop.jcplugin.visitors.InitialScanner;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -50,7 +46,7 @@ class TypeInfoTaskListener implements TaskListener {
             return (Reporter) Class.forName(className).newInstance();
         } catch (InstantiationException | IllegalAccessException | ClassNotFoundException ex) {
             Logger.getLogger(TypeInfoTaskListener.class.getName()).log(Level.SEVERE, null, ex);
-            return new ConsoleReporter();
+            return new FileReporter();
         }
     }
 
