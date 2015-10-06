@@ -37,10 +37,7 @@ import static com.sun.tools.javac.tree.JCTree.*;
  * deletion without notice.</b>
  */
 public class IdentifierScanner extends TreeScanner {
-    private final Map<String, Set<String>> vptMap;
-    private final Map<String, Set<String>> cfeMap;
-    private final Map<Pair<String, String>, Set<String>> ifptMap;
-    private final Reporter reporter;
+
     private final LineMap lineMap;
     private final DoopRepresentationBuilder doopReprBuilder;
 
@@ -58,30 +55,13 @@ public class IdentifierScanner extends TreeScanner {
 
     /**
      *
-     * @param reporter
-     */
-    public IdentifierScanner(Reporter reporter) {
-        this(reporter, null, null, null, null);
-    }
-
-    /**
-     *
-     * @param reporter
-     * @param vptMap
-     * @param cfeMap
-     * @param ifptMap
      * @param lineMap
      */
-    public IdentifierScanner(Reporter reporter, Map<String, Set<String>> vptMap, Map<String, Set<String>> cfeMap,
-                             Map<Pair<String, String>, Set<String>> ifptMap, LineMap lineMap)
+    public IdentifierScanner(LineMap lineMap)
 
     {
         this.doopReprBuilder = DoopRepresentationBuilder.getInstance();
-        this.reporter = reporter;
-        this.vptMap = vptMap;
-        this.ifptMap = ifptMap;
         this.lineMap = lineMap;
-        this.cfeMap = cfeMap;
         this.constructorInvocationCounter = 0;
         this.methodInvocationCounter = 0;
         this.methodNamesPerClassMap = new HashMap<>();
@@ -225,9 +205,6 @@ public class IdentifierScanner extends TreeScanner {
     public void visitSkip(JCSkip tree) {
     }
 
-    /**
-     * @param tree
-     */
     @Override
     public void visitBlock(JCBlock tree) {
         scan(tree.stats);
@@ -528,7 +505,6 @@ public class IdentifierScanner extends TreeScanner {
             System.out.println("Variable name in Doop: " + varNameInDoop);
             System.out.println("##########################################################################################################################");
             SourceFileReport.variableList.add(new Variable());
-//            mapVarPointsTo(varNameInDoop, tree.pos, tree.name);
         }
     }
 

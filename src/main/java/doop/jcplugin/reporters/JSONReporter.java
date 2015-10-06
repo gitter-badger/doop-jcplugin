@@ -15,7 +15,7 @@ import java.util.*;
 /**
  * Created by anantoni on 27/4/2015.
  */
-public class FileReporter implements Reporter {
+public class JSONReporter implements Reporter {
 
     private PrintWriter reportFileWriter = null;
     private Gson gson = null;
@@ -24,7 +24,7 @@ public class FileReporter implements Reporter {
     private Map<Long, Set<CallGraphEdge>> callGraphEdgeMap = null;
     private Map<Long, Set<InstanceFieldPointsTo>> instanceFieldPointsToMap = null;
 
-    public FileReporter() {
+    public JSONReporter() {
         this.gson = new Gson();
     }
 

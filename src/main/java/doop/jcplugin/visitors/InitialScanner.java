@@ -49,33 +49,13 @@ public class InitialScanner extends TreeScanner {
 
     private final LineMap lineMap;
     private final DoopRepresentationBuilder doopReprBuilder;
-
     private ClassSymbol currentClassSymbol;
     private final Map<ClassSymbol, Map<String, Integer>> methodNamesPerClassMap;
     private MethodSymbol currentMethodSymbol;
     private String currentMethodDoopSignature;
     private String currentMethodCompactName;
-
-    private Map<String, Set<Position>> fieldSignatureMap;
-
     private int heapAllocationCounter;
     private Map<String, Integer> heapAllocationCounterMap = null;
-
-    /**
-     * The following two maps will be used by the IdentifierScanner.
-     */
-    private Map<String, HeapAllocation> heapAllocationMap = null;
-
-
-    /**
-     * *************************************************************************
-     * Constructors
-     * *************************************************************************
-     */
-    public InitialScanner() {
-        this(null);
-    }
-
 
     /**
      * @param lineMap holds the line, column information for each symbol.
@@ -86,30 +66,6 @@ public class InitialScanner extends TreeScanner {
         this.heapAllocationCounter = 0;
         this.methodNamesPerClassMap = new HashMap<>();
         this.heapAllocationCounterMap = new HashMap<>();
-        this.heapAllocationMap = new HashMap<>();
-        this.fieldSignatureMap = new HashMap<>();
-    }
-
-
-    /**
-     * *************************************************************************
-     * Getters and Setters
-     * *************************************************************************
-     */
-    public Map<String, HeapAllocation> getHeapAllocationMap() {
-        return heapAllocationMap;
-    }
-
-    public void setHeapAllocationMap(Map<String, HeapAllocation> heapAllocationMap) {
-        this.heapAllocationMap = heapAllocationMap;
-    }
-
-    public Map<String, Set<Position>> getFieldSignatureMap() {
-        return fieldSignatureMap;
-    }
-
-    public void setFieldSignatureMap(Map<String, Set<Position>> fieldSignatureMap) {
-        this.fieldSignatureMap = fieldSignatureMap;
     }
 
     /**
@@ -502,22 +458,22 @@ public class InitialScanner extends TreeScanner {
             String fieldSignature = this.doopReprBuilder.buildDoopFieldSignature((VarSymbol) tree.sym);
             System.out.println("Field Signature: " + fieldSignature);
 
-            if (this.fieldSignatureMap.containsKey(fieldSignature)) {
-                if (this.lineMap.getLineNumber(((VarSymbol) tree.sym).pos) > 0)
-                    this.fieldSignatureMap.get(fieldSignature).add(new Position(this.lineMap.getLineNumber(tree.pos),
-                            this.lineMap.getColumnNumber(tree.pos),
-                            this.lineMap.getColumnNumber(tree.pos + tree.sym.getQualifiedName().toString().length())));
-            }
-            else {
-                Set<Position> positionSet = new HashSet<>();
-                if (this.lineMap.getLineNumber(((VarSymbol) tree.sym).pos) > 0)
-                    positionSet.add(new Position(this.lineMap.getLineNumber(tree.pos),
-                            this.lineMap.getColumnNumber(tree.pos),
-                            this.lineMap.getColumnNumber(tree.pos + tree.sym.getQualifiedName().toString().length())));
-
-                this.fieldSignatureMap.put(fieldSignature, positionSet);
-            }
-            System.out.println(this.fieldSignatureMap);
+//            if (this.fieldSignatureMap.containsKey(fieldSignature)) {
+//                if (this.lineMap.getLineNumber(((VarSymbol) tree.sym).pos) > 0)
+//                    this.fieldSignatureMap.get(fieldSignature).add(new Position(this.lineMap.getLineNumber(tree.pos),
+//                            this.lineMap.getColumnNumber(tree.pos),
+//                            this.lineMap.getColumnNumber(tree.pos + tree.sym.getQualifiedName().toString().length())));
+//            }
+//            else {
+//                Set<Position> positionSet = new HashSet<>();
+//                if (this.lineMap.getLineNumber(((VarSymbol) tree.sym).pos) > 0)
+//                    positionSet.add(new Position(this.lineMap.getLineNumber(tree.pos),
+//                            this.lineMap.getColumnNumber(tree.pos),
+//                            this.lineMap.getColumnNumber(tree.pos + tree.sym.getQualifiedName().toString().length())));
+//
+//                this.fieldSignatureMap.put(fieldSignature, positionSet);
+//            }
+//            System.out.println(this.fieldSignatureMap);
         }
     }
 

@@ -6,9 +6,8 @@ import com.sun.source.util.TaskListener;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.util.Pair;
 import doop.jcplugin.conf.Configuration;
-import doop.jcplugin.reporters.FileReporter;
+import doop.jcplugin.reporters.JSONReporter;
 import doop.jcplugin.reporters.Reporter;
-import doop.jcplugin.util.SourceFileReport;
 import doop.jcplugin.visitors.IdentifierScanner;
 import doop.jcplugin.visitors.InitialScanner;
 
@@ -19,9 +18,6 @@ import java.util.logging.Logger;
 class TypeInfoTaskListener implements TaskListener {
 
     private final Reporter reporter;
-    private Map<String, Set<String>> vptMap;
-    private Map<String, Set<String>> cgeMap;
-    private Map<Pair<String, String>, Set<String>> ifptMap;
 
     /**
      * TypeInfoTaskListener constructor.
@@ -46,7 +42,7 @@ class TypeInfoTaskListener implements TaskListener {
             return (Reporter) Class.forName(className).newInstance();
         } catch (InstantiationException | IllegalAccessException | ClassNotFoundException ex) {
             Logger.getLogger(TypeInfoTaskListener.class.getName()).log(Level.SEVERE, null, ex);
-            return new FileReporter();
+            return new JSONReporter();
         }
     }
 
@@ -59,10 +55,7 @@ class TypeInfoTaskListener implements TaskListener {
     public void finished(TaskEvent arg0) {
         if (arg0.getKind().equals(TaskEvent.Kind.ANALYZE)) {
             System.out.println("\033[31m # Generating report for file: " + arg0.getSourceFile().getName() + "\033[0m");
-            SourceFileReport.classList = new ArrayList<>();
-            SourceFileReport.fieldList = new ArrayList<>();
-            SourceFileReport.methodList = new ArrayList<>();
-            SourceFileReport.variableList = new ArrayList<>();
+
 
             /**
              * Get the LineMap for this compilation unit in order to much positions with lines and columns.
@@ -72,8 +65,8 @@ class TypeInfoTaskListener implements TaskListener {
             /**
              * Open all necessary json files to write facts.
              */
-            if (this.reporter instanceof FileReporter) {
-                ((FileReporter) this.reporter).openJSONReportFile(arg0.getSourceFile());
+            if (this.reporter instanceof JSONReporter) {
+                ((JSONReporter) this.reporter).openJSONReportFile(arg0.getSourceFile());
             }
 
             /**
@@ -81,14 +74,20 @@ class TypeInfoTaskListener implements TaskListener {
              */
             JCTree treeRoot = (JCTree) arg0.getCompilationUnit();
             InitialScanner initialScanner = new InitialScanner(lineMap);
-            treeRoot.accept(initialScanner);
-            treeRoot.accept(new IdentifierScanner(this.reporter, this.vptMap, this.cgeMap, this.ifptMap, lineMap));
+
+            /**
+             * Visitor passes.
+             */
+            treeRoot.accept(initialScanner);                                                                            //First pass
+
+            treeRoot.accept(new IdentifierScanner(lineMap));     //Second pass
+
             /**
              * Write and close all files.
              */
-            if (this.reporter instanceof FileReporter) {
-                ((FileReporter) this.reporter).writeJSONReport();
-                ((FileReporter) this.reporter).closeJSONReportFile();
+            if (this.reporter instanceof JSONReporter) {
+                ((JSONReporter) this.reporter).writeJSONReport();
+                ((JSONReporter) this.reporter).closeJSONReportFile();
             }
         }
     }
