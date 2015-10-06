@@ -13,6 +13,12 @@ task wrapper(type: Wrapper) {
     gradleVersion = '2.7'
 }
 
+task fatJar(type: Jar) {
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }

@@ -98,8 +98,6 @@ public class InitialScanner extends TreeScanner {
      * Visitor methods
      * **************************************************************************
      */
-
-
     @Override
     public void visitTopLevel(JCCompilationUnit tree) {
         scan(tree.packageAnnotations);
