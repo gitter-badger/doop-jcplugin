@@ -49,6 +49,7 @@ public class InitialScanner extends TreeScanner {
 
     private final LineMap lineMap;
     private final DoopRepresentationBuilder doopReprBuilder;
+    private String compilationUnitName;
     private ClassSymbol currentClassSymbol;
     private final Map<ClassSymbol, Map<String, Integer>> methodNamesPerClassMap;
     private MethodSymbol currentMethodSymbol;
@@ -60,12 +61,14 @@ public class InitialScanner extends TreeScanner {
     /**
      * @param lineMap holds the line, column information for each symbol.
      */
-    public InitialScanner(LineMap lineMap) {
+    public InitialScanner(String compilationUnitName, LineMap lineMap) {
+
         this.doopReprBuilder = DoopRepresentationBuilder.getInstance();
         this.lineMap = lineMap;
         this.heapAllocationCounter = 0;
         this.methodNamesPerClassMap = new HashMap<>();
         this.heapAllocationCounterMap = new HashMap<>();
+        this.compilationUnitName = compilationUnitName;
     }
 
     /**
@@ -90,16 +93,13 @@ public class InitialScanner extends TreeScanner {
                 scan(l.head);
     }
 
-
     /**
      * *************************************************************************
      * Visitor methods
      * **************************************************************************
      */
-    /**
-     *
-     * @param tree
-     */
+
+
     @Override
     public void visitTopLevel(JCCompilationUnit tree) {
         scan(tree.packageAnnotations);
@@ -107,14 +107,11 @@ public class InitialScanner extends TreeScanner {
         scan(tree.defs);
     }
 
-    /**
-     *
-     * @param tree
-     */
     @Override
     public void visitImport(JCImport tree) {
         scan(tree.qualid);
     }
+
 
     /**
      * Visit class declaration AST node.
@@ -152,6 +149,7 @@ public class InitialScanner extends TreeScanner {
         scan(tree.defs);
     }
 
+
     /**
      * Visit method declaration AST node.
      *
@@ -181,6 +179,7 @@ public class InitialScanner extends TreeScanner {
 
     }
 
+
     /**
      * Visit variable declaration AST node.
      *
@@ -198,38 +197,23 @@ public class InitialScanner extends TreeScanner {
     public void visitSkip(JCSkip tree) {
     }
 
-    /**
-     * @param tree
-     */
     @Override
     public void visitBlock(JCBlock tree) {
         scan(tree.stats);
     }
 
-    /**
-     *
-     * @param tree
-     */
     @Override
     public void visitDoLoop(JCDoWhileLoop tree) {
         scan(tree.body);
         scan(tree.cond);
     }
 
-    /**
-     *
-     * @param tree
-     */
     @Override
     public void visitWhileLoop(JCWhileLoop tree) {
         scan(tree.cond);
         scan(tree.body);
     }
 
-    /**
-     *
-     * @param tree
-     */
     @Override
     public void visitForLoop(JCForLoop tree) {
         scan(tree.init);
@@ -238,10 +222,6 @@ public class InitialScanner extends TreeScanner {
         scan(tree.body);
     }
 
-    /**
-     *
-     * @param tree
-     */
     @Override
     public void visitForeachLoop(JCEnhancedForLoop tree) {
         scan(tree.var);

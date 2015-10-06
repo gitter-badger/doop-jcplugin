@@ -13,6 +13,7 @@ import java.util.Set;
  */
 @SuppressWarnings("unused")
 public class VarPointsTo {
+
     private long startLine;
     private long startColumn;
     private long endLine;

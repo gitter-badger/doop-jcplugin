@@ -28,7 +28,7 @@ repositories {
 dependencies {
     compile "org.codehaus.groovy:groovy-all:2.3.10"            // Groovy
     compile "plast-lab:doop-persistent:1.0-SNAPSHOT"           // The doop persistent classes
-    compile 'com.google.code.gson:gson:2.3.1'
+    compile 'com.google.code.gson:gson:2.4'
     compile 'commons-io:commons-io:2.4'
     compile files("${javaHome}/../lib/tools.jar")
 }

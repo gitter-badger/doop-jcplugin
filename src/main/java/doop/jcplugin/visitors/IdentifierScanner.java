@@ -43,6 +43,7 @@ public class IdentifierScanner extends TreeScanner {
 
     private MethodSymbol currentMethodSymbol;
     private ClassSymbol currentClassSymbol;
+    private String compilationUnitName;
     private String currentMethodDoopSignature;
     private String currentMethodCompactName;
 
@@ -57,9 +58,7 @@ public class IdentifierScanner extends TreeScanner {
      *
      * @param lineMap
      */
-    public IdentifierScanner(LineMap lineMap)
-
-    {
+    public IdentifierScanner(String compilationUnitName, LineMap lineMap) {
         this.doopReprBuilder = DoopRepresentationBuilder.getInstance();
         this.lineMap = lineMap;
         this.constructorInvocationCounter = 0;
@@ -67,6 +66,7 @@ public class IdentifierScanner extends TreeScanner {
         this.methodNamesPerClassMap = new HashMap<>();
         this.methodInvocationCounterMap = null;
         this.scanForInvocations = false;
+        this.compilationUnitName = compilationUnitName;
     }
 
 
@@ -192,7 +192,6 @@ public class IdentifierScanner extends TreeScanner {
             System.out.println("Variable name in Doop: " + varNameInDoop);
             System.out.println("##########################################################################################################################");
 
-//            mapVarPointsTo(varNameInDoop, tree.pos, tree.name);
         }
 
         scan(tree.mods);

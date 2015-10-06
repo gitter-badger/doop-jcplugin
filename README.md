@@ -6,7 +6,7 @@ mvn package
 
 <h3>javac command</h3>
 execute:
-javac -cp ../advancedTest/ -Xbootclasspath/p:./target/doop-jcplugin-1.0-SNAPSHOT.jar -processorpath ./target/doop-jcplugin-1.0-SNAPSHOT-jar-with-dependencies.jar -Xplugin:TypeInfoPlugin  ../advancedTest/src/main/java/advancedTest/Main.java ../advancedTest/src/main/java/extras/*.java
+javac -cp ../advancedTest/ -Xbootclasspath/p:./build/libs/doop-jcplugin-1.0-SNAPSHOT.jar -processorpath ./build/libs/doop-jcplugin-1.0-SNAPSHOT.jar -Xplugin:TypeInfoPlugin  ../advancedTest/src/main/java/advancedTest/Main.java ../advancedTest/src/main/java/extras/*.java
 
 <h3>useful links</h3>
 javac sources:

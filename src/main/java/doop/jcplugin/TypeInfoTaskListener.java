@@ -56,12 +56,6 @@ class TypeInfoTaskListener implements TaskListener {
         if (arg0.getKind().equals(TaskEvent.Kind.ANALYZE)) {
             System.out.println("\033[31m # Generating report for file: " + arg0.getSourceFile().getName() + "\033[0m");
 
-
-            /**
-             * Get the LineMap for this compilation unit in order to much positions with lines and columns.
-             */
-            LineMap lineMap = arg0.getCompilationUnit().getLineMap();
-
             /**
              * Open all necessary json files to write facts.
              */
@@ -73,14 +67,19 @@ class TypeInfoTaskListener implements TaskListener {
              * Get the AST root for this source code file.
              */
             JCTree treeRoot = (JCTree) arg0.getCompilationUnit();
-            InitialScanner initialScanner = new InitialScanner(lineMap);
+            String compilationUnitName = arg0.getCompilationUnit().toString();
+
+            /**
+             * Get the LineMap for this compilation unit in order to much positions with lines and columns.
+             */
+            LineMap lineMap = arg0.getCompilationUnit().getLineMap();
 
             /**
              * Visitor passes.
              */
-            treeRoot.accept(initialScanner);                                                                            //First pass
+            treeRoot.accept(new InitialScanner(compilationUnitName, lineMap));                     // First pass
 
-            treeRoot.accept(new IdentifierScanner(lineMap));     //Second pass
+            treeRoot.accept(new IdentifierScanner(compilationUnitName, lineMap));     // Second pass
 
             /**
              * Write and close all files.

@@ -5,10 +5,6 @@
  */
 package doop.jcplugin.reporters;
 
-import doop.jcplugin.representation.CallGraphEdge;
-import doop.jcplugin.representation.InstanceFieldPointsTo;
-import doop.jcplugin.representation.VarPointsTo;
-
 /**
  * @author anantoni
  */
