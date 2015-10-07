@@ -121,7 +121,7 @@ public class IdentifierScanner extends TreeScanner {
          * Add Class to source file report.
          */
         this.currentClassSymbol = tree.sym;
-        SourceFileReport.classList.add(new doop.persistent.elements.Class(null, null, this.currentClassSymbol.className()));
+
 
         Map<String, Integer> methodNamesMap;
         if (!methodNamesPerClassMap.containsKey(this.currentClassSymbol)) {

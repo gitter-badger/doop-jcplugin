@@ -19,6 +19,7 @@ import doop.jcplugin.util.SourceFileReport;
 import doop.persistent.elements.HeapAllocation;
 import doop.persistent.elements.Method;
 import doop.persistent.elements.Position;
+import doop.persistent.elements.Class;
 
 import static com.sun.tools.javac.code.Symbol.*;
 import static com.sun.tools.javac.tree.JCTree.*;
@@ -51,8 +52,10 @@ public class InitialScanner extends TreeScanner {
     private final DoopRepresentationBuilder doopReprBuilder;
     private String compilationUnitName;
     private ClassSymbol currentClassSymbol;
+    private Class currentClass;
     private final Map<ClassSymbol, Map<String, Integer>> methodNamesPerClassMap;
     private MethodSymbol currentMethodSymbol;
+    private Method currentMethod;
     private String currentMethodDoopSignature;
     private String currentMethodCompactName;
     private int heapAllocationCounter;
@@ -121,6 +124,10 @@ public class InitialScanner extends TreeScanner {
 
         this.currentClassSymbol = tree.sym;
         Map<String, Integer> methodNamesMap;
+
+        this.currentClass = new Class(null, null, this.currentClassSymbol.className());
+        SourceFileReport.classList.add(this.currentClass);
+
         if (!methodNamesPerClassMap.containsKey(this.currentClassSymbol)) {
             methodNamesMap = new HashMap<>();
             /**
@@ -169,6 +176,8 @@ public class InitialScanner extends TreeScanner {
         scan(tree.defaultValue);
         scan(tree.body);
 
+        System.out.println(tree.params);
+        System.out.println(tree.typarams);
         Position position = new Position(lineMap.getLineNumber(tree.pos),
                                                             lineMap.getColumnNumber(tree.pos),
                                                             lineMap.getColumnNumber(tree.pos + tree.name.toString().length()));
@@ -176,12 +185,16 @@ public class InitialScanner extends TreeScanner {
         /**
          * Add method to source file report.
          */
-        /*SourceFileReport.methodList.add(new Method(position,
-                                                    this.compilationUnitName, null, null, null,
-                                                    this.currentMethodDoopSignature,
-                                                    this.currentMethodCompactName,
-                                                    null,
-                                                    null));*/
+        this.currentMethod = new Method(position,
+                                        this.compilationUnitName,
+                                        this.currentMethodSymbol.name.toString(),
+                                        this.currentClass,
+                                        this.currentMethodSymbol.getReturnType().toString(),
+                                        this.currentMethodDoopSignature,
+                                        this.currentMethodCompactName,
+                                        null,
+                                        null);
+        SourceFileReport.methodList.add(this.currentMethod);
     }
 
 
