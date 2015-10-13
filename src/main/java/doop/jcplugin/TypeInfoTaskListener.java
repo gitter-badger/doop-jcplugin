@@ -4,15 +4,12 @@ import com.sun.source.tree.LineMap;
 import com.sun.source.util.TaskEvent;
 import com.sun.source.util.TaskListener;
 import com.sun.tools.javac.tree.JCTree;
-import com.sun.tools.javac.util.Pair;
 import doop.jcplugin.conf.Configuration;
 import doop.jcplugin.reporters.JSONReporter;
 import doop.jcplugin.reporters.Reporter;
 import doop.jcplugin.util.SourceFileReport;
-import doop.jcplugin.visitors.IdentifierScanner;
 import doop.jcplugin.visitors.InitialScanner;
 
-import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -68,7 +65,7 @@ class TypeInfoTaskListener implements TaskListener {
              * Get the AST root for this source code file.
              */
             JCTree treeRoot = (JCTree) arg0.getCompilationUnit();
-            String compilationUnitName = arg0.getCompilationUnit().toString();
+            String compilationUnitName = arg0.getSourceFile().getName();
 
             /**
              * Get the LineMap for this compilation unit in order to much positions with lines and columns.
@@ -81,7 +78,7 @@ class TypeInfoTaskListener implements TaskListener {
              */
             treeRoot.accept(new InitialScanner(compilationUnitName, lineMap));                     // First pass
 
-            //treeRoot.accept(new IdentifierScanner(compilationUnitName, lineMap));     // Second pass
+            //treeRoot.accept(new OccurrenceScanner(compilationUnitName, lineMap));     // Second pass
 
             /**
              * Write and close all files.

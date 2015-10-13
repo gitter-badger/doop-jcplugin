@@ -11,9 +11,7 @@ import com.sun.tools.javac.util.List;
 import doop.jcplugin.representation.DoopRepresentationBuilder;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import doop.jcplugin.util.SourceFileReport;
 import doop.persistent.elements.HeapAllocation;
@@ -50,7 +48,7 @@ public class InitialScanner extends TreeScanner {
 
     private final LineMap lineMap;
     private final DoopRepresentationBuilder doopReprBuilder;
-    private String compilationUnitName;
+    private String sourceFileName;
     private ClassSymbol currentClassSymbol;
     private Class currentClass;
     private final Map<ClassSymbol, Map<String, Integer>> methodNamesPerClassMap;
@@ -64,14 +62,14 @@ public class InitialScanner extends TreeScanner {
     /**
      * @param lineMap holds the line, column information for each symbol.
      */
-    public InitialScanner(String compilationUnitName, LineMap lineMap) {
+    public InitialScanner(String sourceFileName, LineMap lineMap) {
 
         this.doopReprBuilder = DoopRepresentationBuilder.getInstance();
         this.lineMap = lineMap;
         this.heapAllocationCounter = 0;
         this.methodNamesPerClassMap = new HashMap<>();
         this.heapAllocationCounterMap = new HashMap<>();
-        this.compilationUnitName = compilationUnitName;
+        this.sourceFileName = sourceFileName;
     }
 
     /**
@@ -125,7 +123,15 @@ public class InitialScanner extends TreeScanner {
         this.currentClassSymbol = tree.sym;
         Map<String, Integer> methodNamesMap;
 
-        this.currentClass = new Class(null, null, this.currentClassSymbol.className());
+
+        /**
+         * Add class to source file report.
+         */
+        Position position = new Position(lineMap.getLineNumber(tree.pos),
+                                            lineMap.getColumnNumber(tree.pos),
+                                            lineMap.getColumnNumber(tree.pos + this.currentClassSymbol.className().length()));
+
+        this.currentClass = new Class(position, this.sourceFileName, this.currentClassSymbol.className());
         SourceFileReport.classList.add(this.currentClass);
 
         if (!methodNamesPerClassMap.containsKey(this.currentClassSymbol)) {
@@ -176,24 +182,33 @@ public class InitialScanner extends TreeScanner {
         scan(tree.defaultValue);
         scan(tree.body);
 
-        System.out.println(tree.params);
-        System.out.println(tree.typarams);
+        List<JCVariableDecl> parametersList = tree.getParameters();
+
         Position position = new Position(lineMap.getLineNumber(tree.pos),
                                                             lineMap.getColumnNumber(tree.pos),
                                                             lineMap.getColumnNumber(tree.pos + tree.name.toString().length()));
 
+        String[] params = new String[parametersList.length()];
+        String[] paramTypes = new String[parametersList.length()];
+
+        int counter = 0;
+        for (JCVariableDecl jcVariableDecl : parametersList) {
+            params[counter] = jcVariableDecl.getName().toString();
+            paramTypes[counter] = jcVariableDecl.vartype.toString();
+            counter++;
+        }
         /**
          * Add method to source file report.
          */
         this.currentMethod = new Method(position,
-                                        this.compilationUnitName,
-                                        this.currentMethodSymbol.name.toString(),
+                                        this.sourceFileName,
+                                        this.currentMethodSymbol.name.toString().trim(),
                                         this.currentClass,
-                                        this.currentMethodSymbol.getReturnType().toString(),
+                                        this.currentMethodSymbol.getReturnType().toString().trim(),
                                         this.currentMethodDoopSignature,
                                         this.currentMethodCompactName,
-                                        null,
-                                        null);
+                                        params,
+                                        paramTypes);
         SourceFileReport.methodList.add(this.currentMethod);
     }
 
@@ -379,7 +394,8 @@ public class InitialScanner extends TreeScanner {
                                                         lineMap.getColumnNumber(tree.clazz.pos),
                                                         lineMap.getColumnNumber(tree.clazz.pos + tree.clazz.toString().length()));
 
-        SourceFileReport.heapAllocationList.add(new HeapAllocation(position, this.compilationUnitName, heapAllocation, tree.clazz.type.toString(), null));
+        SourceFileReport.heapAllocationList.add(new HeapAllocation(position, this.sourceFileName,
+                                                    heapAllocation, tree.clazz.type.toString(), this.currentMethod));
     }
 
     @Override

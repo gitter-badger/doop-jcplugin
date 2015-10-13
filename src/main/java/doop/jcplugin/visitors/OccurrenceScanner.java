@@ -36,7 +36,7 @@ import static com.sun.tools.javac.tree.JCTree.*;
  * This code and its internal interfaces are subject to change or
  * deletion without notice.</b>
  */
-public class IdentifierScanner extends TreeScanner {
+public class OccurrenceScanner extends TreeScanner {
 
     private final LineMap lineMap;
     private final DoopRepresentationBuilder doopReprBuilder;
@@ -58,7 +58,7 @@ public class IdentifierScanner extends TreeScanner {
      *
      * @param lineMap
      */
-    public IdentifierScanner(String compilationUnitName, LineMap lineMap) {
+    public OccurrenceScanner(String compilationUnitName, LineMap lineMap) {
         this.doopReprBuilder = DoopRepresentationBuilder.getInstance();
         this.lineMap = lineMap;
         this.constructorInvocationCounter = 0;
