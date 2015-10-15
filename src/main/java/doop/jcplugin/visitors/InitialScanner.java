@@ -134,6 +134,9 @@ public class InitialScanner extends TreeScanner {
         this.currentClass = new Class(position, this.sourceFileName, this.currentClassSymbol.className());
         SourceFileReport.classList.add(this.currentClass);
 
+        System.out.println("Reported class: " + this.currentClassSymbol.className());
+        System.out.println("Source file name: " + this.sourceFileName);
+
         if (!methodNamesPerClassMap.containsKey(this.currentClassSymbol)) {
             methodNamesMap = new HashMap<>();
             /**
