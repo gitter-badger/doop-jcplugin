@@ -8,7 +8,7 @@ import doop.jcplugin.conf.Configuration;
 import doop.jcplugin.reporters.JSONReporter;
 import doop.jcplugin.reporters.Reporter;
 import doop.jcplugin.util.SourceFileReport;
-import doop.jcplugin.visitors.InitialScanner;
+import doop.jcplugin.visitors.SymbolScanner;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -76,7 +76,7 @@ class TypeInfoTaskListener implements TaskListener {
             /**
              * Visitor passes.
              */
-            treeRoot.accept(new InitialScanner(compilationUnitName, lineMap));                     // First pass
+            treeRoot.accept(new SymbolScanner(compilationUnitName, lineMap));                     // First pass
 
             //treeRoot.accept(new OccurrenceScanner(compilationUnitName, lineMap));     // Second pass
 

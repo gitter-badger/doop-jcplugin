@@ -40,9 +40,9 @@ import static com.sun.tools.javac.tree.JCTree.*;
  */
 
 /**
- * InitialScanner scans the compilation unit for heap allocations and method definitions.
+ * SymbolScanner scans the compilation unit for heap allocations and method definitions.
  */
-public class InitialScanner extends TreeScanner {
+public class SymbolScanner extends TreeScanner {
 
     private final LineMap lineMap;
     private final DoopRepresentationBuilder doopReprBuilder;
@@ -56,11 +56,15 @@ public class InitialScanner extends TreeScanner {
     private String currentMethodCompactName;
     private int heapAllocationCounter;
     private Map<String, Integer> heapAllocationCounterMap = null;
+    private boolean scanForInvocations;
+    private int constructorInvocationCounter = 0;
+    private int methodInvocationCounter = 0;
+    private Map<String, Integer> methodInvocationCounterMap;
 
     /**
      * @param lineMap holds the line, column information for each symbol.
      */
-    public InitialScanner(String sourceFileName, LineMap lineMap) {
+    public SymbolScanner(String sourceFileName, LineMap lineMap) {
 
         this.doopReprBuilder = DoopRepresentationBuilder.getInstance();
         this.lineMap = lineMap;
@@ -184,9 +188,13 @@ public class InitialScanner extends TreeScanner {
     @Override
     public void visitMethodDef(JCMethodDecl tree) {
 
+        this.scanForInvocations = true;
         this.currentMethodSymbol = tree.sym;
         this.currentMethodDoopSignature = this.doopReprBuilder.buildDoopMethodSignature(currentMethodSymbol);
         this.currentMethodCompactName = this.doopReprBuilder.buildDoopMethodCompactName(currentMethodSymbol);
+        this.methodInvocationCounter = 0;
+        this.methodInvocationCounterMap = new HashMap<>();
+
 
         List<JCVariableDecl> parametersList = tree.getParameters();
 
@@ -203,6 +211,7 @@ public class InitialScanner extends TreeScanner {
             paramTypes[counter] = jcVariableDecl.vartype.toString();
             counter++;
         }
+
         /**
          * Add method to source file report.
          */
@@ -235,6 +244,7 @@ public class InitialScanner extends TreeScanner {
         scan(tree.defaultValue);
         scan(tree.body);
 
+        this.scanForInvocations = false;
 
     }
 
@@ -247,7 +257,9 @@ public class InitialScanner extends TreeScanner {
     @Override
     public void visitVarDef(JCVariableDecl tree) {
 
-
+        /**
+         * Report field.
+         */
         if (tree.sym.getKind().toString().equals("FIELD")) {
 
             Position position = new Position(this.lineMap.getLineNumber(tree.pos),
@@ -273,6 +285,46 @@ public class InitialScanner extends TreeScanner {
             SourceFileReport.fieldList.add(field);
 
         }
+        /**
+         * Report local variable or parameter.
+         */
+        else {
+            boolean isLocal = tree.sym.getKind().toString().equals("LOCAL_VARIABLE")? true : false;
+            boolean isParameter = tree.sym.getKind().toString().equals("PARAMETER")? true : false;
+
+            Position position = new Position(this.lineMap.getLineNumber(tree.pos),
+                    this.lineMap.getColumnNumber(tree.pos),
+                    this.lineMap.getColumnNumber(tree.pos + tree.sym.getQualifiedName().toString().length()));
+
+            String varNameInDoop;
+            /**
+             * If current method is overloaded use its signature to build the variable name.
+             */
+            if (this.methodNamesPerClassMap.get(currentClassSymbol).get(this.currentMethodSymbol.getQualifiedName().toString()) > 1)
+                varNameInDoop = this.doopReprBuilder.buildDoopVarName(this.currentMethodDoopSignature, tree.sym.getQualifiedName().toString());
+            /**
+             * Otherwise use its compact name.
+             */
+            else
+                varNameInDoop = this.doopReprBuilder.buildDoopVarName(this.currentMethodCompactName, tree.sym.getQualifiedName().toString());
+
+            System.out.println("Reporting local variable: " + tree.sym.name);
+            System.out.println("Doop variable name: " + varNameInDoop);
+            System.out.println("Variable type: " + tree.sym.type.toString());
+
+            Variable variable = new Variable(position,
+                                             this.sourceFileName,
+                                             tree.sym.name.toString(),
+                                             varNameInDoop,
+                                             tree.sym.type.toString(),
+                                             currentMethod.getId(),
+                                             isLocal,
+                                             isParameter);
+
+            SourceFileReport.variableList.add(variable);
+        }
+
+
         scan(tree.mods);
         scan(tree.vartype);
         scan(tree.nameexpr);
@@ -400,6 +452,69 @@ public class InitialScanner extends TreeScanner {
         scan(tree.typeargs);
         scan(tree.meth);
         scan(tree.args);
+
+        java.lang.Class<?> clazz = tree.meth.getClass();
+        java.lang.reflect.Field field;
+        Object fieldValue = null;
+
+        System.out.println(tree.meth.toString());
+
+        try {
+            field = clazz.getField("sym");
+            fieldValue = field.get(tree.meth);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
+        if (fieldValue instanceof MethodSymbol && scanForInvocations) {
+
+            String doopMethodInvocation;
+            /**
+             * If current method is overloaded use its signature to build the variable name.
+             */
+            if (this.methodNamesPerClassMap.get(this.currentClassSymbol).get(this.currentMethodSymbol.getQualifiedName().toString()) > 1)
+                doopMethodInvocation = this.doopReprBuilder.buildDoopMethodInvocationInMethod(this.currentMethodDoopSignature,
+                        this.doopReprBuilder.buildDoopMethodInvocation((Symbol.MethodSymbol) fieldValue));
+            /**
+             * Otherwise use its compact name.
+             */
+            else
+                doopMethodInvocation = this.doopReprBuilder.buildDoopMethodInvocationInMethod(this.currentMethodCompactName,
+                        this.doopReprBuilder.buildDoopMethodInvocation((Symbol.MethodSymbol) fieldValue));
+
+            String methodName = fieldValue.toString();
+            if (methodName.contains("("))
+                methodName = methodName.substring(0, methodName.indexOf("("));
+            if (methodName.contains("."))
+                methodName = methodName.substring(methodName.lastIndexOf("."));
+
+
+            /**
+             * Evaluate heap allocation counter within method.
+             */
+            if (!doopMethodInvocation.endsWith("<init>")) {
+                if (methodInvocationCounterMap.containsKey(methodName)) {
+                    methodInvocationCounter = methodInvocationCounterMap.get(methodName) + 1;
+                    methodInvocationCounterMap.put(methodName, methodInvocationCounter);
+                } else {
+                    methodInvocationCounter = 0;
+                    methodInvocationCounterMap.put(methodName, 0);
+                }
+                doopMethodInvocation += "/" + this.methodInvocationCounter;
+            }
+            else {
+                doopMethodInvocation += "/" + this.constructorInvocationCounter++;
+            }
+
+            long invocationPos;
+            if (tree.meth.toString().contains("."))
+                invocationPos = tree.meth.pos + 1;
+            else
+                invocationPos = tree.meth.pos;
+
+            System.out.println("\033[35m Method Invocation from visitApply: \033[0m" + doopMethodInvocation);
+            SourceFileReport.invocationList.add(new MethodInvocation(null, this.sourceFileName, doopMethodInvocation, this.currentMethod.toString()));
+        }
     }
 
     /**
@@ -458,6 +573,27 @@ public class InitialScanner extends TreeScanner {
                                                 tree.clazz.type.toString(),
                                                 this.currentMethod.getId()));
 
+        if (this.scanForInvocations) {
+            /**
+             * Method Invocation: Constructor
+             */
+            String doopMethodInvocation;
+            /**
+             * If current method is overloaded use its signature to build the variable name.
+             */
+            if (this.methodNamesPerClassMap.get(this.currentClassSymbol).get(this.currentMethodSymbol.getQualifiedName().toString()) > 1)
+                doopMethodInvocation = this.doopReprBuilder.buildDoopMethodInvocationInMethod(this.currentMethodDoopSignature,
+                        this.doopReprBuilder.buildDoopMethodInvocation((MethodSymbol) tree.constructor) + "/" + this.constructorInvocationCounter++);
+            /**
+             * Otherwise use its compact name.
+             */
+            else
+                doopMethodInvocation = this.doopReprBuilder.buildDoopMethodInvocationInMethod(this.currentMethodCompactName,
+                        this.doopReprBuilder.buildDoopMethodInvocation((MethodSymbol) tree.constructor) + "/" + this.constructorInvocationCounter++);
+
+            System.out.println("\033[35m Method Invocation (Constructor): \033[0m" + doopMethodInvocation);
+            SourceFileReport.invocationList.add(new MethodInvocation(null, this.sourceFileName, doopMethodInvocation, this.currentMethod.getId()));
+        }
 
     }
 
