@@ -127,6 +127,9 @@ public class InitialScanner extends TreeScanner {
         /**
          * Add class to source file report.
          */
+        System.out.println("Reporting class: " + this.currentClassSymbol.className());
+        System.out.println("Source file name: " + this.sourceFileName);
+
         Position position = new Position(lineMap.getLineNumber(tree.pos),
                                             lineMap.getColumnNumber(tree.pos),
                                             lineMap.getColumnNumber(tree.pos + this.currentClassSymbol.className().length()));
@@ -134,8 +137,7 @@ public class InitialScanner extends TreeScanner {
         this.currentClass = new Class(position, this.sourceFileName, this.currentClassSymbol.className());
         SourceFileReport.classList.add(this.currentClass);
 
-        System.out.println("Reported class: " + this.currentClassSymbol.className());
-        System.out.println("Source file name: " + this.sourceFileName);
+
 
         if (!methodNamesPerClassMap.containsKey(this.currentClassSymbol)) {
             methodNamesMap = new HashMap<>();
@@ -188,8 +190,8 @@ public class InitialScanner extends TreeScanner {
         List<JCVariableDecl> parametersList = tree.getParameters();
 
         Position position = new Position(lineMap.getLineNumber(tree.pos),
-                                                            lineMap.getColumnNumber(tree.pos),
-                                                            lineMap.getColumnNumber(tree.pos + tree.name.toString().length()));
+                                         lineMap.getColumnNumber(tree.pos),
+                                         lineMap.getColumnNumber(tree.pos + tree.name.toString().length()));
 
         String[] params = new String[parametersList.length()];
         String[] paramTypes = new String[parametersList.length()];
@@ -203,11 +205,20 @@ public class InitialScanner extends TreeScanner {
         /**
          * Add method to source file report.
          */
+        System.out.println("Reporting method: " + this.currentMethodSymbol.name);
+        System.out.println("Source file name: " + this.sourceFileName);
+        System.out.println("Declaring class id: " + this.currentClass.getId());
+        System.out.println("Return type: " + this.currentMethodSymbol.getReturnType().toString());
+        System.out.println("Doop method signature: " + this.currentMethodDoopSignature);
+        System.out.println("Method compact name: " + this.currentMethodCompactName);
+        System.out.println("Method parameters: " + params.toString());
+        System.out.println("Method parameter types: " + paramTypes.toString());
+
         this.currentMethod = new Method(position,
                                         this.sourceFileName,
-                                        this.currentMethodSymbol.name.toString().trim(),
-                                        this.currentClass,
-                                        this.currentMethodSymbol.getReturnType().toString().trim(),
+                                        this.currentMethodSymbol.name.toString(),
+                                        this.currentClass.getId(),
+                                        this.currentMethodSymbol.getReturnType().toString(),
                                         this.currentMethodDoopSignature,
                                         this.currentMethodCompactName,
                                         params,
@@ -353,7 +364,7 @@ public class InitialScanner extends TreeScanner {
     }
 
     /**
-     * Visit "new Class()" AST node.
+     * Visit "new <T>()" AST node aka heap allocation.
      *
      * @param tree
      */
@@ -365,40 +376,50 @@ public class InitialScanner extends TreeScanner {
         scan(tree.args);
         scan(tree.def);
 
-        String heapAllocation;
+        String doopHeapAllocationID;
         /**
          * If current method is overloaded use its signature to build the heap allocation.
          */
         if (this.methodNamesPerClassMap.get(this.currentClassSymbol).get(this.currentMethodSymbol.getQualifiedName().toString()) > 1)
-            heapAllocation = this.doopReprBuilder.buildDoopHeapAllocation(currentMethodDoopSignature, tree.clazz.type.getOriginalType().toString());
+            doopHeapAllocationID = this.doopReprBuilder.buildDoopHeapAllocation(currentMethodDoopSignature, tree.clazz.type.getOriginalType().toString());
         /**
          * Otherwise use its compact name.
          */
         else
-            heapAllocation = this.doopReprBuilder.buildDoopHeapAllocation(currentMethodCompactName, tree.clazz.type.getOriginalType().toString());
+            doopHeapAllocationID = this.doopReprBuilder.buildDoopHeapAllocation(currentMethodCompactName, tree.clazz.type.getOriginalType().toString());
 
         /**
          * Evaluate heap allocation counter within method.
          */
-        if (heapAllocationCounterMap.containsKey(heapAllocation)) {
-            heapAllocationCounter = heapAllocationCounterMap.get(heapAllocation) + 1;
-            heapAllocationCounterMap.put(heapAllocation, heapAllocationCounter);
+        if (heapAllocationCounterMap.containsKey(doopHeapAllocationID)) {
+            heapAllocationCounter = heapAllocationCounterMap.get(doopHeapAllocationID) + 1;
+            heapAllocationCounterMap.put(doopHeapAllocationID, heapAllocationCounter);
         }
         else {
             heapAllocationCounter = 0;
-            heapAllocationCounterMap.put(heapAllocation, 0);
+            heapAllocationCounterMap.put(doopHeapAllocationID, 0);
         }
-        heapAllocation += "/" + heapAllocationCounter;
+        doopHeapAllocationID += "/" + heapAllocationCounter;
 
         /**
          * Add Heap Allocation to source file report.
          */
-        Position position = new Position(lineMap.getLineNumber(tree.clazz.pos),
-                                                        lineMap.getColumnNumber(tree.clazz.pos),
-                                                        lineMap.getColumnNumber(tree.clazz.pos + tree.clazz.toString().length()));
+        System.out.println("Reporting heap allocation: " + doopHeapAllocationID);
+        System.out.println("Source file name: " + this.sourceFileName);
+        System.out.println("Allocated object type: " + tree.clazz.type.toString());
+        System.out.println("Allocating method id: " + this.currentMethod.getId());
 
-        SourceFileReport.heapAllocationList.add(new HeapAllocation(position, this.sourceFileName,
-                                                    heapAllocation, tree.clazz.type.toString(), this.currentMethod));
+        Position position = new Position(lineMap.getLineNumber(tree.clazz.pos),
+                                            lineMap.getColumnNumber(tree.clazz.pos),
+                                            lineMap.getColumnNumber(tree.clazz.pos + tree.clazz.toString().length()));
+
+        SourceFileReport.heapAllocationList.add(new HeapAllocation(position,
+                                                this.sourceFileName,
+                                                doopHeapAllocationID,
+                                                tree.clazz.type.toString(),
+                                                this.currentMethod.getId()));
+
+
     }
 
     @Override
