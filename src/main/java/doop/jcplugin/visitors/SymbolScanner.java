@@ -512,6 +512,10 @@ public class SymbolScanner extends TreeScanner {
             else
                 invocationPos = tree.meth.pos;
 
+            Position position = new Position(this.lineMap.getLineNumber(invocationPos),
+                                             this.lineMap.getColumnNumber(invocationPos),
+                                             this.lineMap.getLineNumber(invocationPos + methodName.length()));
+
             System.out.println("\033[35m Method Invocation from visitApply: \033[0m" + doopMethodInvocation);
             SourceFileReport.invocationList.add(new MethodInvocation(null, this.sourceFileName, doopMethodInvocation, this.currentMethod.toString()));
         }
@@ -591,8 +595,12 @@ public class SymbolScanner extends TreeScanner {
                 doopMethodInvocation = this.doopReprBuilder.buildDoopMethodInvocationInMethod(this.currentMethodCompactName,
                         this.doopReprBuilder.buildDoopMethodInvocation((MethodSymbol) tree.constructor) + "/" + this.constructorInvocationCounter++);
 
+            position = new Position(lineMap.getLineNumber(tree.pos),
+                                    lineMap.getColumnNumber(tree.pos),
+                                    lineMap.getLineNumber(tree.pos) + tree.clazz.toString().length());
+
             System.out.println("\033[35m Method Invocation (Constructor): \033[0m" + doopMethodInvocation);
-            SourceFileReport.invocationList.add(new MethodInvocation(null, this.sourceFileName, doopMethodInvocation, this.currentMethod.getId()));
+            SourceFileReport.invocationList.add(new MethodInvocation(position, this.sourceFileName, doopMethodInvocation, this.currentMethod.getId()));
         }
 
     }
