@@ -14,9 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import doop.jcplugin.util.SourceFileReport;
-import doop.persistent.elements.HeapAllocation;
-import doop.persistent.elements.Method;
-import doop.persistent.elements.Position;
+import doop.persistent.elements.*;
 import doop.persistent.elements.Class;
 
 import static com.sun.tools.javac.code.Symbol.*;
@@ -129,12 +127,21 @@ public class InitialScanner extends TreeScanner {
          */
         System.out.println("Reporting class: " + this.currentClassSymbol.className());
         System.out.println("Source file name: " + this.sourceFileName);
+        System.out.println("Package full name: " + this.currentClassSymbol.packge().fullname);
 
         Position position = new Position(lineMap.getLineNumber(tree.pos),
                                             lineMap.getColumnNumber(tree.pos),
                                             lineMap.getColumnNumber(tree.pos + this.currentClassSymbol.className().length()));
 
-        this.currentClass = new Class(position, this.sourceFileName, this.currentClassSymbol.className());
+        this.currentClass = new Class(position,
+                                      this.sourceFileName,
+                                      this.currentClassSymbol.className(),
+                                      this.currentClassSymbol.packge().fullname.toString(),
+                                      this.currentClassSymbol.isInterface(),
+                                      this.currentClassSymbol.isEnum(),
+                                      this.currentClassSymbol.isStatic(),
+                                      this.currentClassSymbol.isInner(),
+                                      this.currentClassSymbol.isAnonymous());
         SourceFileReport.classList.add(this.currentClass);
 
 
@@ -162,6 +169,9 @@ public class InitialScanner extends TreeScanner {
         scan(tree.typarams);
         scan(tree.extending);
         scan(tree.implementing);
+        for(JCTree def : tree.defs) {
+            System.out.println(def.getClass());
+        }
         scan(tree.defs);
     }
 
@@ -178,20 +188,11 @@ public class InitialScanner extends TreeScanner {
         this.currentMethodDoopSignature = this.doopReprBuilder.buildDoopMethodSignature(currentMethodSymbol);
         this.currentMethodCompactName = this.doopReprBuilder.buildDoopMethodCompactName(currentMethodSymbol);
 
-        scan(tree.mods);
-        scan(tree.restype);
-        scan(tree.typarams);
-        scan(tree.recvparam);
-        scan(tree.params);
-        scan(tree.thrown);
-        scan(tree.defaultValue);
-        scan(tree.body);
-
         List<JCVariableDecl> parametersList = tree.getParameters();
 
         Position position = new Position(lineMap.getLineNumber(tree.pos),
-                                         lineMap.getColumnNumber(tree.pos),
-                                         lineMap.getColumnNumber(tree.pos + tree.name.toString().length()));
+                lineMap.getColumnNumber(tree.pos),
+                lineMap.getColumnNumber(tree.pos + tree.name.toString().length()));
 
         String[] params = new String[parametersList.length()];
         String[] paramTypes = new String[parametersList.length()];
@@ -224,6 +225,17 @@ public class InitialScanner extends TreeScanner {
                                         params,
                                         paramTypes);
         SourceFileReport.methodList.add(this.currentMethod);
+
+        scan(tree.mods);
+        scan(tree.restype);
+        scan(tree.typarams);
+        scan(tree.recvparam);
+        scan(tree.params);
+        scan(tree.thrown);
+        scan(tree.defaultValue);
+        scan(tree.body);
+
+
     }
 
 
@@ -234,6 +246,33 @@ public class InitialScanner extends TreeScanner {
      */
     @Override
     public void visitVarDef(JCVariableDecl tree) {
+
+
+        if (tree.sym.getKind().toString().equals("FIELD")) {
+
+            Position position = new Position(this.lineMap.getLineNumber(tree.pos),
+                                             this.lineMap.getColumnNumber(tree.pos),
+                                             this.lineMap.getColumnNumber(tree.pos + tree.sym.getQualifiedName().toString().length()));
+
+            String fieldName = tree.sym.name.toString();
+            String fieldSignature = this.doopReprBuilder.buildDoopFieldSignature(tree.sym);
+
+
+            System.out.println("Reporting field: " + fieldName);
+            System.out.println("Field signature: " + fieldSignature);
+            System.out.println("Source file name: " + this.sourceFileName);
+            System.out.println("Field type: " + tree.sym.type.toString());
+
+            Field field = new Field(position,
+                                    this.sourceFileName,
+                                    fieldName,
+                                    fieldSignature,
+                                    tree.sym.type.toString(),
+                                    this.currentClass.getId(),
+                                    tree.sym.isStatic());
+            SourceFileReport.fieldList.add(field);
+
+        }
         scan(tree.mods);
         scan(tree.vartype);
         scan(tree.nameexpr);
