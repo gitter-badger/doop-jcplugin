@@ -49,17 +49,15 @@ public class SymbolScanner extends TreeScanner {
     private String sourceFileName;
     private ClassSymbol currentClassSymbol;
     private Class currentClass;
-    private final Map<ClassSymbol, Map<String, Integer>> methodNamesPerClassMap;
     private MethodSymbol currentMethodSymbol;
     private Method currentMethod;
     private String currentMethodDoopSignature;
     private String currentMethodCompactName;
-    private int heapAllocationCounter;
-    private Map<String, Integer> heapAllocationCounterMap = null;
+    private Map<String, Integer> heapAllocationCounterMap;
     private boolean scanForInvocations;
-    private int constructorInvocationCounter = 0;
-    private int methodInvocationCounter = 0;
-    private Map<String, Integer> methodInvocationCounterMap;
+    private final Map<ClassSymbol, Map<String, Integer>> methodNamesPerClassMap;
+    private Map<Integer, doop.persistent.elements.Symbol> varSymbolMap;
+    private Map<Integer, ClassSymbol> classSymbolMap;
 
     /**
      * @param lineMap holds the line, column information for each symbol.
@@ -68,10 +66,10 @@ public class SymbolScanner extends TreeScanner {
 
         this.doopReprBuilder = DoopRepresentationBuilder.getInstance();
         this.lineMap = lineMap;
-        this.heapAllocationCounter = 0;
         this.methodNamesPerClassMap = new HashMap<>();
-        this.heapAllocationCounterMap = new HashMap<>();
         this.sourceFileName = sourceFileName;
+        this.varSymbolMap = new HashMap<>();
+        this.classSymbolMap = new HashMap<>();
     }
 
     /**
@@ -125,7 +123,6 @@ public class SymbolScanner extends TreeScanner {
         this.currentClassSymbol = tree.sym;
         Map<String, Integer> methodNamesMap;
 
-
         /**
          * Add class to source file report.
          */
@@ -147,8 +144,6 @@ public class SymbolScanner extends TreeScanner {
                                       this.currentClassSymbol.isInner(),
                                       this.currentClassSymbol.isAnonymous());
         SourceFileReport.classList.add(this.currentClass);
-
-
 
         if (!methodNamesPerClassMap.containsKey(this.currentClassSymbol)) {
             methodNamesMap = new HashMap<>();
@@ -188,14 +183,10 @@ public class SymbolScanner extends TreeScanner {
     @Override
     public void visitMethodDef(JCMethodDecl tree) {
 
-        this.scanForInvocations = true;
         this.currentMethodSymbol = tree.sym;
         this.currentMethodDoopSignature = this.doopReprBuilder.buildDoopMethodSignature(currentMethodSymbol);
         this.currentMethodCompactName = this.doopReprBuilder.buildDoopMethodCompactName(currentMethodSymbol);
-        this.methodInvocationCounter = 0;
-        this.methodInvocationCounterMap = new HashMap<>();
-
-
+        this.heapAllocationCounterMap = new HashMap<>();
         List<JCVariableDecl> parametersList = tree.getParameters();
 
         Position position = new Position(lineMap.getLineNumber(tree.pos),
@@ -232,7 +223,9 @@ public class SymbolScanner extends TreeScanner {
                                         this.currentMethodDoopSignature,
                                         this.currentMethodCompactName,
                                         params,
-                                        paramTypes);
+                                        paramTypes,
+                                        this.currentMethodSymbol.isStatic());
+
         SourceFileReport.methodList.add(this.currentMethod);
 
         scan(tree.mods);
@@ -242,12 +235,11 @@ public class SymbolScanner extends TreeScanner {
         scan(tree.params);
         scan(tree.thrown);
         scan(tree.defaultValue);
+
+        InvocationScanner invocationScanner = new InvocationScanner(sourceFileName, lineMap, currentClassSymbol, currentMethodSymbol, currentMethod, currentMethodDoopSignature, currentMethodCompactName, heapAllocationCounterMap, methodNamesPerClassMap);
+        tree.body.accept(invocationScanner);
         scan(tree.body);
-
-        this.scanForInvocations = false;
-
     }
-
 
     /**
      * Visit variable declaration AST node.
@@ -282,19 +274,22 @@ public class SymbolScanner extends TreeScanner {
                                     tree.sym.type.toString(),
                                     this.currentClass.getId(),
                                     tree.sym.isStatic());
+
             SourceFileReport.fieldList.add(field);
+            varSymbolMap.put(tree.sym.hashCode(), field);
 
         }
         /**
          * Report local variable or parameter.
          */
         else {
+
             boolean isLocal = tree.sym.getKind().toString().equals("LOCAL_VARIABLE")? true : false;
             boolean isParameter = tree.sym.getKind().toString().equals("PARAMETER")? true : false;
 
             Position position = new Position(this.lineMap.getLineNumber(tree.pos),
-                    this.lineMap.getColumnNumber(tree.pos),
-                    this.lineMap.getColumnNumber(tree.pos + tree.sym.getQualifiedName().toString().length()));
+                                             this.lineMap.getColumnNumber(tree.pos),
+                                             this.lineMap.getColumnNumber(tree.pos + tree.sym.getQualifiedName().toString().length()));
 
             String varNameInDoop;
             /**
@@ -322,6 +317,7 @@ public class SymbolScanner extends TreeScanner {
                                              isParameter);
 
             SourceFileReport.variableList.add(variable);
+            varSymbolMap.put(tree.sym.hashCode(), variable);
         }
 
 
@@ -447,163 +443,7 @@ public class SymbolScanner extends TreeScanner {
         scan(tree.detail);
     }
 
-    @Override
-    public void visitApply(JCMethodInvocation tree) {
-        scan(tree.typeargs);
-        scan(tree.meth);
-        scan(tree.args);
 
-        java.lang.Class<?> clazz = tree.meth.getClass();
-        java.lang.reflect.Field field;
-        Object fieldValue = null;
-
-        System.out.println(tree.meth.toString());
-
-        try {
-            field = clazz.getField("sym");
-            fieldValue = field.get(tree.meth);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            e.printStackTrace();
-        }
-
-        if (fieldValue instanceof MethodSymbol && scanForInvocations) {
-
-            String doopMethodInvocation;
-            /**
-             * If current method is overloaded use its signature to build the variable name.
-             */
-            if (this.methodNamesPerClassMap.get(this.currentClassSymbol).get(this.currentMethodSymbol.getQualifiedName().toString()) > 1)
-                doopMethodInvocation = this.doopReprBuilder.buildDoopMethodInvocationInMethod(this.currentMethodDoopSignature,
-                        this.doopReprBuilder.buildDoopMethodInvocation((Symbol.MethodSymbol) fieldValue));
-            /**
-             * Otherwise use its compact name.
-             */
-            else
-                doopMethodInvocation = this.doopReprBuilder.buildDoopMethodInvocationInMethod(this.currentMethodCompactName,
-                        this.doopReprBuilder.buildDoopMethodInvocation((Symbol.MethodSymbol) fieldValue));
-
-            String methodName = fieldValue.toString();
-            if (methodName.contains("("))
-                methodName = methodName.substring(0, methodName.indexOf("("));
-            if (methodName.contains("."))
-                methodName = methodName.substring(methodName.lastIndexOf("."));
-
-
-            /**
-             * Evaluate heap allocation counter within method.
-             */
-            if (!doopMethodInvocation.endsWith("<init>")) {
-                if (methodInvocationCounterMap.containsKey(methodName)) {
-                    methodInvocationCounter = methodInvocationCounterMap.get(methodName) + 1;
-                    methodInvocationCounterMap.put(methodName, methodInvocationCounter);
-                } else {
-                    methodInvocationCounter = 0;
-                    methodInvocationCounterMap.put(methodName, 0);
-                }
-                doopMethodInvocation += "/" + this.methodInvocationCounter;
-            }
-            else {
-                doopMethodInvocation += "/" + this.constructorInvocationCounter++;
-            }
-
-            long invocationPos;
-            if (tree.meth.toString().contains("."))
-                invocationPos = tree.meth.pos + 1;
-            else
-                invocationPos = tree.meth.pos;
-
-            Position position = new Position(this.lineMap.getLineNumber(invocationPos),
-                                             this.lineMap.getColumnNumber(invocationPos),
-                                             this.lineMap.getLineNumber(invocationPos + methodName.length()));
-
-            System.out.println("\033[35m Method Invocation from visitApply: \033[0m" + doopMethodInvocation);
-            SourceFileReport.invocationList.add(new MethodInvocation(null, this.sourceFileName, doopMethodInvocation, this.currentMethod.toString()));
-        }
-    }
-
-    /**
-     * Visit "new <T>()" AST node aka heap allocation.
-     *
-     * @param tree
-     */
-    @Override
-    public void visitNewClass(JCNewClass tree) {
-        scan(tree.encl);
-        scan(tree.typeargs);
-        scan(tree.clazz);
-        scan(tree.args);
-        scan(tree.def);
-
-        String doopHeapAllocationID;
-        /**
-         * If current method is overloaded use its signature to build the heap allocation.
-         */
-        if (this.methodNamesPerClassMap.get(this.currentClassSymbol).get(this.currentMethodSymbol.getQualifiedName().toString()) > 1)
-            doopHeapAllocationID = this.doopReprBuilder.buildDoopHeapAllocation(currentMethodDoopSignature, tree.clazz.type.getOriginalType().toString());
-        /**
-         * Otherwise use its compact name.
-         */
-        else
-            doopHeapAllocationID = this.doopReprBuilder.buildDoopHeapAllocation(currentMethodCompactName, tree.clazz.type.getOriginalType().toString());
-
-        /**
-         * Evaluate heap allocation counter within method.
-         */
-        if (heapAllocationCounterMap.containsKey(doopHeapAllocationID)) {
-            heapAllocationCounter = heapAllocationCounterMap.get(doopHeapAllocationID) + 1;
-            heapAllocationCounterMap.put(doopHeapAllocationID, heapAllocationCounter);
-        }
-        else {
-            heapAllocationCounter = 0;
-            heapAllocationCounterMap.put(doopHeapAllocationID, 0);
-        }
-        doopHeapAllocationID += "/" + heapAllocationCounter;
-
-        /**
-         * Add Heap Allocation to source file report.
-         */
-        System.out.println("Reporting heap allocation: " + doopHeapAllocationID);
-        System.out.println("Source file name: " + this.sourceFileName);
-        System.out.println("Allocated object type: " + tree.clazz.type.toString());
-        System.out.println("Allocating method id: " + this.currentMethod.getId());
-
-        Position position = new Position(lineMap.getLineNumber(tree.clazz.pos),
-                                            lineMap.getColumnNumber(tree.clazz.pos),
-                                            lineMap.getColumnNumber(tree.clazz.pos + tree.clazz.toString().length()));
-
-        SourceFileReport.heapAllocationList.add(new HeapAllocation(position,
-                                                this.sourceFileName,
-                                                doopHeapAllocationID,
-                                                tree.clazz.type.toString(),
-                                                this.currentMethod.getId()));
-
-        if (this.scanForInvocations) {
-            /**
-             * Method Invocation: Constructor
-             */
-            String doopMethodInvocation;
-            /**
-             * If current method is overloaded use its signature to build the variable name.
-             */
-            if (this.methodNamesPerClassMap.get(this.currentClassSymbol).get(this.currentMethodSymbol.getQualifiedName().toString()) > 1)
-                doopMethodInvocation = this.doopReprBuilder.buildDoopMethodInvocationInMethod(this.currentMethodDoopSignature,
-                        this.doopReprBuilder.buildDoopMethodInvocation((MethodSymbol) tree.constructor) + "/" + this.constructorInvocationCounter++);
-            /**
-             * Otherwise use its compact name.
-             */
-            else
-                doopMethodInvocation = this.doopReprBuilder.buildDoopMethodInvocationInMethod(this.currentMethodCompactName,
-                        this.doopReprBuilder.buildDoopMethodInvocation((MethodSymbol) tree.constructor) + "/" + this.constructorInvocationCounter++);
-
-            position = new Position(lineMap.getLineNumber(tree.pos),
-                                    lineMap.getColumnNumber(tree.pos),
-                                    lineMap.getLineNumber(tree.pos) + tree.clazz.toString().length());
-
-            System.out.println("\033[35m Method Invocation (Constructor): \033[0m" + doopMethodInvocation);
-            SourceFileReport.invocationList.add(new MethodInvocation(position, this.sourceFileName, doopMethodInvocation, this.currentMethod.getId()));
-        }
-
-    }
 
     @Override
     public void visitNewArray(JCNewArray tree) {
@@ -706,6 +546,11 @@ public class SymbolScanner extends TreeScanner {
 
     @Override
     public void visitIdent(JCIdent tree) {
+        if (tree.sym != null)
+            if (varSymbolMap.containsKey(tree.sym.hashCode())) {
+                System.out.println("Found occurrence of var/field: " + tree.sym.name + " line: " + this.lineMap.getLineNumber(tree.pos));
+
+            }
     }
 
     @Override
