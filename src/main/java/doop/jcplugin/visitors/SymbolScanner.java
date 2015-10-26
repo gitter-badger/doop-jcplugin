@@ -449,7 +449,7 @@ public class SymbolScanner extends TreeScanner {
         scan(tree.elemtype);
         scan(tree.dims);
         tree.dimAnnotations.stream().forEach(this::scan);
-        OccurrenceScanner occurrenceScanner = new UseOccurrenceScanner(this.sourceFileName, this.lineMap);
+        OccurrenceScanner occurrenceScanner = new UseOccurrenceScanner(this.sourceFileName, this.lineMap, this.varSymbolMap);
         scan(tree.elems);
         occurrenceScanner = null;
     }
@@ -457,7 +457,7 @@ public class SymbolScanner extends TreeScanner {
     @Override
     public void visitLambda(JCLambda tree) {
         scan(tree.body);
-        OccurrenceScanner occurrenceScanner = new UseOccurrenceScanner(this.sourceFileName, this.lineMap);
+        OccurrenceScanner occurrenceScanner = new UseOccurrenceScanner(this.sourceFileName, this.lineMap, this.varSymbolMap);
         scan(tree.params);
         tree.accept(occurrenceScanner);
         occurrenceScanner = null;
@@ -470,10 +470,10 @@ public class SymbolScanner extends TreeScanner {
 
     @Override
     public void visitAssign(JCAssign tree) {
-        OccurrenceScanner occurrenceScanner = new DefOccurrenceScanner(this.sourceFileName, this.lineMap);
+        OccurrenceScanner occurrenceScanner = new DefOccurrenceScanner(this.sourceFileName, this.lineMap, this.varSymbolMap);
         scan(tree.lhs);
         tree.lhs.accept(occurrenceScanner);
-        occurrenceScanner = new UseOccurrenceScanner(this.sourceFileName, this.lineMap);
+        occurrenceScanner = new UseOccurrenceScanner(this.sourceFileName, this.lineMap, this.varSymbolMap);
         scan(tree.rhs);
         tree.rhs.accept(occurrenceScanner);
         occurrenceScanner = null;
@@ -481,10 +481,10 @@ public class SymbolScanner extends TreeScanner {
 
     @Override
     public void visitAssignop(JCAssignOp tree) {
-        OccurrenceScanner occurrenceScanner = new DefOccurrenceScanner(this.sourceFileName, this.lineMap);
+        OccurrenceScanner occurrenceScanner = new DefOccurrenceScanner(this.sourceFileName, this.lineMap, this.varSymbolMap);
         scan(tree.lhs);
         tree.lhs.accept(occurrenceScanner);
-        occurrenceScanner = new UseOccurrenceScanner(this.sourceFileName, this.lineMap);
+        occurrenceScanner = new UseOccurrenceScanner(this.sourceFileName, this.lineMap, this.varSymbolMap);
         scan(tree.rhs);
         tree.rhs.accept(occurrenceScanner);
         occurrenceScanner = null;
@@ -497,7 +497,7 @@ public class SymbolScanner extends TreeScanner {
 
     @Override
     public void visitBinary(JCBinary tree) {
-        OccurrenceScanner occurrenceScanner = new UseOccurrenceScanner(this.sourceFileName, this.lineMap);
+        OccurrenceScanner occurrenceScanner = new UseOccurrenceScanner(this.sourceFileName, this.lineMap, this.varSymbolMap);
         scan(tree.lhs);
         tree.lhs.accept(occurrenceScanner);
         scan(tree.rhs);
