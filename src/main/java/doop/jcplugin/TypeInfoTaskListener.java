@@ -78,7 +78,7 @@ class TypeInfoTaskListener implements TaskListener {
              */
             treeRoot.accept(new SymbolScanner(compilationUnitName, lineMap));                     // First pass
 
-            //treeRoot.accept(new OccurrenceScanner(compilationUnitName, lineMap));     // Second pass
+            //treeRoot.accept(new OccurrenceScanner(sourceFileName, lineMap));     // Second pass
 
             /**
              * Write and close all files.

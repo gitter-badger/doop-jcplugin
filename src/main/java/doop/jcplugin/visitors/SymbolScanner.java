@@ -190,8 +190,8 @@ public class SymbolScanner extends TreeScanner {
         List<JCVariableDecl> parametersList = tree.getParameters();
 
         Position position = new Position(lineMap.getLineNumber(tree.pos),
-                lineMap.getColumnNumber(tree.pos),
-                lineMap.getColumnNumber(tree.pos + tree.name.toString().length()));
+                                         lineMap.getColumnNumber(tree.pos),
+                                         lineMap.getColumnNumber(tree.pos + tree.name.toString().length()));
 
         String[] params = new String[parametersList.length()];
         String[] paramTypes = new String[parametersList.length()];
@@ -289,7 +289,7 @@ public class SymbolScanner extends TreeScanner {
 
             Position position = new Position(this.lineMap.getLineNumber(tree.pos),
                                              this.lineMap.getColumnNumber(tree.pos),
-                                             this.lineMap.getColumnNumber(tree.pos + tree.sym.getQualifiedName().toString().length()));
+                                             this.lineMap.getColumnNumber(tree.pos + tree.sym.name.toString().length()));
 
             String varNameInDoop;
             /**
@@ -443,21 +443,24 @@ public class SymbolScanner extends TreeScanner {
         scan(tree.detail);
     }
 
-
-
     @Override
     public void visitNewArray(JCNewArray tree) {
         scan(tree.annotations);
         scan(tree.elemtype);
         scan(tree.dims);
         tree.dimAnnotations.stream().forEach(this::scan);
+        OccurrenceScanner occurrenceScanner = new UseOccurrenceScanner(this.sourceFileName, this.lineMap);
         scan(tree.elems);
+        occurrenceScanner = null;
     }
 
     @Override
     public void visitLambda(JCLambda tree) {
         scan(tree.body);
+        OccurrenceScanner occurrenceScanner = new UseOccurrenceScanner(this.sourceFileName, this.lineMap);
         scan(tree.params);
+        tree.accept(occurrenceScanner);
+        occurrenceScanner = null;
     }
 
     @Override
@@ -467,14 +470,24 @@ public class SymbolScanner extends TreeScanner {
 
     @Override
     public void visitAssign(JCAssign tree) {
+        OccurrenceScanner occurrenceScanner = new DefOccurrenceScanner(this.sourceFileName, this.lineMap);
         scan(tree.lhs);
+        tree.lhs.accept(occurrenceScanner);
+        occurrenceScanner = new UseOccurrenceScanner(this.sourceFileName, this.lineMap);
         scan(tree.rhs);
+        tree.rhs.accept(occurrenceScanner);
+        occurrenceScanner = null;
     }
 
     @Override
     public void visitAssignop(JCAssignOp tree) {
+        OccurrenceScanner occurrenceScanner = new DefOccurrenceScanner(this.sourceFileName, this.lineMap);
         scan(tree.lhs);
+        tree.lhs.accept(occurrenceScanner);
+        occurrenceScanner = new UseOccurrenceScanner(this.sourceFileName, this.lineMap);
         scan(tree.rhs);
+        tree.rhs.accept(occurrenceScanner);
+        occurrenceScanner = null;
     }
 
     @Override
@@ -484,8 +497,12 @@ public class SymbolScanner extends TreeScanner {
 
     @Override
     public void visitBinary(JCBinary tree) {
+        OccurrenceScanner occurrenceScanner = new UseOccurrenceScanner(this.sourceFileName, this.lineMap);
         scan(tree.lhs);
+        tree.lhs.accept(occurrenceScanner);
         scan(tree.rhs);
+        tree.rhs.accept(occurrenceScanner);
+        occurrenceScanner = null;
     }
 
     @Override

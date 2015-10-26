@@ -1,12 +1,9 @@
 package doop.jcplugin.util;
 
-import doop.persistent.elements.Method;
-import doop.persistent.elements.Variable;
-import doop.persistent.elements.Field;
+import doop.persistent.elements.*;
 import doop.persistent.elements.Class;
-import doop.persistent.elements.MethodInvocation;
-import doop.persistent.elements.HeapAllocation;
 
+import javax.xml.transform.Source;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,15 +18,15 @@ public class SourceFileReport {
     public static List<Variable> variableList;
     public static List<MethodInvocation> invocationList;
     public static List<HeapAllocation> heapAllocationList;
+    public static List<Occurrence> occurrenceList;
 
     public static void initializeSymbolLists() {
-
         SourceFileReport.classList = new ArrayList<>();
         SourceFileReport.fieldList = new ArrayList<>();
         SourceFileReport.methodList = new ArrayList<>();
         SourceFileReport.variableList = new ArrayList<>();
         SourceFileReport.invocationList = new ArrayList<>();
         SourceFileReport.heapAllocationList = new ArrayList<>();
-
+        SourceFileReport.occurrenceList = new ArrayList<>();
     }
 }
