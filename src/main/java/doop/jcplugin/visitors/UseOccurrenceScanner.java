@@ -35,7 +35,7 @@ public class UseOccurrenceScanner extends OccurrenceScanner {
                 SourceFileReport.occurrenceList.add(occurrence);
 
                 Variable var = (Variable) this.varSymbolMap.get(tree.sym.hashCode());
-                System.out.println("Reported variable occurrence: (def)" + var.getName());
+                System.out.println("Reported variable occurrence (use):" + var.getName());
                 System.out.println("Source file name: " + var.getSourceFileName());
                 System.out.println("Position: " + var.getPosition().getStartLine());
             }
@@ -53,7 +53,7 @@ public class UseOccurrenceScanner extends OccurrenceScanner {
 
                 SourceFileReport.occurrenceList.add(occurrence);
                 Field field = (Field) this.varSymbolMap.get(tree.sym.hashCode());
-                System.out.println("Reported field occurrence: (def)" + field.getName());
+                System.out.println("Reported field occurrence (use): " + field.getName());
                 System.out.println("Source file name: " + field.getSourceFileName());
                 System.out.println("Position: " + field.getPosition().getStartLine());
             }
