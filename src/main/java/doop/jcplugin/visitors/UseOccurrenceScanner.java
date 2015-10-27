@@ -7,7 +7,6 @@ import doop.persistent.elements.*;
 
 import java.util.Map;
 import static doop.persistent.elements.OccurrenceType.READ;
-import static doop.persistent.elements.OccurrenceType.WRITE;
 
 /**
  * Created by anantoni on 22/10/2015.

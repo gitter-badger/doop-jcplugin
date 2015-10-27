@@ -54,10 +54,8 @@ public class SymbolScanner extends TreeScanner {
     private String currentMethodDoopSignature;
     private String currentMethodCompactName;
     private Map<String, Integer> heapAllocationCounterMap;
-    private boolean scanForInvocations;
     private final Map<ClassSymbol, Map<String, Integer>> methodNamesPerClassMap;
     private Map<Integer, doop.persistent.elements.Symbol> varSymbolMap;
-    private Map<Integer, ClassSymbol> classSymbolMap;
 
     /**
      * @param lineMap holds the line, column information for each symbol.
@@ -69,7 +67,6 @@ public class SymbolScanner extends TreeScanner {
         this.methodNamesPerClassMap = new HashMap<>();
         this.sourceFileName = sourceFileName;
         this.varSymbolMap = new HashMap<>();
-        this.classSymbolMap = new HashMap<>();
     }
 
     /**
