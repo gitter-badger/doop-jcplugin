@@ -13,6 +13,12 @@ import doop.jcplugin.visitors.SymbolScanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static doop.jcplugin.conf.Configuration.DEFAULT_OUTPUT_DIR;
+import static doop.jcplugin.conf.Configuration.PROCESSED_PROJECT;
+import static org.apache.commons.io.FilenameUtils.concat;
+import static org.apache.commons.io.FilenameUtils.getBaseName;
+import static org.apache.commons.io.FilenameUtils.getName;
+
 class TypeInfoTaskListener implements TaskListener {
 
     private final Reporter reporter;
@@ -58,17 +64,18 @@ class TypeInfoTaskListener implements TaskListener {
              * Open all necessary json files to write facts.
              */
             if (this.reporter instanceof JSONReporter) {
-                ((JSONReporter) this.reporter).openJSONReportFile(arg0.getSourceFile());
+                ((JSONReporter) this.reporter).openJSONReportFile(arg0);
             }
 
             /**
              * Get the AST root for this source code file.
              */
             JCTree treeRoot = (JCTree) arg0.getCompilationUnit();
-            String compilationUnitName = arg0.getSourceFile().getName();
+            String sourceFileName = getName(arg0.getSourceFile().getName());
+            String sourceFilePath = arg0.getCompilationUnit().getPackageName() + "." + sourceFileName;
 
             /**
-             * Get the LineMap for this compilation unit in order to much positions with lines and columns.
+             * Get the LineMap for this compilation unit in order to match positions with lines and columns.
              */
             LineMap lineMap = arg0.getCompilationUnit().getLineMap();
 
@@ -76,9 +83,7 @@ class TypeInfoTaskListener implements TaskListener {
             /**
              * Visitor passes.
              */
-            treeRoot.accept(new SymbolScanner(compilationUnitName, lineMap));                     // First pass
-
-            //treeRoot.accept(new OccurrenceScanner(sourceFileName, lineMap));     // Second pass
+            treeRoot.accept(new SymbolScanner(sourceFilePath, lineMap));
 
             /**
              * Write and close all files.

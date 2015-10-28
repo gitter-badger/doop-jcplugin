@@ -5,6 +5,6 @@ package doop.jcplugin.conf;
  */
 public class Configuration {
     public static final String DEFAULT_REPORTER = "doop.jcplugin.reporters.JSONReporter";
-    public static final String SELECTED_PROJECT = "advancedTest";
+    public static final String PROCESSED_PROJECT = "advancedTest";
     public static final String DEFAULT_OUTPUT_DIR = "/home/anantoni/plugin-output-projects/";
 }

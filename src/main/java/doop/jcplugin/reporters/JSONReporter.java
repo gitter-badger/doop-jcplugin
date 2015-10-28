@@ -1,15 +1,18 @@
 package doop.jcplugin.reporters;
 
 import com.google.gson.Gson;
-import doop.jcplugin.conf.Configuration;
+import com.sun.source.util.TaskEvent;
 import doop.jcplugin.util.SourceFileReport;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import javax.tools.JavaFileObject;
+
 import java.io.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static doop.jcplugin.conf.Configuration.DEFAULT_OUTPUT_DIR;
+import static doop.jcplugin.conf.Configuration.PROCESSED_PROJECT;
+import static org.apache.commons.io.FilenameUtils.*;
 
 /**
  * Created by anantoni on 27/4/2015.
@@ -38,16 +41,14 @@ public class JSONReporter implements Reporter {
         this.reportFileWriter.write(this.gson.toJson(jsonReport));
     }
 
-    public void openJSONReportFile(JavaFileObject sourceFile) {
-        String reportFilePath = FilenameUtils.concat(Configuration.DEFAULT_OUTPUT_DIR + Configuration.SELECTED_PROJECT,
-                                                        sourceFile.getName().replace("/", ".").replace(".java", ".json").replaceAll("^\\.+", ""));
-
-        System.out.println(reportFilePath);
-
+    public void openJSONReportFile(TaskEvent analyzeEvent) {
+        String sourceBaseName = getBaseName(analyzeEvent.getSourceFile().getName());
+        String reportPath = concat(DEFAULT_OUTPUT_DIR + PROCESSED_PROJECT,
+                                   analyzeEvent.getCompilationUnit().getPackageName() + "." + sourceBaseName + ".json");
 
         try {
-            FileUtils.forceMkdir(new File(FilenameUtils.getFullPath(reportFilePath)));
-            this.reportFileWriter = new PrintWriter(reportFilePath, "UTF-8");
+            FileUtils.forceMkdir(new File(getFullPath(reportPath)));
+            this.reportFileWriter = new PrintWriter(reportPath, "UTF-8");
 
         } catch (IOException e) {
             e.printStackTrace();
