@@ -1,11 +1,12 @@
 language: java
 sudo: false
 jdk:
-  - oraclejdk8
   - openjdk8
-  
+  - oraclejdk8
+
 before_install:
-   - chmod +x gradlew
+  - gradle wrapper
+  - chmod +x gradlew
 
 before_cache:
   - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
