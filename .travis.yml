@@ -4,7 +4,6 @@ jdk:
   - oraclejdk8
 
 before_install:
-  - gradle wrapper
   - chmod +x gradlew
 
 before_cache:
