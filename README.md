@@ -12,3 +12,6 @@ javac -cp ../advancedTest/ -Xbootclasspath/p:./build/libs/doop-jcplugin-all-1.0-
 javac sources:
 http://www.docjar.com/docs/api/com/sun/tools/javac/tree/JCTree.html
 http://cr.openjdk.java.net/~forax/lambda/src/share/classes/com/sun/tools/javac/tree/JCTree.java.html
+
+
+[![Join the chat at https://gitter.im/plast-lab/doop-jcplugin](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/plast-lab/doop-jcplugin?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
